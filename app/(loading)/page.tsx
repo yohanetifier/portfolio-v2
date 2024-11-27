@@ -28,7 +28,7 @@ export default function Loading() {
     )
       .fromTo(
         arrayOfImages[0],
-        { y: '20vh', scale: 1.1, opacity: 0 },
+        { y: '20vh', scale: 1.05, opacity: 0 },
         { y: -10, duration: 0.5, opacity: 1 },
       )
       .fromTo(
@@ -46,12 +46,13 @@ export default function Loading() {
       )
       .to(arrayOfImages[2], {
         y: 0,
-        scale: 1,
+        // scale: 1,
         onComplete: () => setImageArrived(true),
       });
   }, []);
 
   useEffect(() => {
+    console.log('imageArrived', imageArrived);
     if (imageArrived) {
       console.log('imageArrived', imageArrived);
       window.addEventListener('mousemove', (e) => {
@@ -72,7 +73,7 @@ export default function Loading() {
         // arrayOfImages[2].style.top = `${normalizeSize * 10}px`;
       });
     }
-  }, [clientX, clientY]);
+  }, [clientX, clientY, imageArrived]);
 
   return (
     <div className="flex justify-center items-center relative w-full h-[100vh]">
