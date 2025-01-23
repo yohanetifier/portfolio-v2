@@ -1,11 +1,12 @@
 'use client';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Flip } from 'gsap/all';
+import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import React, { useEffect, useRef } from 'react';
 
-gsap.registerPlugin(Flip);
+gsap.registerPlugin(Flip, ScrollTrigger);
+console.log('ScrollTrigger', ScrollTrigger);
 
 export default function Loading() {
   const buttonRef = useRef<any | null>(null);
@@ -13,40 +14,15 @@ export default function Loading() {
   const mainWrapperRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLDivElement>(null);
   const [showWrapper, setShowWrapper] = React.useState(true);
-  const [isGridIsVisible, setIsGridIsVisible] = React.useState(false);
   const titleRef = React.useRef<HTMLHeadingElement | null>(null);
   const [imageArrived, setImageArrived] = React.useState(false);
-  let clientX;
-  let clientY;
-  let arrayOfImages: HTMLElement[];
   const tl = gsap.timeline({});
 
   useEffect(() => {
     const arrayOfImages: HTMLElement[] = Array.from(
       wrapperImage.current!.children,
     ) as HTMLElement[];
-    if (wrapperImage.current) {
-      // const card = Flip.getState(buttonRef.current);
-      // wrapperImage.current?.appendChild(card);
-      // const cardSecond = Flip.getState(arrayOfImages[1]);
-      // const cardThird = Flip.getState(arrayOfImages[2]);
-      // Flip.from(card, {
-      //   duration: 1,
-      // });
-    }
-    // tl.from(cardSecond, {
-    //   duration: 1,
-    //   gridColumnStart: '3',
-    //   gridColumnEnd: '4',
-    //   gridRowStart: '1',
-    //   gridRowEnd: '1',
-    // }).from(cardThird, {
-    //   duration: 1,
-    //   gridColumnStart: '5',
-    //   gridColumnEnd: '6',
-    //   gridRowStart: '1',
-    //   gridRowEnd: '1',
-    // });
+
     tl.fromTo(
       titleRef.current,
       { y: '20vh', opacity: 0.5 },
@@ -99,39 +75,33 @@ export default function Loading() {
 
   useEffect(() => {
     if (imageArrived) {
-      // window.addEventListener('mousemove', (e) => {
-      //   // clientX = e.clientX;
-      //   // clientY = e.clientY;
-      //   const arrayOfImages: HTMLElement[] = Array.from(
-      //     wrapperImage.current!.children,
-      //   ) as HTMLElement[];
-      //   const normalizeSize = e.clientX / window.innerWidth - 0.5;
-      //   arrayOfImages[2].style.left = `${normalizeSize * 50}px`;
-      //   arrayOfImages[2].style.transform = `rotate(${normalizeSize * 5}deg)`;
-
-      //   arrayOfImages[1].style.left = `${normalizeSize * 200}px`;
-      //   arrayOfImages[1].style.transform = `rotate(${normalizeSize * 25}deg)`;
-
-      //   arrayOfImages[0].style.left = `${normalizeSize * 300}px`;
-      //   arrayOfImages[0].style.transform = `rotate(${normalizeSize * 50}deg)`;
-      // });
-
       window.addEventListener('mousemove', animateImageWithMouseMove);
       return () => {
         window.removeEventListener('mousemove', animateImageWithMouseMove);
       };
     }
-    // flex justify-center items-center relative w-full h-[100vh]
   }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-1 col-end-2 row-start-1 row-end-2 border-2 border-red-500 w-full h-[200px]',
+    'col-start-1 col-end-2 row-start-1 row-end-2 border-2 border-black-500 w-full h-[200px]',
     'col-start-3 col-end-4 row-start-1 row-end-2 border-2 border-red-500 w-full h-[200px]',
     'col-start-5 col-end-6 row-start-1 row-end-2 border-2 border-red-500 w-full h-[200px]',
+    'col-start-2 col-end-3 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px] ',
+    'col-start-4 col-end-5 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px]',
+    'col-start-1 col-end-2 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
+    'col-start-3 col-end-4 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
+    'col-start-5 col-end-6 row-start-3 row-end-3  border-2 border-green-500 w-full h-[200px]',
+    'col-start-2 col-end-3 row-start-4 row-end-4 border-2 border-orange-500 w-full h-[200px]',
+    'col-start-4 col-end-5 row-start-4 row-end-4 border-2 border-orange-500 w-full h-[200px]',
+    'col-start-1 col-end-2 row-start-5 row-end-5 border-2 border-red-500 w-full h-[200px]',
+    'col-start-3 col-end-4 row-start-5 row-end-5 border-2 border-red-500 w-full h-[200px]',
+    'col-start-5 col-end-6 row-start-5 row-end-5  border-2 border-red-500 w-full h-[200px]',
   ];
 
   const handleClick = () => {
-    setIsGridIsVisible(true);
+    const arrayOfImages: HTMLElement[] = Array.from(
+      wrapperImage.current!.children,
+    );
     const state = Flip.getState(wrapperImage.current?.children);
     const children = Array.from(wrapperImage.current.children) as HTMLElement[];
     children.forEach((child, index) => {
@@ -140,6 +110,12 @@ export default function Loading() {
     gridRef.current!.append(
       ...Array.from(wrapperImage.current.children as HTMLCollection),
     );
+
+    arrayOfImages.forEach((image) => {
+      image.style.left = `0px`;
+      image.style.transform = `rotate(0deg)`;
+    });
+
     tl.to(buttonRef.current, { opacity: 0, duration: 1 });
     Flip.from(state, {
       duration: 1,
@@ -150,6 +126,20 @@ export default function Loading() {
       },
     });
   };
+  if (gridRef.current) {
+    const arrayOfImages = Array.from(gridRef.current!.children);
+    console.log('arrayOfImages[0]', arrayOfImages[0]);
+    // gsap.to(arrayOfImages[0], {
+    //   opacity: 0, // L'image se ferme complètement verticalement
+    //   transformOrigin: 'center top', // Point d'origine pour la fermeture
+    //   scrollTrigger: {
+    //     trigger: arrayOfImages[0], // L'image déclenche l'effet
+    //     start: 'top center', // Début de l'animation
+    //     end: 'bottom center', // Fin de l'animation
+    //     scrub: true, // Synchronisation avec le scroll
+    //   },
+    // });
+  }
 
   return (
     <div
@@ -157,7 +147,21 @@ export default function Loading() {
       ref={mainWrapperRef}
     >
       <div className="absolute w-[35vw] h-[90vh] rounded-xl" ref={wrapperImage}>
-        {['desktop.jpg', 'tesla.jpeg', 'holidays.jpg'].map((source, index) => (
+        {[
+          'desktop.jpg',
+          'tesla.jpeg',
+          'holidays.jpg',
+          'desktop.jpg',
+          'tesla.jpeg',
+          'holidays.jpg',
+          'desktop.jpg',
+          'tesla.jpeg',
+          'holidays.jpg',
+          'desktop.jpg',
+          'tesla.jpeg',
+          'holidays.jpg',
+          'holidays.jpg',
+        ].map((source, index) => (
           <Image
             key={index}
             src={`/images/${source}`}
@@ -178,7 +182,7 @@ export default function Loading() {
       </button>
 
       <div
-        className={`w-full grid grid-rows-5 grid-cols-5 gap-[20px] relative `}
+        className={`w-full grid grid-rows-5 grid-cols-5 gap-[20px] relative h-[200vh] `}
         ref={gridRef}
       ></div>
     </div>
