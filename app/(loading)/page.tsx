@@ -83,19 +83,19 @@ export default function Loading() {
   }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-1 col-end-2 row-start-1 row-end-2 border-2 border-black-500 w-full h-[200px]',
-    'col-start-3 col-end-4 row-start-1 row-end-2 border-2 border-red-500 w-full h-[200px]',
-    'col-start-5 col-end-6 row-start-1 row-end-2 border-2 border-red-500 w-full h-[200px]',
+    'col-start-1 col-end-2 row-start-1 row-end-2 border-2 border-red-500 w-full h-[200px]',
+    'col-start-3 col-end-4 row-start-1 row-end-2 border-2 w-full h-[200px]',
+    'col-start-5 col-end-6 row-start-1 row-end-2 border-2 w-full h-[200px]',
     'col-start-2 col-end-3 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px] ',
     'col-start-4 col-end-5 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px]',
     'col-start-1 col-end-2 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
-    'col-start-3 col-end-4 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
-    'col-start-5 col-end-6 row-start-3 row-end-3  border-2 border-green-500 w-full h-[200px]',
+    'col-start-3 col-end-4 row-start-3 row-end-3 border-[10px] border-red-500 w-full h-[200px]',
+    'col-start-5 col-end-6 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
     'col-start-2 col-end-3 row-start-4 row-end-4 border-2 border-orange-500 w-full h-[200px]',
     'col-start-4 col-end-5 row-start-4 row-end-4 border-2 border-orange-500 w-full h-[200px]',
-    'col-start-1 col-end-2 row-start-5 row-end-5 border-2 border-red-500 w-full h-[200px]',
-    'col-start-3 col-end-4 row-start-5 row-end-5 border-2 border-red-500 w-full h-[200px]',
-    'col-start-5 col-end-6 row-start-5 row-end-5  border-2 border-red-500 w-full h-[200px]',
+    'col-start-1 col-end-2 row-start-5 row-end-5 border-2 w-full h-[200px]',
+    'col-start-3 col-end-4 row-start-5 row-end-5 border-2 w-full h-[200px]',
+    'col-start-5 col-end-6 row-start-5 row-end-5  border-2 w-full h-[200px]',
   ];
 
   const handleClick = () => {
@@ -128,17 +128,18 @@ export default function Loading() {
   };
   if (gridRef.current) {
     const arrayOfImages = Array.from(gridRef.current!.children);
-    console.log('arrayOfImages[0]', arrayOfImages[0]);
-    // gsap.to(arrayOfImages[0], {
-    //   opacity: 0, // L'image se ferme complètement verticalement
-    //   transformOrigin: 'center top', // Point d'origine pour la fermeture
-    //   scrollTrigger: {
-    //     trigger: arrayOfImages[0], // L'image déclenche l'effet
-    //     start: 'top center', // Début de l'animation
-    //     end: 'bottom center', // Fin de l'animation
-    //     scrub: true, // Synchronisation avec le scroll
-    //   },
-    // });
+    gsap.to(arrayOfImages[6], {
+      scaleX: 0, // L'image se ferme complètement verticalement
+      transformOrigin: 'center top', // Point d'origine pour la fermeture
+      scrollTrigger: {
+        trigger: arrayOfImages[6], // L'image déclenche l'effet
+        start: 'top top', // Début de l'animation
+        end: 'bottom top', // Fin de l'animation
+        scrub: true, // Synchronisation avec le scroll
+        // pin: true,
+        markers: true,
+      },
+    });
   }
 
   return (
@@ -182,7 +183,7 @@ export default function Loading() {
       </button>
 
       <div
-        className={`w-full grid grid-rows-5 grid-cols-5 gap-[20px] relative h-[200vh] `}
+        className={`w-full grid grid-rows-5 grid-cols-5 gap-[20px] relative h-[200vh]`}
         ref={gridRef}
       ></div>
     </div>
