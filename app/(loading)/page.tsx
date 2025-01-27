@@ -46,14 +46,8 @@ export default function Loading() {
       )
       .to(arrayOfImages[2], {
         y: 0,
-        // scale: 1,
         onComplete: () => setImageArrived(true),
       });
-    // .to(arrayOfImages[1], {
-    //   x: 500,
-    //   delay: '3',
-    //   onComplete: () => setImageArrived(false),
-    // });
   }, []);
 
   const animateImageWithMouseMove = (e: MouseEvent) => {
@@ -128,17 +122,15 @@ export default function Loading() {
   };
   if (gridRef.current) {
     const arrayOfImages = Array.from(gridRef.current!.children);
-    arrayOfImages.map((image, index) => {
+    arrayOfImages.map((image) => {
       gsap.to(image, {
-        scaleX: 0, // L'image se ferme complètement verticalement
-        transformOrigin: 'center top', // Point d'origine pour la fermeture
+        scaleX: 0,
+        transformOrigin: 'center top',
         scrollTrigger: {
-          trigger: image, // L'image déclenche l'effet
-          start: 'top top', // Début de l'animation
-          end: 'bottom top', // Fin de l'animation
-          scrub: true, // Synchronisation avec le scroll
-          // pin: true,
-          markers: true,
+          trigger: image,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
         },
       });
     });
