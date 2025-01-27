@@ -1,12 +1,10 @@
 'use client';
-import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import React, { useEffect, useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
-console.log('ScrollTrigger', ScrollTrigger);
 
 export default function Loading() {
   const buttonRef = useRef<any | null>(null);
@@ -123,22 +121,26 @@ export default function Loading() {
       stagger: 0.1,
       onUpdate: () => {
         setShowWrapper(false);
+        wrapperImage.current.style.display = 'none';
+        ScrollTrigger.refresh();
       },
     });
   };
   if (gridRef.current) {
     const arrayOfImages = Array.from(gridRef.current!.children);
-    gsap.to(arrayOfImages[6], {
-      scaleX: 0, // L'image se ferme complètement verticalement
-      transformOrigin: 'center top', // Point d'origine pour la fermeture
-      scrollTrigger: {
-        trigger: arrayOfImages[6], // L'image déclenche l'effet
-        start: 'top top', // Début de l'animation
-        end: 'bottom top', // Fin de l'animation
-        scrub: true, // Synchronisation avec le scroll
-        // pin: true,
-        markers: true,
-      },
+    arrayOfImages.map((image, index) => {
+      gsap.to(image, {
+        scaleX: 0, // L'image se ferme complètement verticalement
+        transformOrigin: 'center top', // Point d'origine pour la fermeture
+        scrollTrigger: {
+          trigger: image, // L'image déclenche l'effet
+          start: 'top top', // Début de l'animation
+          end: 'bottom top', // Fin de l'animation
+          scrub: true, // Synchronisation avec le scroll
+          // pin: true,
+          markers: true,
+        },
+      });
     });
   }
 
@@ -169,7 +171,7 @@ export default function Loading() {
             alt={source}
             width={0}
             height={0}
-            className="border-2  w-full h-full object-cover absolute rounded-3xl"
+            className="border-2 w-full h-full object-cover absolute rounded-3xl"
           />
         ))}
       </div>
