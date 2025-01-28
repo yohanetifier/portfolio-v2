@@ -2,18 +2,18 @@
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
 export default function Loading() {
-  const buttonRef = useRef<any | null>(null);
-  const wrapperImage = React.useRef<any>(null);
-  const mainWrapperRef = React.useRef<HTMLDivElement>(null);
-  const gridRef = React.useRef<HTMLDivElement>(null);
-  const [showWrapper, setShowWrapper] = React.useState(true);
-  const titleRef = React.useRef<HTMLHeadingElement | null>(null);
-  const [imageArrived, setImageArrived] = React.useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const wrapperImage = useRef<HTMLDivElement>(null);
+  const mainWrapperRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  // const [showWrapper, setShowWrapper] = React.useState(true);
+  const titleRef = useRef<HTMLHeadingElement | null>(null);
+  const [imageArrived, setImageArrived] = useState(false);
   const tl = gsap.timeline({});
 
   useEffect(() => {
@@ -91,21 +91,21 @@ export default function Loading() {
   ];
 
   const handleClick = () => {
-    const arrayOfImages: HTMLElement[] = Array.from(
+    const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
+    const state = Flip.getState(wrapperImage.current!.children);
+    const children = Array.from(
       wrapperImage.current!.children,
-    );
-    const state = Flip.getState(wrapperImage.current?.children);
-    const children = Array.from(wrapperImage.current.children) as HTMLElement[];
+    ) as HTMLElement[];
     children.forEach((child, index) => {
       child.className = gridClasses[index] || '';
     });
     gridRef.current!.append(
-      ...Array.from(wrapperImage.current.children as HTMLCollection),
+      ...Array.from(wrapperImage.current!.children as HTMLCollection),
     );
 
     arrayOfImages.forEach((image) => {
-      image.style.left = `0px`;
-      image.style.transform = `rotate(0deg)`;
+      (image as HTMLElement).style.left = `0px`;
+      (image as HTMLElement).style.transform = `rotate(0deg)`;
     });
 
     tl.to(buttonRef.current, { opacity: 0, duration: 1 });
@@ -114,13 +114,34 @@ export default function Loading() {
       ease: 'power2.inOut',
       stagger: 0.1,
       onUpdate: () => {
-        setShowWrapper(false);
-        wrapperImage.current.style.display = 'none';
-        ScrollTrigger.refresh();
+        // setShowWrapper(false);
+        wrapperImage.current!.style.visibility = 'hidden';
+        ScrollTrigger.update();
+      },
+      onComplete: () => {
+        // ScrollTrigger.getAll().forEach((trigger) => trigger.enable()); // Réactiver
+        // ScrollTrigger.refresh(); // Recalcule les positions
+        // const arrayOfImages = Array.from(gridRef.current!.children);
+        // arrayOfImages.map((image) => {
+        //   gsap.to(image, {
+        //     scaleX: 0,
+        //     transformOrigin: 'center top',
+        //     scrollTrigger: {
+        //       trigger: image,
+        //       start: 'top top',
+        //       end: 'bottom top',
+        //       scrub: true,
+        //       markers: true,
+        //     },
+        //   });
+        // });
+        // ScrollTrigger.refresh();
+        handleScroll();
       },
     });
   };
-  if (gridRef.current) {
+
+  const handleScroll = () => {
     const arrayOfImages = Array.from(gridRef.current!.children);
     arrayOfImages.map((image) => {
       gsap.to(image, {
@@ -131,10 +152,27 @@ export default function Loading() {
           start: 'top top',
           end: 'bottom top',
           scrub: true,
+          markers: true,
         },
       });
     });
-  }
+  };
+  // if (gridRef.current) {
+  //   const arrayOfImages = Array.from(gridRef.current!.children);
+  //   arrayOfImages.map((image) => {
+  //     gsap.to(image, {
+  //       scaleX: 0,
+  //       transformOrigin: 'center top',
+  //       scrollTrigger: {
+  //         trigger: image,
+  //         start: 'top top',
+  //         end: 'bottom top',
+  //         scrub: true,
+  //         markers: true,
+  //       },
+  //     });
+  //   });
+  // }
 
   return (
     <div

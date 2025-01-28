@@ -1,47 +1,9 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
 
-interface Props {
-  arrayOfImages: [];
-}
-
-const Home = ({ arrayOfImages }: Props) => {
+const Home = () => {
   const wrapperImage = useRef<HTMLDivElement | null>(null);
-  const tl = gsap.timeline();
-  useEffect(() => {
-    // tl.fromTo(arrayOfImages[0], { y: '100vh' }, { y: '50%' });
-    // tl.fromTo(
-    //   arrayOfImages[0],
-    //   { y: '20vh', scale: 1.05, opacity: 0 },
-    //   { y: -10, duration: 0.5, opacity: 1 },
-    // )
-    //   .fromTo(
-    //     arrayOfImages[1],
-    //     { y: '30vh', opacity: 0 },
-    //     { y: -80, duration: 0.5, opacity: 1 },
-    //   )
-    //   .to(arrayOfImages[0], { y: 0, scale: 1 })
-    //   .to(arrayOfImages[1], { y: 0, scale: 1 }, '<')
-    //   .fromTo(
-    //     arrayOfImages[2],
-    //     { y: '30vh', opacity: 0 },
-    //     { y: -80, duration: 0.5, opacity: 1 },
-    //     '<',
-    //   )
-    //   .to(arrayOfImages[2], {
-    //     y: 0,
-    //     // scale: 1,
-    //     // onComplete: () => setImageArrived(true),
-    //   });
-    //   .to(arrayOfImages[1], {
-    //     x: 500,
-    //     delay: '3',
-    //     onComplete: () => setImageArrived(false),
-    //   });
-    // return cleanUp = () => {
-    // }
-  }, []);
+  useEffect(() => {}, []);
   return (
     <div
       className="grid grid-rows-5 grid-cols-5 gap-[20px] relative"
