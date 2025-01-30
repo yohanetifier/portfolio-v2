@@ -75,22 +75,18 @@ export default function Loading() {
   }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-1 col-end-2 row-start-1 row-end-2 border-2 border-red-500 w-full h-[200px]',
-    'col-start-3 col-end-4 row-start-1 row-end-2 border-2 w-full h-[200px]',
-    'col-start-5 col-end-6 row-start-1 row-end-2 border-2 w-full h-[200px]',
-    'col-start-2 col-end-3 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px] ',
-    'col-start-4 col-end-5 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px]',
-    'col-start-1 col-end-2 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
-    'col-start-3 col-end-4 row-start-3 row-end-3 border-[10px] border-red-500 w-full h-[200px]',
-    'col-start-5 col-end-6 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
-    'col-start-2 col-end-3 row-start-4 row-end-4 border-2 border-orange-500 w-full h-[200px]',
-    'col-start-4 col-end-5 row-start-4 row-end-4 border-2 border-orange-500 w-full h-[200px]',
-    'col-start-1 col-end-2 row-start-5 row-end-5 border-2 w-full h-[200px]',
-    'col-start-3 col-end-4 row-start-5 row-end-5 border-2 w-full h-[200px]',
-    'col-start-5 col-end-6 row-start-5 row-end-5  border-2 w-full h-[200px]',
+    'col-start-2 col-end-4 row-start-3 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
+    'col-start-6 col-end-9 row-start-5 border-2 w-[20.208vw] h-[24.219vw] border-green-500',
+    'col-start-5 col-end-8 row-start-2 border-2 w-[28.542vw] h-[18.854vw] border-cyan-500',
+    'col-start-7 col-end-9 row-start-6 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
+    // 'col-start-2 col-end-3 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px] ',
+    // 'col-start-4 col-end-5 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px]',
+    // 'col-start-1 col-end-2 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
+    // 'col-start-3 col-end-4 row-start-3 row-end-3 border-[10px] border-red-500 w-full h-[200px]',
   ];
 
   const handleClick = () => {
+    mainWrapperRef.current!.style.height = '200vh';
     const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
     const state = Flip.getState(wrapperImage.current!.children);
     const children = Array.from(
@@ -146,23 +142,24 @@ export default function Loading() {
       src: '/images/desktop.jpg',
       alt: 'desktop',
       className:
-        'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] -z-0',
+        'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]',
     },
     {
       src: '/images/tesla.jpeg',
       alt: 'tesla',
-      className: 'w-[16.641vw] h-[19.943vw] absolute top-[40%] z-10',
+      className: 'w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]',
     },
     {
       src: '/images/holidays.jpg',
       alt: 'holidays',
-      className: 'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%]',
+      className:
+        'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
     },
     {
       src: '/images/desktop.jpg',
       alt: 'desktop',
       className:
-        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg]',
+        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
     },
     // {
     //   src: '/images/tesla.jpeg',
@@ -180,7 +177,7 @@ export default function Loading() {
 
   return (
     <div
-      className="flex justify-center items-center relative w-full h-[100vh]"
+      className="flex justify-center items-center relative w-full h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
       <div
@@ -199,16 +196,16 @@ export default function Loading() {
         ))}
       </div>
 
-      {/* <button
+      <button
         ref={buttonRef}
         className="z-10 absolute right-[200px] border-2 border-red-500 w-[200px] h-[50px]"
         onClick={handleClick}
       >
         Enter
-      </button> */}
+      </button>
 
       <div
-        className={`w-full grid grid-rows-5 grid-cols-5 gap-[20px] relative h-[200vh]`}
+        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative border-[10px] border-green-500 h-full`}
         ref={gridRef}
       ></div>
     </div>
