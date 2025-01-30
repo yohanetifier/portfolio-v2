@@ -1,4 +1,5 @@
 'use client';
+import Header from '@/common/components/Header/Header';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
@@ -207,7 +208,9 @@ export default function Loading() {
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative border-[10px] border-green-500 h-full`}
         ref={gridRef}
-      ></div>
+      >
+        <Header />
+      </div>
     </div>
   );
 }

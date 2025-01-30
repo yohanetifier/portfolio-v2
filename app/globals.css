@@ -19,3 +19,11 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@font-face {
+  font-family: 'FabrikatMono';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/FabrikatMono-Bold.otf') format('opentype');
+}

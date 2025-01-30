@@ -21,6 +21,9 @@ export default {
       animation: {
         fadeIn: 'fadeIn 0.5s ease-in-out forwards',
       },
+      fontFamily: {
+        fabrikatMono: ['FabrikatMono', 'monospace'],
+      },
     },
   },
   plugins: [],
