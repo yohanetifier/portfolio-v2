@@ -16,39 +16,39 @@ export default function Loading() {
   const [imageArrived, setImageArrived] = useState(false);
   const tl = gsap.timeline({});
 
-  useEffect(() => {
-    const arrayOfImages: HTMLElement[] = Array.from(
-      wrapperImage.current!.children,
-    ) as HTMLElement[];
+  // useEffect(() => {
+  //   const arrayOfImages: HTMLElement[] = Array.from(
+  //     wrapperImage.current!.children,
+  //   ) as HTMLElement[];
 
-    tl.fromTo(
-      titleRef.current,
-      { y: '20vh', opacity: 0.5 },
-      { y: 0, opacity: 1 },
-    );
-    tl.fromTo(
-      arrayOfImages[0],
-      { y: '20vh', scale: 1.05, opacity: 0 },
-      { y: -10, duration: 0.5, opacity: 1 },
-    )
-      .fromTo(
-        arrayOfImages[1],
-        { y: '30vh', opacity: 0 },
-        { y: -80, duration: 0.5, opacity: 1 },
-      )
-      .to(arrayOfImages[0], { y: 0, scale: 1 })
-      .to(arrayOfImages[1], { y: 0, scale: 1 }, '<')
-      .fromTo(
-        arrayOfImages[2],
-        { y: '30vh', opacity: 0 },
-        { y: -80, duration: 0.5, opacity: 1 },
-        '<',
-      )
-      .to(arrayOfImages[2], {
-        y: 0,
-        onComplete: () => setImageArrived(true),
-      });
-  }, []);
+  //   tl.fromTo(
+  //     titleRef.current,
+  //     { y: '20vh', opacity: 0.5 },
+  //     { y: 0, opacity: 1 },
+  //   );
+  //   tl.fromTo(
+  //     arrayOfImages[0],
+  //     { y: '20vh', scale: 1.05, opacity: 0 },
+  //     { y: -10, duration: 0.5, opacity: 1 },
+  //   )
+  //     .fromTo(
+  //       arrayOfImages[1],
+  //       { y: '30vh', opacity: 0 },
+  //       { y: -80, duration: 0.5, opacity: 1 },
+  //     )
+  //     .to(arrayOfImages[0], { y: 0, scale: 1 })
+  //     .to(arrayOfImages[1], { y: 0, scale: 1 }, '<')
+  //     .fromTo(
+  //       arrayOfImages[2],
+  //       { y: '30vh', opacity: 0 },
+  //       { y: -80, duration: 0.5, opacity: 1 },
+  //       '<',
+  //     )
+  //     .to(arrayOfImages[2], {
+  //       y: 0,
+  //       onComplete: () => setImageArrived(true),
+  //     });
+  // }, []);
 
   const animateImageWithMouseMove = (e: MouseEvent) => {
     const arrayOfImages: HTMLElement[] = Array.from(
@@ -119,45 +119,12 @@ export default function Loading() {
         ScrollTrigger.update();
       },
       onComplete: () => {
-        // ScrollTrigger.getAll().forEach((trigger) => trigger.enable()); // Réactiver
-        // ScrollTrigger.refresh(); // Recalcule les positions
-        // const arrayOfImages = Array.from(gridRef.current!.children);
-        // arrayOfImages.map((image) => {
-        //   gsap.to(image, {
-        //     scaleX: 0,
-        //     transformOrigin: 'center top',
-        //     scrollTrigger: {
-        //       trigger: image,
-        //       start: 'top top',
-        //       end: 'bottom top',
-        //       scrub: true,
-        //       markers: true,
-        //     },
-        //   });
-        // });
-        // ScrollTrigger.refresh();
-        handleScroll();
+        // handleScroll();
       },
     });
   };
 
-  const handleScroll = () => {
-    const arrayOfImages = Array.from(gridRef.current!.children);
-    arrayOfImages.map((image) => {
-      gsap.to(image, {
-        scaleX: 0,
-        transformOrigin: 'center top',
-        scrollTrigger: {
-          trigger: image,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          // markers: true,
-        },
-      });
-    });
-  };
-  // if (gridRef.current) {
+  // const handleScroll = () => {
   //   const arrayOfImages = Array.from(gridRef.current!.children);
   //   arrayOfImages.map((image) => {
   //     gsap.to(image, {
@@ -168,51 +135,77 @@ export default function Loading() {
   //         start: 'top top',
   //         end: 'bottom top',
   //         scrub: true,
-  //         markers: true,
+  //         // markers: true,
   //       },
   //     });
   //   });
-  // }
+  // };
+
+  const assets = [
+    {
+      src: '/images/desktop.jpg',
+      alt: 'desktop',
+      className:
+        'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] -z-0',
+    },
+    {
+      src: '/images/tesla.jpeg',
+      alt: 'tesla',
+      className: 'w-[16.641vw] h-[19.943vw] absolute top-[40%] z-10',
+    },
+    {
+      src: '/images/holidays.jpg',
+      alt: 'holidays',
+      className: 'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%]',
+    },
+    {
+      src: '/images/desktop.jpg',
+      alt: 'desktop',
+      className:
+        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg]',
+    },
+    // {
+    //   src: '/images/tesla.jpeg',
+    //   alt: 'tesla',
+    // },
+    // {
+    //   src: '/images/holidays.jpg',
+    //   alt: 'holidays',
+    // },
+    // {
+    //   src: '/images/desktop.jpg',
+    //   alt: 'desktop',
+    // },
+  ];
 
   return (
     <div
       className="flex justify-center items-center relative w-full h-[100vh]"
       ref={mainWrapperRef}
     >
-      <div className="absolute w-[35vw] h-[90vh] rounded-xl" ref={wrapperImage}>
-        {[
-          'desktop.jpg',
-          'tesla.jpeg',
-          'holidays.jpg',
-          'desktop.jpg',
-          'tesla.jpeg',
-          'holidays.jpg',
-          'desktop.jpg',
-          'tesla.jpeg',
-          'holidays.jpg',
-          'desktop.jpg',
-          'tesla.jpeg',
-          'holidays.jpg',
-          'holidays.jpg',
-        ].map((source, index) => (
+      <div
+        className="absolute w-full h-full rounded-xl border-2 border-red-400 flex justify-center items-center"
+        ref={wrapperImage}
+      >
+        {assets.map(({ src, alt, className }, index) => (
           <Image
             key={index}
-            src={`/images/${source}`}
-            alt={source}
+            src={src}
+            alt={alt}
             width={0}
             height={0}
-            className="border-2 w-full h-full object-cover absolute rounded-3xl"
+            className={className}
           />
         ))}
       </div>
 
-      <button
+      {/* <button
         ref={buttonRef}
         className="z-10 absolute right-[200px] border-2 border-red-500 w-[200px] h-[50px]"
         onClick={handleClick}
       >
         Enter
-      </button>
+      </button> */}
 
       <div
         className={`w-full grid grid-rows-5 grid-cols-5 gap-[20px] relative h-[200vh]`}
