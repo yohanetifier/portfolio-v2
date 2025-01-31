@@ -80,14 +80,14 @@ export default function Loading() {
     'col-start-6 col-end-9 row-start-5 border-2 w-[20.208vw] h-[24.219vw] border-green-500',
     'col-start-5 col-end-8 row-start-2 border-2 w-[28.542vw] h-[18.854vw] border-cyan-500',
     'col-start-7 col-end-9 row-start-6 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
-    // 'col-start-2 col-end-3 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px] ',
-    // 'col-start-4 col-end-5 row-start-2 row-end-2 border-2 border-cyan-500 w-full h-[200px]',
-    // 'col-start-1 col-end-2 row-start-3 row-end-3 border-2 border-green-500 w-full h-[200px]',
+    'col-start-3 col-end-5 row-start-6 border-2 border-cyan-500 w-[20.208vw] h-[24.219vw] relative top-[65px] ',
+    'col-start-2 col-end-5 row-start-8 w-[28.542vw] h-[18.854vw] relative top-[100px]',
+    'col-start-7 col-end-9 row-start-9 w-[20.208vw] h-[24.219vw] relative left-[26px]',
     // 'col-start-3 col-end-4 row-start-3 row-end-3 border-[10px] border-red-500 w-full h-[200px]',
   ];
 
   const handleClick = () => {
-    mainWrapperRef.current!.style.height = '200vh';
+    mainWrapperRef.current!.style.height = '300vh';
     const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
     const state = Flip.getState(wrapperImage.current!.children);
     const children = Array.from(
@@ -116,27 +116,27 @@ export default function Loading() {
         ScrollTrigger.update();
       },
       onComplete: () => {
-        // handleScroll();
+        handleScroll();
       },
     });
   };
 
-  // const handleScroll = () => {
-  //   const arrayOfImages = Array.from(gridRef.current!.children);
-  //   arrayOfImages.map((image) => {
-  //     gsap.to(image, {
-  //       scaleX: 0,
-  //       transformOrigin: 'center top',
-  //       scrollTrigger: {
-  //         trigger: image,
-  //         start: 'top top',
-  //         end: 'bottom top',
-  //         scrub: true,
-  //         // markers: true,
-  //       },
-  //     });
-  //   });
-  // };
+  const handleScroll = () => {
+    const arrayOfImages = Array.from(gridRef.current!.children);
+    arrayOfImages.map((image) => {
+      gsap.to(image, {
+        scaleX: 0,
+        transformOrigin: 'center top',
+        scrollTrigger: {
+          trigger: image,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
+          // markers: true,
+        },
+      });
+    });
+  };
 
   const assets = [
     {
@@ -162,18 +162,18 @@ export default function Loading() {
       className:
         'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
     },
-    // {
-    //   src: '/images/tesla.jpeg',
-    //   alt: 'tesla',
-    // },
-    // {
-    //   src: '/images/holidays.jpg',
-    //   alt: 'holidays',
-    // },
-    // {
-    //   src: '/images/desktop.jpg',
-    //   alt: 'desktop',
-    // },
+    {
+      src: '/images/tesla.jpeg',
+      alt: 'tesla',
+    },
+    {
+      src: '/images/holidays.jpg',
+      alt: 'holidays',
+    },
+    {
+      src: '/images/desktop.jpg',
+      alt: 'desktop',
+    },
   ];
 
   return (
@@ -181,6 +181,7 @@ export default function Loading() {
       className="flex justify-center items-center relative w-full h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
+      <Header />
       <div
         className="absolute w-full h-full rounded-xl border-2 border-red-400 flex justify-center items-center"
         ref={wrapperImage}
@@ -208,9 +209,7 @@ export default function Loading() {
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative border-[10px] border-green-500 h-full`}
         ref={gridRef}
-      >
-        <Header />
-      </div>
+      ></div>
     </div>
   );
 }
