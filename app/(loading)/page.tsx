@@ -178,7 +178,7 @@ export default function Loading() {
 
   return (
     <div
-      className="flex justify-center items-center relative w-full h-[100vh] transition-height duration-1000"
+      className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
       <Header />
