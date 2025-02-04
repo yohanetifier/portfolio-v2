@@ -101,7 +101,7 @@ export default function Loading() {
     );
 
     arrayOfImages.forEach((image) => {
-      (image as HTMLElement).style.left = `0px`;
+      // (image as HTMLElement).style.left = `0px`;
       (image as HTMLElement).style.transform = `rotate(0deg)`;
     });
 
@@ -181,11 +181,11 @@ export default function Loading() {
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
-      <div className="absolute top-0 w-full border-2 border-cyan-500">
+      {/* <div className="absolute top-0 w-full border-2 border-green-500 h-[100px]">
         <Header />
-      </div>
+      </div> */}
       <div
-        className="absolute w-full h-full rounded-xl border-2 border-red-400 flex justify-center items-center"
+        className="absolute w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
       >
         {assets.map(({ src, alt, className }, index) => (
@@ -209,12 +209,12 @@ export default function Loading() {
       </button>
 
       <div
-        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative border-[10px] border-green-500 h-full`}
+        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full`}
         ref={gridRef}
       >
-        {/* <div className="row-span-2 col-span-10 border-2 border-cyan-500 ">
+        <div className="absolute w-full px-[55px] border-2 border-cyan-500 ">
           <Header />
-        </div> */}
+        </div>
       </div>
     </div>
   );
