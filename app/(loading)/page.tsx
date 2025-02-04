@@ -181,7 +181,9 @@ export default function Loading() {
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
-      <Header />
+      <div className="absolute top-0 w-full border-2 border-cyan-500">
+        <Header />
+      </div>
       <div
         className="absolute w-full h-full rounded-xl border-2 border-red-400 flex justify-center items-center"
         ref={wrapperImage}
@@ -209,7 +211,11 @@ export default function Loading() {
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative border-[10px] border-green-500 h-full`}
         ref={gridRef}
-      ></div>
+      >
+        {/* <div className="row-span-2 col-span-10 border-2 border-cyan-500 ">
+          <Header />
+        </div> */}
+      </div>
     </div>
   );
 }
