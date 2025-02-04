@@ -76,14 +76,13 @@ export default function Loading() {
   }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-2 col-end-4 row-start-3 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
+    'col-start-3 col-end-5 row-start-3 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
     'col-start-6 col-end-9 row-start-5 border-2 w-[20.208vw] h-[24.219vw] border-green-500',
     'col-start-5 col-end-8 row-start-2 border-2 w-[28.542vw] h-[18.854vw] border-cyan-500',
     'col-start-7 col-end-9 row-start-6 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
     'col-start-3 col-end-5 row-start-6 border-2 border-cyan-500 w-[20.208vw] h-[24.219vw] relative top-[65px] ',
     'col-start-2 col-end-5 row-start-8 w-[28.542vw] h-[18.854vw] relative top-[100px]',
     'col-start-7 col-end-9 row-start-9 w-[20.208vw] h-[24.219vw] relative left-[26px]',
-    // 'col-start-3 col-end-4 row-start-3 row-end-3 border-[10px] border-red-500 w-full h-[200px]',
   ];
 
   const handleClick = () => {
@@ -122,7 +121,7 @@ export default function Loading() {
   };
 
   const handleScroll = () => {
-    const arrayOfImages = Array.from(gridRef.current!.children);
+    const arrayOfImages = Array.from(gridRef.current!.children).slice(1);
     arrayOfImages.map((image) => {
       gsap.to(image, {
         scaleX: 0,
@@ -209,10 +208,10 @@ export default function Loading() {
       </button>
 
       <div
-        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full`}
+        className={`w-full grid grid-rows-10 grid-cols-15 gap-[20px] relative h-full`}
         ref={gridRef}
       >
-        <div className="absolute w-full px-[55px] border-2 border-cyan-500 ">
+        <div className="absolute w-full border-2 border-cyan-500 ">
           <Header />
         </div>
       </div>
