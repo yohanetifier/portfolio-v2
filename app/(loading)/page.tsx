@@ -180,6 +180,7 @@ export default function Loading() {
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
+      <Header />
       {/* <div className="absolute top-0 w-full border-2 border-green-500 h-[100px]">
         <Header />
       </div> */}
@@ -208,12 +209,12 @@ export default function Loading() {
       </button>
 
       <div
-        className={`w-full grid grid-rows-10 grid-cols-15 gap-[20px] relative h-full`}
+        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full`}
         ref={gridRef}
       >
-        <div className="absolute w-full border-2 border-cyan-500 ">
+        {/* <div className="w-full border-2 border-cyan-500 ">
           <Header />
-        </div>
+        </div> */}
       </div>
     </div>
   );
