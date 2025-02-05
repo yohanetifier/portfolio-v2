@@ -3,7 +3,7 @@ import Header from '@/common/components/Header/Header';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -12,9 +12,10 @@ export default function Loading() {
   const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
   // const [showWrapper, setShowWrapper] = React.useState(true);
-  const titleRef = useRef<HTMLHeadingElement | null>(null);
-  const [imageArrived, setImageArrived] = useState(false);
+  // const titleRef = useRef<HTMLHeadingElement | null>(null);
+  // const [imageArrived, setImageArrived] = useState(false);
   const tl = gsap.timeline({});
 
   // useEffect(() => {
@@ -51,29 +52,29 @@ export default function Loading() {
   //     });
   // }, []);
 
-  const animateImageWithMouseMove = (e: MouseEvent) => {
-    const arrayOfImages: HTMLElement[] = Array.from(
-      wrapperImage.current!.children,
-    ) as HTMLElement[];
-    const normalizeSize = e.clientX / window.innerWidth - 0.5;
-    arrayOfImages[2].style.left = `${normalizeSize * 50}px`;
-    arrayOfImages[2].style.transform = `rotate(${normalizeSize * 5}deg)`;
+  // const animateImageWithMouseMove = (e: MouseEvent) => {
+  //   const arrayOfImages: HTMLElement[] = Array.from(
+  //     wrapperImage.current!.children,
+  //   ) as HTMLElement[];
+  //   const normalizeSize = e.clientX / window.innerWidth - 0.5;
+  //   arrayOfImages[2].style.left = `${normalizeSize * 50}px`;
+  //   arrayOfImages[2].style.transform = `rotate(${normalizeSize * 5}deg)`;
 
-    arrayOfImages[1].style.left = `${normalizeSize * 200}px`;
-    arrayOfImages[1].style.transform = `rotate(${normalizeSize * 25}deg)`;
+  //   arrayOfImages[1].style.left = `${normalizeSize * 200}px`;
+  //   arrayOfImages[1].style.transform = `rotate(${normalizeSize * 25}deg)`;
 
-    arrayOfImages[0].style.left = `${normalizeSize * 300}px`;
-    arrayOfImages[0].style.transform = `rotate(${normalizeSize * 50}deg)`;
-  };
+  //   arrayOfImages[0].style.left = `${normalizeSize * 300}px`;
+  //   arrayOfImages[0].style.transform = `rotate(${normalizeSize * 50}deg)`;
+  // };
 
-  useEffect(() => {
-    if (imageArrived) {
-      window.addEventListener('mousemove', animateImageWithMouseMove);
-      return () => {
-        window.removeEventListener('mousemove', animateImageWithMouseMove);
-      };
-    }
-  }, [imageArrived]);
+  // useEffect(() => {
+  //   if (imageArrived) {
+  //     window.addEventListener('mousemove', animateImageWithMouseMove);
+  //     return () => {
+  //       window.removeEventListener('mousemove', animateImageWithMouseMove);
+  //     };
+  //   }
+  // }, [imageArrived]);
 
   const gridClasses = [
     'col-start-3 col-end-5 row-start-3 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
@@ -100,7 +101,6 @@ export default function Loading() {
     );
 
     arrayOfImages.forEach((image) => {
-      // (image as HTMLElement).style.left = `0px`;
       (image as HTMLElement).style.transform = `rotate(0deg)`;
     });
 
@@ -110,12 +110,12 @@ export default function Loading() {
       ease: 'power2.inOut',
       stagger: 0.1,
       onUpdate: () => {
-        // setShowWrapper(false);
         wrapperImage.current!.style.visibility = 'hidden';
         ScrollTrigger.update();
       },
       onComplete: () => {
         handleScroll();
+        gsap.to(headerRef.current, { opacity: 1 });
       },
     });
   };
@@ -180,7 +180,9 @@ export default function Loading() {
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
-      <Header />
+      <div className="opacity-0" ref={headerRef}>
+        <Header />
+      </div>
       {/* <div className="absolute top-0 w-full border-2 border-green-500 h-[100px]">
         <Header />
       </div> */}
