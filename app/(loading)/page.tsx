@@ -3,7 +3,8 @@ import Header from '@/common/components/Header/Header';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import SplitType from 'split-type';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -189,6 +190,70 @@ export default function Loading() {
     },
   ];
 
+  const [split, setSplit] = useState<SplitType | null>(null); // Stocke l'instance SplitType
+
+  const randomChar = () => {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*';
+    return chars[Math.floor(Math.random() * chars.length)];
+  };
+
+  const scrambleText = (element, originalText, duration = 1) => {
+    let iterations = 0;
+    const totalFrames = duration * 60; // 60 FPS
+
+    const scrambleInterval = setInterval(() => {
+      iterations++;
+
+      const scrambled = originalText
+        .split('')
+        .map((char, index) =>
+          Math.random() > iterations / totalFrames ? randomChar() : char,
+        )
+        .join('');
+
+      element.innerText = scrambled;
+
+      if (iterations >= totalFrames) {
+        clearInterval(scrambleInterval);
+        element.innerText = originalText;
+      }
+    }, 1000 / 60); // 60 FPS
+  };
+
+  // Fonction pour animer le texte
+  const animateText = () => {
+    if (!welcomeRef.current) return;
+
+    // Supprime l'ancienne séparation (si elle existe) avant de recréer
+    if (split) split.revert();
+
+    // Sépare le texte en mots et caractères
+    const newSplit = new SplitType(welcomeRef.current!, {
+      types: 'words,chars',
+    });
+    setSplit(newSplit);
+
+    // Animation GSAP : apparition avec décalage
+    gsap.fromTo(
+      newSplit.words,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        stagger: 0.3, // Délai entre chaque caractère
+        onStart: () => {
+          newSplit.words?.forEach((word) =>
+            scrambleText(word, word.innerText, 1),
+          );
+        },
+      },
+    );
+  };
+
+  // Animation au chargement
+
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
@@ -217,6 +282,7 @@ export default function Loading() {
         ref={welcomeRef}
         className="z-10 absolute left-[400px] w-[200px] h-[50px]"
         onClick={handleClick}
+        onPointerMove={animateText}
       >
         ( welcome )
       </button>
