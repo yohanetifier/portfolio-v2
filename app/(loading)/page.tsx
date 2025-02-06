@@ -78,11 +78,11 @@ export default function Loading() {
   // }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-3 col-end-5 row-start-3 border-2 border-red-500 w-[20.208vw] h-[24.219vw] relative right-[120px] bottom-[100px] ',
-    'col-start-6 col-end-9 row-start-4 border-2 w-[20.208vw] h-[24.219vw] border-green-500 relative bottom-[100px] left-[100px]',
-    'col-start-5 col-end-8 row-start-2 border-2 w-[28.542vw] h-[18.854vw] border-cyan-500 relative left-[120px] bottom-[100px]',
-    'col-start-7 col-end-9 row-start-4 border-2 border-red-500 w-[20.208vw] h-[24.219vw] relative top-[150px]',
-    'col-start-3 col-end-5 row-start-5 border-2 border-cyan-500 w-[20.208vw] h-[24.219vw] relative bottom-[65px] ',
+    'col-start-3 col-end-5 row-start-3 w-[20.208vw] h-[24.219vw] relative right-[120px] bottom-[100px] ',
+    'col-start-6 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative bottom-[100px] left-[100px]',
+    'col-start-5 col-end-8 row-start-2 w-[28.542vw] h-[18.854vw] relative left-[120px] bottom-[100px]',
+    'col-start-7 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative top-[150px]',
+    'col-start-3 col-end-5 row-start-5 w-[20.208vw] h-[24.219vw] relative bottom-[65px] ',
     'col-start-2 col-end-5 row-start-7 w-[28.542vw] h-[18.854vw]',
     'col-start-7 col-end-9 row-start-8 w-[20.208vw] h-[24.219vw] relative bottom-[100px]',
   ];
