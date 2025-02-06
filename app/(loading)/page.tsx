@@ -9,6 +9,7 @@ gsap.registerPlugin(Flip, ScrollTrigger);
 
 export default function Loading() {
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -77,13 +78,13 @@ export default function Loading() {
   // }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-3 col-end-5 row-start-3 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
-    'col-start-6 col-end-9 row-start-5 border-2 w-[20.208vw] h-[24.219vw] border-green-500',
-    'col-start-5 col-end-8 row-start-2 border-2 w-[28.542vw] h-[18.854vw] border-cyan-500',
-    'col-start-7 col-end-9 row-start-6 border-2 border-red-500 w-[20.208vw] h-[24.219vw] ',
-    'col-start-3 col-end-5 row-start-6 border-2 border-cyan-500 w-[20.208vw] h-[24.219vw] relative top-[65px] ',
-    'col-start-2 col-end-5 row-start-8 w-[28.542vw] h-[18.854vw] relative top-[100px]',
-    'col-start-7 col-end-9 row-start-9 w-[20.208vw] h-[24.219vw] relative left-[26px]',
+    'col-start-3 col-end-5 row-start-3 border-2 border-red-500 w-[20.208vw] h-[24.219vw] relative right-[120px] bottom-[100px] ',
+    'col-start-6 col-end-9 row-start-4 border-2 w-[20.208vw] h-[24.219vw] border-green-500 relative bottom-[100px] left-[100px]',
+    'col-start-5 col-end-8 row-start-2 border-2 w-[28.542vw] h-[18.854vw] border-cyan-500 relative left-[120px] bottom-[100px]',
+    'col-start-7 col-end-9 row-start-4 border-2 border-red-500 w-[20.208vw] h-[24.219vw] relative top-[150px]',
+    'col-start-3 col-end-5 row-start-5 border-2 border-cyan-500 w-[20.208vw] h-[24.219vw] relative bottom-[65px] ',
+    'col-start-2 col-end-5 row-start-7 w-[28.542vw] h-[18.854vw]',
+    'col-start-7 col-end-9 row-start-8 w-[20.208vw] h-[24.219vw] relative bottom-[100px]',
   ];
 
   const handleClick = () => {
@@ -105,6 +106,12 @@ export default function Loading() {
     });
 
     tl.to(buttonRef.current, { opacity: 0, duration: 1 });
+    tl.to(welcomeRef.current, { opacity: 0, duration: 1 });
+    const thirdLastChildren = Array.from(gridRef.current!.children).slice(-3);
+    thirdLastChildren.forEach((children) => {
+      (children as HTMLElement).style.opacity = '0';
+    });
+
     Flip.from(state, {
       duration: 1,
       ease: 'power2.inOut',
@@ -115,13 +122,17 @@ export default function Loading() {
       },
       onComplete: () => {
         handleScroll();
+        gsap.to(
+          [thirdLastChildren[0], thirdLastChildren[1], thirdLastChildren[2]],
+          { opacity: 1 },
+        );
         gsap.to(headerRef.current, { opacity: 1 });
       },
     });
   };
 
   const handleScroll = () => {
-    const arrayOfImages = Array.from(gridRef.current!.children).slice(1);
+    const arrayOfImages = Array.from(gridRef.current!.children);
     arrayOfImages.map((image) => {
       gsap.to(image, {
         scaleX: 0,
@@ -139,39 +150,42 @@ export default function Loading() {
 
   const assets = [
     {
-      src: '/images/desktop.jpg',
+      src: '/images/first-image.png',
       alt: 'desktop',
       className:
         'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]',
     },
     {
-      src: '/images/tesla.jpeg',
+      src: '/images/second-image.png',
       alt: 'tesla',
       className: 'w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]',
     },
     {
-      src: '/images/holidays.jpg',
+      src: '/images/third-image.png',
       alt: 'holidays',
       className:
         'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
     },
     {
-      src: '/images/desktop.jpg',
+      src: '/images/fourth-image.png',
       alt: 'desktop',
       className:
         'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
     },
     {
-      src: '/images/tesla.jpeg',
+      src: '/images/fifth-image.png',
       alt: 'tesla',
+      className: 'opacity-0',
     },
     {
-      src: '/images/holidays.jpg',
+      src: '/images/sixth-image.png',
       alt: 'holidays',
+      className: 'opacity-0',
     },
     {
-      src: '/images/desktop.jpg',
+      src: '/images/seventh-image.png',
       alt: 'desktop',
+      className: 'opacity-0',
     },
   ];
 
@@ -183,9 +197,6 @@ export default function Loading() {
       <div className="opacity-0" ref={headerRef}>
         <Header />
       </div>
-      {/* <div className="absolute top-0 w-full border-2 border-green-500 h-[100px]">
-        <Header />
-      </div> */}
       <div
         className="absolute w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
@@ -195,19 +206,26 @@ export default function Loading() {
             key={index}
             src={src}
             alt={alt}
-            width={0}
-            height={0}
+            width={1000}
+            height={1000}
             className={className}
           />
         ))}
       </div>
 
       <button
-        ref={buttonRef}
-        className="z-10 absolute right-[200px] border-2 border-red-500 w-[200px] h-[50px]"
+        ref={welcomeRef}
+        className="z-10 absolute left-[400px] w-[200px] h-[50px]"
         onClick={handleClick}
       >
-        Enter
+        ( welcome )
+      </button>
+      <button
+        ref={buttonRef}
+        className="z-10 absolute right-[500px] w-[200px] h-[50px]"
+        onClick={handleClick}
+      >
+        ( click to start )
       </button>
 
       <div

@@ -21,9 +21,13 @@ body {
 }
 
 @font-face {
-  font-family: 'FabrikatMono';
+  font-family: 'Fabrikat Mono';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url('/fonts/FabrikatMono-Bold.otf') format('opentype');
+  src: url('/fonts/FabrikatMono-Light.otf') format('opentype');
+}
+
+body {
+  font-family: 'Fabrikat Mono', monospace;
 }

@@ -22,7 +22,7 @@ export default {
         fadeIn: 'fadeIn 0.5s ease-in-out forwards',
       },
       fontFamily: {
-        fabrikatMono: ['FabrikatMono', 'monospace'],
+        fabrikatMono: ['Fabrikat Mono', 'monospace'],
       },
     },
   },

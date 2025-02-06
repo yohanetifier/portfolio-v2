@@ -1,18 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
-interface Props {}
-
-const Header = (props: Props) => {
+const Header = () => {
   const workRef = useRef<HTMLParagraphElement | null>(null);
-
-  // useEffect(() => {
-  //   workRef.current!.style.justifySelf = 'end';
-  // }, []);
 
   return (
     <header
-      className="absolute top-0 grid grid-cols-10 row-start-1 col-start-1 col-end-10 w-full"
-      style={{ paddingTop: '50px' }}
+      className="grid grid-cols-10 row-start-1 col-start-1 col-end-10 w-full"
+      style={{
+        paddingTop: '50px',
+        position: 'absolute',
+        top: '0px',
+      }}
     >
       <div className="pl-[55px] col-start-2 col-end-3 flex justify-between ">
         <p className="absolute" style={{ left: '55px' }}>
@@ -24,7 +22,7 @@ const Header = (props: Props) => {
       </div>
       <p
         ref={workRef}
-        className="col-start-3 col-end-5 row-start-1 w-[300px] "
+        className="col-start-3 col-end-5 row-start-1"
         style={{
           justifySelf: 'end',
           position: 'relative',
