@@ -88,49 +88,49 @@ export default function Loading() {
     'col-start-7 col-end-9 row-start-8 w-[20.208vw] h-[24.219vw] relative bottom-[100px]',
   ];
 
-  const handleClick = () => {
-    mainWrapperRef.current!.style.height = '300vh';
-    const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
-    const state = Flip.getState(wrapperImage.current!.children);
-    const children = Array.from(
-      wrapperImage.current!.children,
-    ) as HTMLElement[];
-    children.forEach((child, index) => {
-      child.className = gridClasses[index] || '';
-    });
-    gridRef.current!.append(
-      ...Array.from(wrapperImage.current!.children as HTMLCollection),
-    );
+  // const handleClick = () => {
+  //   mainWrapperRef.current!.style.height = '300vh';
+  //   const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
+  //   const state = Flip.getState(wrapperImage.current!.children);
+  //   const children = Array.from(
+  //     wrapperImage.current!.children,
+  //   ) as HTMLElement[];
+  //   children.forEach((child, index) => {
+  //     child.className = gridClasses[index] || '';
+  //   });
+  //   gridRef.current!.append(
+  //     ...Array.from(wrapperImage.current!.children as HTMLCollection),
+  //   );
 
-    arrayOfImages.forEach((image) => {
-      (image as HTMLElement).style.transform = `rotate(0deg)`;
-    });
+  //   arrayOfImages.forEach((image) => {
+  //     (image as HTMLElement).style.transform = `rotate(0deg)`;
+  //   });
 
-    tl.to(buttonRef.current, { opacity: 0, duration: 1 });
-    tl.to(welcomeRef.current, { opacity: 0, duration: 1 });
-    const thirdLastChildren = Array.from(gridRef.current!.children).slice(-3);
-    thirdLastChildren.forEach((children) => {
-      (children as HTMLElement).style.opacity = '0';
-    });
+  //   tl.to(buttonRef.current, { opacity: 0, duration: 1 });
+  //   tl.to(welcomeRef.current, { opacity: 0, duration: 1 });
+  //   const thirdLastChildren = Array.from(gridRef.current!.children).slice(-3);
+  //   thirdLastChildren.forEach((children) => {
+  //     (children as HTMLElement).style.opacity = '0';
+  //   });
 
-    Flip.from(state, {
-      duration: 1,
-      ease: 'power2.inOut',
-      stagger: 0.1,
-      onUpdate: () => {
-        wrapperImage.current!.style.visibility = 'hidden';
-        ScrollTrigger.update();
-      },
-      onComplete: () => {
-        handleScroll();
-        gsap.to(
-          [thirdLastChildren[0], thirdLastChildren[1], thirdLastChildren[2]],
-          { opacity: 1 },
-        );
-        gsap.to(headerRef.current, { opacity: 1 });
-      },
-    });
-  };
+  //   Flip.from(state, {
+  //     duration: 1,
+  //     ease: 'power2.inOut',
+  //     stagger: 0.1,
+  //     onUpdate: () => {
+  //       wrapperImage.current!.style.visibility = 'hidden';
+  //       ScrollTrigger.update();
+  //     },
+  //     onComplete: () => {
+  //       handleScroll();
+  //       gsap.to(
+  //         [thirdLastChildren[0], thirdLastChildren[1], thirdLastChildren[2]],
+  //         { opacity: 1 },
+  //       );
+  //       gsap.to(headerRef.current, { opacity: 1 });
+  //     },
+  //   });
+  // };
 
   const handleScroll = () => {
     const arrayOfImages = Array.from(gridRef.current!.children);
@@ -203,26 +203,27 @@ export default function Loading() {
     originalText: string,
     duration = 1,
   ) => {
-    let iterations = 0;
-    const totalFrames = duration * 60; // 60 FPS
+    console.log('word', element);
+    // let iterations = 0;
+    // const totalFrames = duration * 60; // 60 FPS
 
-    const scrambleInterval = setInterval(() => {
-      iterations++;
+    // const scrambleInterval = setInterval(() => {
+    //   iterations++;
 
-      const scrambled = originalText
-        .split('')
-        .map((char: string) =>
-          Math.random() > iterations / totalFrames ? randomChar() : char,
-        )
-        .join('');
+    //   const scrambled = originalText
+    //     .split('')
+    //     .map((char: string) =>
+    //       Math.random() > iterations / totalFrames ? randomChar() : char,
+    //     )
+    //     .join('');
 
-      element.innerText = scrambled;
+    //   element.innerText = scrambled;
 
-      if (iterations >= totalFrames) {
-        clearInterval(scrambleInterval);
-        element.innerText = originalText;
-      }
-    }, 1000 / 60); // 60 FPS
+    //   if (iterations >= totalFrames) {
+    //     clearInterval(scrambleInterval);
+    //     element.innerText = originalText;
+    //   }
+    // }, 1000 / 60); // 60 FPS
   };
 
   // Fonction pour animer le texte
@@ -239,16 +240,16 @@ export default function Loading() {
     setSplit(newSplit);
 
     // Animation GSAP : apparition avec décalage
-    gsap.fromTo(
+    gsap.to(
       newSplit.words,
-      { opacity: 0, y: 20 },
+      // { opacity: 0, y: 20 },
       {
         opacity: 1,
         y: 0,
         duration: 1,
         stagger: 0.3, // Délai entre chaque caractère
         onStart: () => {
-          newSplit.words?.forEach((word) =>
+          newSplit.chars?.forEach((word) =>
             scrambleText(word, word.innerText, 1),
           );
         },
@@ -256,6 +257,63 @@ export default function Loading() {
     );
   };
 
+  const handleClick = () => {
+    const originalText = welcomeRef.current?.textContent;
+    const splitText = new SplitType(welcomeRef.current!, { types: 'chars' });
+    const allChars = splitText.chars;
+    const random =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*';
+    gsap.fromTo(
+      allChars,
+      {
+        opacity: 0,
+      },
+      {
+        opacity: 1,
+        text: 'good',
+        stagger: 0.1,
+        onStart: () => {
+          allChars!.forEach((char) => {
+            // gsap.set(char, {
+            //   text: random.split('')[Math.floor(Math.random() * 26)],
+            //   stagger: 0.5,
+            // });
+            char.innerText = random.split('')[Math.floor(Math.random() * 26)];
+            // gsap.to(allChars, { modifiers: { text: () => { return  random.split('')[Math.floor(Math.random() * 26)]} } });
+          });
+        },
+        onUpdate: function () {
+          if (this.progress() > 0.2) {
+            // allChars?.forEach((char) => {
+            allChars?.forEach((char) => {
+              char.innerText = random.split('')[Math.floor(Math.random() * 26)];
+            });
+            // })
+          }
+          if (this.progress() > 0.5) {
+            allChars?.forEach((char, index) => {
+              console.log(originalText!.split('')[index]);
+              char.innerText = originalText!.split('')[index];
+            });
+          }
+        },
+      },
+    );
+    // allChars?.forEach((char) => {
+    //   tl.fromTo(
+    //     allChars,
+    //     {
+    //       opacity: 0,
+    //     },
+    //     {
+    //       opacity: 1,
+    //       onStart: () => {
+    //         char.innerHTML = '0';
+    //       },
+    //     },
+    //   );
+    // });
+  };
   // Animation au chargement
 
   return (
@@ -286,7 +344,7 @@ export default function Loading() {
         ref={welcomeRef}
         className="z-10 absolute left-[400px] w-[200px] h-[50px]"
         onClick={handleClick}
-        onPointerMove={animateText}
+        // onPointerMove={handleClick}
       >
         ( welcome )
       </button>
