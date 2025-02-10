@@ -3,7 +3,7 @@ import Header from '@/common/components/Header/Header';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import SplitType from 'split-type';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
@@ -198,7 +198,11 @@ export default function Loading() {
     return chars[Math.floor(Math.random() * chars.length)];
   };
 
-  const scrambleText = (element, originalText, duration = 1) => {
+  const scrambleText = (
+    element: HTMLElement,
+    originalText: string,
+    duration = 1,
+  ) => {
     let iterations = 0;
     const totalFrames = duration * 60; // 60 FPS
 
@@ -207,7 +211,7 @@ export default function Loading() {
 
       const scrambled = originalText
         .split('')
-        .map((char, index) =>
+        .map((char: string) =>
           Math.random() > iterations / totalFrames ? randomChar() : char,
         )
         .join('');
