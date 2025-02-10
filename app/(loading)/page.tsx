@@ -258,44 +258,55 @@ export default function Loading() {
   };
 
   const handleClick = () => {
-    const originalText = welcomeRef.current?.textContent;
+    const originalText = ['w', 'e', 'l', 'c', 'o', 'm', 'e'];
     const splitText = new SplitType(welcomeRef.current!, { types: 'chars' });
     const allChars = splitText.chars;
-    const random =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*';
-    gsap.fromTo(
+    const random = 'abcdefghijklmnopqrstuvwxyz0123456789@#$%&*-_ˆ!?)(/<>.,+=';
+    tl.fromTo(
       allChars,
       {
         opacity: 0,
       },
       {
         opacity: 1,
-        text: 'good',
         stagger: 0.1,
         onStart: () => {
-          allChars!.forEach((char) => {
-            // gsap.set(char, {
-            //   text: random.split('')[Math.floor(Math.random() * 26)],
-            //   stagger: 0.5,
-            // });
-            char.innerText = random.split('')[Math.floor(Math.random() * 26)];
-            // gsap.to(allChars, { modifiers: { text: () => { return  random.split('')[Math.floor(Math.random() * 26)]} } });
-          });
+          let counter = 0;
+          setInterval(() => {
+            if (counter > 8) {
+              allChars!.forEach((char, index) => {
+                char.innerText = originalText![index];
+              });
+            } else {
+              counter++;
+              allChars!.forEach((char) => {
+                char.innerText =
+                  random.split('')[Math.floor(Math.random() * 26)];
+              });
+            }
+          }, 50);
         },
+        // onComplete: () => {
+        //   setInterval(() => {
+        //     allChars!.forEach((char, index) => {
+        //       char.innerText = originalText!.split('')[index];
+        //     });
+        //   }, 50);
+        // },
         onUpdate: function () {
-          if (this.progress() > 0.2) {
-            // allChars?.forEach((char) => {
-            allChars?.forEach((char) => {
-              char.innerText = random.split('')[Math.floor(Math.random() * 26)];
-            });
-            // })
-          }
-          if (this.progress() > 0.5) {
-            allChars?.forEach((char, index) => {
-              console.log(originalText!.split('')[index]);
-              char.innerText = originalText!.split('')[index];
-            });
-          }
+          // if (this.progress() > 0.2) {
+          //   // allChars?.forEach((char) => {
+          //   allChars?.forEach((char) => {
+          //     char.innerText = random.split('')[Math.floor(Math.random() * 26)];
+          //   });
+          //   // })
+          // }
+          // if (this.progress() > 0.5) {
+          //   allChars?.forEach((char, index) => {
+          //     console.log(originalText!.split('')[index]);
+          //     char.innerText = originalText!.split('')[index];
+          //   });
+          // }
         },
       },
     );
@@ -346,7 +357,7 @@ export default function Loading() {
         onClick={handleClick}
         // onPointerMove={handleClick}
       >
-        ( welcome )
+        welcome
       </button>
       <button
         ref={buttonRef}
