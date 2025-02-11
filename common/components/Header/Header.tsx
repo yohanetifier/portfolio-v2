@@ -1,41 +1,13 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import SplitType from 'split-type';
+import React, { useRef } from 'react';
+import { animateText } from '@/common/utils/animateText';
 
 const Header = () => {
-  const workRef = useRef<HTMLParagraphElement | null>(null);
-  const personalRef = useRef<HTMLParagraphElement | null>(null);
-  const [split, setSplit] = useState<SplitType | null>(null); // Stocke l'instance SplitType
-
-  // Fonction pour animer le texte
-  const animateText = () => {
-    if (!personalRef.current) return;
-
-    // Supprime l'ancienne séparation (si elle existe) avant de recréer
-    if (split) split.revert();
-
-    // Sépare le texte en mots et caractères
-    const newSplit = new SplitType(personalRef.current!, {
-      types: 'words,chars',
-    });
-    setSplit(newSplit);
-
-    // Animation GSAP : apparition avec décalage
-    gsap.from(newSplit.chars, {
-      opacity: 0,
-      y: 20,
-      duration: 1,
-      stagger: 0.05, // Délai entre chaque caractère
-      ease: 'power2.out',
-      delay: 2,
-    });
-  };
-
-  // Animation au chargement
-  useEffect(() => {
-    animateText();
-  }, []);
+  const workRef = useRef<HTMLParagraphElement>(null);
+  const personalRef = useRef<HTMLParagraphElement>(null);
+  const jobRef = useRef<HTMLParagraphElement>(null);
+  const aboutRef = useRef<HTMLParagraphElement>(null);
+  const contactRef = useRef<HTMLParagraphElement>(null);
 
   return (
     <header
@@ -44,13 +16,24 @@ const Header = () => {
         paddingTop: '50px',
         position: 'absolute',
         top: '0px',
+        zIndex: '10',
       }}
     >
       <div className="pl-[55px] col-start-2 col-end-3 flex justify-between ">
-        <p className="absolute" style={{ left: '55px' }} ref={personalRef}>
+        <p
+          className="absolute"
+          style={{ left: '55px', cursor: 'pointer' }}
+          ref={personalRef}
+          onMouseEnter={() => animateText(personalRef.current!)}
+        >
           Ncstr
         </p>
-        <p className="text-right" style={{ justifySelf: 'end' }}>
+        <p
+          className="text-right"
+          style={{ justifySelf: 'end', cursor: 'pointer' }}
+          ref={jobRef}
+          onMouseEnter={() => animateText(jobRef.current!)}
+        >
           Art director
         </p>
       </div>
@@ -61,17 +44,31 @@ const Header = () => {
           justifySelf: 'end',
           position: 'relative',
           right: '20px',
+          cursor: 'pointer',
         }}
+        onMouseEnter={() => animateText(workRef.current!)}
       >
         Travaux
       </p>
       <p
         className="col-start-5 col-end-8 justify-self-end"
-        style={{ justifySelf: 'end', position: 'relative', right: '20px' }}
+        style={{
+          justifySelf: 'end',
+          position: 'relative',
+          right: '20px',
+          cursor: 'pointer',
+        }}
+        ref={aboutRef}
+        onPointerEnter={() => animateText(aboutRef.current!)}
       >
         À propos
       </p>
-      <p className="absolute" style={{ right: '55px', top: '50px' }}>
+      <p
+        className="absolute"
+        style={{ right: '55px', top: '50px', cursor: 'pointer' }}
+        ref={contactRef}
+        onPointerEnter={() => animateText(contactRef.current!)}
+      >
         Contact
       </p>
     </header>
