@@ -3,6 +3,7 @@ import Header from '@/common/components/Header/Header';
 import { animateText } from '@/common/utils/animateText';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
+import { Link, useTransitionRouter } from 'next-view-transitions';
 import Image from 'next/image';
 import React, { useRef } from 'react';
 
@@ -15,6 +16,7 @@ export default function Loading() {
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const router = useTransitionRouter();
   // const [showWrapper, setShowWrapper] = React.useState(true);
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
   // const [imageArrived, setImageArrived] = useState(false);
@@ -118,7 +120,7 @@ export default function Loading() {
       ease: 'power2.inOut',
       stagger: 0.1,
       onUpdate: () => {
-        wrapperImage.current!.style.visibility = 'hidden';
+        wrapperImage.current!.style.display = 'none';
         ScrollTrigger.update();
       },
       onComplete: () => {
@@ -190,6 +192,63 @@ export default function Loading() {
     },
   ];
 
+  const zooming = (element: HTMLElement) => {
+    element.animate(
+      [
+        {
+          transform: 'scale(1)',
+        },
+        {
+          transform: 'scale(1.1)',
+        },
+      ],
+      {
+        duration: 400,
+        easing: 'ease',
+        fill: 'forwards',
+        pseudoElement: '::view-transition-old(root)',
+      },
+    );
+
+    element.animate(
+      [
+        {
+          transform: 'scale(1)',
+        },
+        {
+          transform: 'scale(1.2)',
+        },
+      ],
+      {
+        duration: 400,
+        easing: 'ease',
+        fill: 'forwards',
+        pseudoElement: '::view-transition-new(root)',
+      },
+    );
+  };
+
+  const handleTransition = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  ) => {
+    e.preventDefault();
+    const target = e.currentTarget;
+
+    // if (!target || !document.startViewTransition) {
+    //   router.push('/work');
+    //   return;
+    // }
+    router.push('/work', { onTransitionReady: () => zooming(target) });
+
+    // document
+    //   .startViewTransition(() => {
+    //     router.push('/work');
+    //   })
+    //   .ready.then(() => {
+    //     zooming(target);
+    //   });
+  };
+
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
@@ -203,14 +262,14 @@ export default function Loading() {
         ref={wrapperImage}
       >
         {assets.map(({ src, alt, className }, index) => (
-          <Image
+          <Link
             key={index}
-            src={src}
-            alt={alt}
-            width={1000}
-            height={1000}
+            onClick={(e) => handleTransition(e)}
+            href=""
             className={className}
-          />
+          >
+            <Image src={src} alt={alt} width={1000} height={1000} />
+          </Link>
         ))}
       </div>
 

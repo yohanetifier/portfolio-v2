@@ -71,7 +71,6 @@ export const animateText = (ref: HTMLElement) => {
         onRepeat: () => {
           repeatCount++;
           if (repeatCount === 1) {
-            // Set --opa to 0 after the first repeat
             gsap.set(char, { '--opa': 0 });
           }
         },
