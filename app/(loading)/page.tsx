@@ -196,15 +196,28 @@ export default function Loading() {
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
-    e.preventDefault();
+    // const state = Flip.getState(e.currentTarget);
+    // e.currentTarget.className = '';
+    const parentNode = e.currentTarget.parentElement;
+    // parentNode!.className = '';
     gsap.to(e.currentTarget, {
       position: 'absolute',
       top: 0,
       left: 0,
-      width: '100vw',
-      height: '100vh',
-      duration: 0.5,
+      // width: '100vw',
+      // height: '100vh',
+      scale: 4,
+      // gridArea: '',
+      // gridRowStart: '',
+      // gridColumnStart: '',
+      // gridColumnEnd: '',
     });
+    e.preventDefault();
+    // Flip.to(state, {
+    //   scale: true,
+    //   absolute: true,
+    //   duration: 0.5,
+    // });
   };
 
   return (
@@ -222,11 +235,17 @@ export default function Loading() {
         {assets.map(({ src, alt, className }, index) => (
           <Link
             key={index}
-            onClick={(e) => handleTransition(e)}
             href=""
             className={className}
+            onClick={(e) => handleTransition(e)}
           >
-            <Image src={src} alt={alt} width={1000} height={1000} />
+            <Image
+              src={src}
+              alt={alt}
+              width={1000}
+              height={1000}
+              className="w-full h-full"
+            />
           </Link>
         ))}
       </div>
