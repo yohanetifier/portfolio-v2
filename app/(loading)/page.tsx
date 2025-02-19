@@ -5,7 +5,6 @@ import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import React, { useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
@@ -17,7 +16,6 @@ export default function Loading() {
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
   // const [showWrapper, setShowWrapper] = React.useState(true);
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
   // const [imageArrived, setImageArrived] = useState(false);
@@ -198,21 +196,18 @@ export default function Loading() {
   ) => {
     // const state = Flip.getState(e.currentTarget);
     // e.currentTarget.className = '';
-    const parentNode = e.currentTarget.parentElement;
+    // const parentNode = e.currentTarget.parentElement;
     // parentNode!.className = '';
+    const imageSize = e.currentTarget.getBoundingClientRect();
+    const scaleX = window.innerWidth / imageSize.width;
+    const scaleY = window.innerHeight / imageSize.height;
+    const scale = Math.max(scaleX, scaleY);
     gsap.to(e.currentTarget, {
       position: 'absolute',
       top: 0,
       left: 0,
-      // width: '100vw',
-      // height: '100vh',
-      scale: 4,
-      // gridArea: '',
-      // gridRowStart: '',
-      // gridColumnStart: '',
-      // gridColumnEnd: '',
+      scale,
     });
-    e.preventDefault();
     // Flip.to(state, {
     //   scale: true,
     //   absolute: true,
