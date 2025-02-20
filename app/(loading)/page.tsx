@@ -202,8 +202,7 @@ export default function Loading() {
     console.log(e.currentTarget);
     e.currentTarget.className = '';
     fullscreenRef.current!.append(e.currentTarget);
-    e.currentTarget.className =
-      'absolute w-screen h-screen border-[10px] border-purple-500';
+    e.currentTarget.className = 'absolute w-screen h-screen ';
     Flip.from(state, {
       duration: 1,
       ease: 'power2.inOut',
@@ -261,10 +260,7 @@ export default function Loading() {
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
         ref={gridRef}
       ></div>
-      <div
-        className="absolute top-0 w-screen h-screen border-[10px] border-red-500 z-0"
-        ref={fullscreenRef}
-      >
+      <div className="absolute top-0 w-screen h-screen z-0" ref={fullscreenRef}>
         {' '}
       </div>
     </div>

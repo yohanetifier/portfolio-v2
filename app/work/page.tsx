@@ -1,8 +1,6 @@
 import React from 'react';
 
-interface Props {}
-
-const Work = (props: Props) => {
+const Work = () => {
   return <div>Work</div>;
 };
 
