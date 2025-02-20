@@ -1,4 +1,3 @@
-import { ViewTransitions } from 'next-view-transitions';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
