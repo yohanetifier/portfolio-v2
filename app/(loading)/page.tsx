@@ -80,8 +80,8 @@ export default function Loading() {
   // }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-3 col-end-5 row-start-3 w-[20.208vw] h-[24.219vw] relative right-[120px] bottom-[100px] ',
-    'col-start-6 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative bottom-[100px] left-[100px]',
+    'col-start-3 col-end-5 row-start-3 w-[20.208vw] h-[24.219vw] relative right-[120px] bottom-[100px] z-[10] ',
+    'col-start-6 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative bottom-[100px] left-[100px] z-[10]',
     'col-start-5 col-end-8 row-start-2 w-[28.542vw] h-[18.854vw] relative left-[120px] bottom-[100px]',
     'col-start-7 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative top-[150px]',
     'col-start-3 col-end-5 row-start-5 w-[20.208vw] h-[24.219vw] relative bottom-[65px] ',
@@ -92,6 +92,8 @@ export default function Loading() {
   const handleClick = () => {
     mainWrapperRef.current!.style.height = '300vh';
     const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
+    console.log('arrayOfImages', arrayOfImages);
+
     const state = Flip.getState(wrapperImage.current!.children);
     const children = Array.from(
       wrapperImage.current!.children,
@@ -191,28 +193,21 @@ export default function Loading() {
     },
   ];
 
+  const fullscreenRef = useRef<HTMLDivElement | null>(null);
+
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
-    // const state = Flip.getState(e.currentTarget);
-    // e.currentTarget.className = '';
-    // const parentNode = e.currentTarget.parentElement;
-    // parentNode!.className = '';
-    const imageSize = e.currentTarget.getBoundingClientRect();
-    const scaleX = window.innerWidth / imageSize.width;
-    const scaleY = window.innerHeight / imageSize.height;
-    const scale = Math.max(scaleX, scaleY);
-    gsap.to(e.currentTarget, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      scale,
+    const state = Flip.getState(e.currentTarget);
+    console.log(e.currentTarget);
+    e.currentTarget.className = '';
+    fullscreenRef.current!.append(e.currentTarget);
+    e.currentTarget.className =
+      'absolute w-screen h-screen border-[10px] border-purple-500';
+    Flip.from(state, {
+      duration: 1,
+      ease: 'power2.inOut',
     });
-    // Flip.to(state, {
-    //   scale: true,
-    //   absolute: true,
-    //   duration: 0.5,
-    // });
   };
 
   return (
@@ -263,9 +258,15 @@ export default function Loading() {
       </button>
 
       <div
-        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full`}
+        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
         ref={gridRef}
       ></div>
+      <div
+        className="absolute top-0 w-screen h-screen border-[10px] border-red-500 z-0"
+        ref={fullscreenRef}
+      >
+        {' '}
+      </div>
     </div>
   );
 }
