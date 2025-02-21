@@ -199,7 +199,27 @@ export default function Loading() {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
     const state = Flip.getState(e.currentTarget);
-    console.log(e.currentTarget);
+    const otherChildren = Array.from(gridRef.current!.children).filter(
+      (child) => child !== e.currentTarget,
+    );
+    const screenSize = window.innerWidth;
+    const childLeft: HTMLElement[] = [];
+    const childRight: HTMLElement[] = [];
+    otherChildren.forEach((child) => {
+      const position = child.getBoundingClientRect();
+      const isLeft = position.left < screenSize / 2;
+      if (isLeft) {
+        childLeft.push(child as HTMLElement);
+      } else {
+        childRight.push(child as HTMLElement);
+      }
+    });
+    tl.to(childLeft, { x: '-100', rotate: -10, opacity: 0, duration: 1 }).to(
+      childRight,
+      { x: 100, opacity: 0, duration: 1 },
+      '<',
+    );
+    console.log('otherChildren', otherChildren);
     e.currentTarget.className = '';
     fullscreenRef.current!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
