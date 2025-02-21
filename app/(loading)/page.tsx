@@ -198,12 +198,12 @@ export default function Loading() {
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
+    e.preventDefault();
     const target = e.currentTarget;
     const state = Flip.getState(e.currentTarget);
     const otherChildren = Array.from(gridRef.current!.children).filter(
       (child) => child !== e.currentTarget,
     );
-    // const screenSize = window.innerWidth;
     const childatTheBottom: HTMLElement[] = [];
     const childAtTheTop: HTMLElement[] = [];
     otherChildren.forEach((child) => {
@@ -215,16 +215,19 @@ export default function Loading() {
         childAtTheTop.push(child as HTMLElement);
       }
     });
-    tl.to(childatTheBottom, {
-      y: '100vh',
-      rotate: -10,
-      opacity: 0,
-      duration: 1,
-    }).to(childAtTheTop, { y: '-100vh', opacity: 0, duration: 1 }, '<');
+
     e.currentTarget.className = '';
     fullscreenRef.current!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
+
+    tl.to(childatTheBottom, {
+      y: '100vh',
+      rotate: -10,
+      duration: 1,
+    }).to(childAtTheTop, { y: '-100vh', rotate: 10, duration: 1 }, '<');
+
     Flip.from(state, {
+      delay: 0.01,
       duration: 1,
       ease: 'power2.inOut',
     });
@@ -281,10 +284,7 @@ export default function Loading() {
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
         ref={gridRef}
       ></div>
-      <div
-        className="absolute top-0 w-screen h-screen z-0 border-2 border-red-500"
-        ref={fullscreenRef}
-      >
+      <div className="fixed top-0 w-screen h-screen z-0" ref={fullscreenRef}>
         {' '}
       </div>
     </div>
