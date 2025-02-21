@@ -198,28 +198,29 @@ export default function Loading() {
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
+    const target = e.currentTarget;
     const state = Flip.getState(e.currentTarget);
     const otherChildren = Array.from(gridRef.current!.children).filter(
       (child) => child !== e.currentTarget,
     );
-    const screenSize = window.innerWidth;
-    const childLeft: HTMLElement[] = [];
-    const childRight: HTMLElement[] = [];
+    // const screenSize = window.innerWidth;
+    const childatTheBottom: HTMLElement[] = [];
+    const childAtTheTop: HTMLElement[] = [];
     otherChildren.forEach((child) => {
       const position = child.getBoundingClientRect();
-      const isLeft = position.left < screenSize / 2;
-      if (isLeft) {
-        childLeft.push(child as HTMLElement);
+      const isAtTheBottom = position.top > target.getBoundingClientRect().top;
+      if (isAtTheBottom) {
+        childatTheBottom.push(child as HTMLElement);
       } else {
-        childRight.push(child as HTMLElement);
+        childAtTheTop.push(child as HTMLElement);
       }
     });
-    tl.to(childLeft, { x: '-100', rotate: -10, opacity: 0, duration: 1 }).to(
-      childRight,
-      { x: 100, opacity: 0, duration: 1 },
-      '<',
-    );
-    console.log('otherChildren', otherChildren);
+    tl.to(childatTheBottom, {
+      y: '100vh',
+      rotate: -10,
+      opacity: 0,
+      duration: 1,
+    }).to(childAtTheTop, { y: '-100vh', opacity: 0, duration: 1 }, '<');
     e.currentTarget.className = '';
     fullscreenRef.current!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
@@ -280,7 +281,10 @@ export default function Loading() {
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
         ref={gridRef}
       ></div>
-      <div className="absolute top-0 w-screen h-screen z-0" ref={fullscreenRef}>
+      <div
+        className="absolute top-0 w-screen h-screen z-0 border-2 border-red-500"
+        ref={fullscreenRef}
+      >
         {' '}
       </div>
     </div>
