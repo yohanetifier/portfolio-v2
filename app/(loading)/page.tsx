@@ -239,6 +239,10 @@ export default function Loading() {
       delay: 0.01,
       duration: 1,
       ease: 'power2.inOut',
+      onStart: () => {
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100vh';
+      },
     });
   };
 
