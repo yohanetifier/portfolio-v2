@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
@@ -21,6 +22,7 @@ export default function Loading() {
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
   // const [imageArrived, setImageArrived] = useState(false);
   const tl = gsap.timeline({});
+  const router = useRouter();
 
   // useEffect(() => {
   //   const arrayOfImages: HTMLElement[] = Array.from(
@@ -220,6 +222,12 @@ export default function Loading() {
     e.currentTarget.className = '';
     fullscreenRef.current!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        router.push('/work');
+      },
+    });
 
     tl.to(childatTheBottom, {
       y: '100vh',
