@@ -1,4 +1,5 @@
 'use client';
+import Button from '@/common/components/Button/Button';
 import Header from '@/common/components/Header/Header';
 import { animateText } from '@/common/utils/animateText';
 import gsap from 'gsap';
@@ -262,23 +263,20 @@ export default function Loading() {
           </Link>
         ))}
       </div>
-
-      <button
-        ref={welcomeRef}
-        className="z-10 absolute left-[400px] w-[200px] h-[50px]"
+      <Button
         onClick={handleClick}
         onMouseEnter={() => animateText(welcomeRef.current!)}
-      >
-        ( welcome )
-      </button>
-      <button
+        title={'welcome'}
+        ref={welcomeRef}
+        className="z-10 absolute left-[400px] w-[200px] h-[50px]"
+      />
+      <Button
+        onClick={handleClick}
+        onMouseEnter={() => animateText(buttonRef.current!)}
+        title={'click to start'}
         ref={buttonRef}
         className="z-10 absolute right-[500px] w-[200px] h-[50px]"
-        onMouseEnter={() => animateText(buttonRef.current!)}
-        onClick={handleClick}
-      >
-        ( click to start )
-      </button>
+      />
 
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
