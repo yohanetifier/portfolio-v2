@@ -1,18 +1,5 @@
 import { API_URL } from '@/config/constants';
-
-const QUERY = `
-  query NewQuery {
-    posts {
-      nodes {
-        featuredImage {
-          node {
-            sourceUrl
-          }
-        }
-      }
-    }
-  }
-`;
+import { GET_POSTS_QUERY } from './graphql/queries';
 
 export async function getPosts() {
   const res = await fetch(API_URL, {
@@ -20,7 +7,7 @@ export async function getPosts() {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ quuery: QUERY }),
+    body: JSON.stringify({ quuery: GET_POSTS_QUERY }),
   });
   if (!res.ok) {
     throw new Error('Failed to fetch posts');
