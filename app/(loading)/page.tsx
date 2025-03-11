@@ -2,6 +2,7 @@
 import Button from '@/common/components/Button/Button';
 import Header from '@/common/components/Header/Header';
 import { animateText } from '@/common/utils/animateText';
+import { usePortfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
@@ -12,6 +13,10 @@ import React, { useRef } from 'react';
 gsap.registerPlugin(Flip, ScrollTrigger);
 
 export default function Loading() {
+  const { projects, loading, error } = usePortfolioViewModel();
+  console.log('projects', projects);
+  console.log('loading', loading);
+  console.log('error', error);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);
@@ -95,7 +100,6 @@ export default function Loading() {
   const handleClick = () => {
     mainWrapperRef.current!.style.height = '300vh';
     const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
-    console.log('arrayOfImages', arrayOfImages);
 
     const state = Flip.getState(wrapperImage.current!.children);
     const children = Array.from(
