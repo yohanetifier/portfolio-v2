@@ -1,5 +1,6 @@
 import { API_URL } from '@/config/constants';
 import { GET_POSTS_QUERY } from '@/lib/graphql/queries';
+import { Data } from '../types/Data';
 
 export async function getPosts() {
   const res = await fetch(API_URL, {
@@ -13,10 +14,9 @@ export async function getPosts() {
     throw new Error('Failed to fetch posts');
   }
   const json = await res.json();
-  return json.data.posts.nodes.map((projects: any) => ({
-    imageUrl: projects.featuredImage.node.sourceUrl,
+  return json.data.posts.nodes.map((projects: Data) => ({
+    src: projects.featuredImage.node.sourceUrl,
+    alt: projects.featuredImage.node.altText,
+    title: projects.title,
   }));
-  //   return json.data.posts.nodes.map(
-  //     (post: any) => post.featuredImage?.node?.sourceUrl,
-  //   );
 }
