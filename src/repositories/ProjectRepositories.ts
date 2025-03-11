@@ -15,8 +15,10 @@ export async function getPosts() {
   }
   const json = await res.json();
   return json.data.posts.nodes.map((projects: Data) => ({
-    src: projects.featuredImage.node.sourceUrl,
-    alt: projects.featuredImage.node.altText,
+    featuredImage: {
+      src: projects.featuredImage.node.sourceUrl,
+      alt: projects.featuredImage.node.altText,
+    },
     title: projects.title,
   }));
 }

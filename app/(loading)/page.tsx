@@ -14,7 +14,6 @@ gsap.registerPlugin(Flip, ScrollTrigger);
 
 export default function Loading() {
   const { projects, loading, error } = usePortfolioViewModel();
-  console.log('projects', projects);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);
@@ -157,6 +156,36 @@ export default function Loading() {
     });
   };
 
+  const startingClass = [
+    {
+      className: `w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]`,
+    },
+    {
+      className: `w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]`,
+    },
+    {
+      className:
+        'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
+    },
+    {
+      className:
+        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
+    },
+    {
+      className:
+        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
+    },
+    {
+      className: 'opacity-0',
+    },
+    {
+      className: 'opacity-0',
+    },
+    {
+      className: 'opacity-0',
+    },
+  ];
+
   const assets = [
     {
       src: '/images/first-image.png',
@@ -248,6 +277,8 @@ export default function Loading() {
     });
   };
 
+  console.log('projects', projects);
+
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
@@ -260,7 +291,24 @@ export default function Loading() {
         className="absolute w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
       >
-        {assets.map(({ src, alt, className }, index) => (
+        {projects.map(({ featuredImage, title }, index) => (
+          <Link
+            key={index}
+            href=""
+            className={startingClass[index].className}
+            onClick={(e) => handleTransition(e)}
+          >
+            <Image
+              src={featuredImage.src}
+              alt={featuredImage.alt}
+              width={1000}
+              height={1000}
+              className="w-full h-full"
+            />
+          </Link>
+        ))}
+
+        {/* {assets.map(({ src, alt, className }, index) => (
           <Link
             key={index}
             href=""
@@ -275,7 +323,7 @@ export default function Loading() {
               className="w-full h-full"
             />
           </Link>
-        ))}
+        ))} */}
       </div>
       <Button
         onClick={handleClick}
