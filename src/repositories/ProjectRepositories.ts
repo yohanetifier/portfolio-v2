@@ -41,11 +41,13 @@ export async function getPostsByTitle(title: string) {
 
   const json = await res.json();
 
-  return json.data.posts.nodes.map((projects: Data) => ({
-    featuredImage: {
-      src: projects.featuredImage.node.sourceUrl,
-      alt: projects.featuredImage.node.altText,
-    },
-    title: projects.title,
-  }));
+  return json;
+
+  // return json.data.posts.nodes.map((projects: Data) => ({
+  //   featuredImage: {
+  //     src: projects.featuredImage.node.sourceUrl,
+  //     alt: projects.featuredImage.node.altText,
+  //   },
+  //   title: projects.title,
+  // }));
 }

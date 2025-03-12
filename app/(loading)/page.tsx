@@ -231,6 +231,7 @@ export default function Loading() {
 
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    title: string,
   ) => {
     e.preventDefault();
     const target = e.currentTarget;
@@ -256,7 +257,7 @@ export default function Loading() {
 
     const tl = gsap.timeline({
       onComplete: () => {
-        router.push('/work');
+        router.push(`/work/${title}`);
       },
     });
 
@@ -277,8 +278,6 @@ export default function Loading() {
     });
   };
 
-  console.log('projects', projects);
-
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
@@ -294,9 +293,9 @@ export default function Loading() {
         {projects.map(({ featuredImage, title }, index) => (
           <Link
             key={index}
-            href=""
+            href={``}
             className={startingClass[index].className}
-            onClick={(e) => handleTransition(e)}
+            onClick={(e) => handleTransition(e, title)}
           >
             <Image
               src={featuredImage.src}
