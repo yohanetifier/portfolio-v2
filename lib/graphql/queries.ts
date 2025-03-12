@@ -1,5 +1,5 @@
 export const GET_POSTS_QUERY = `
-  query NewQuery {
+  query GetPosts {
     posts {
       nodes {
         title
@@ -13,3 +13,18 @@ export const GET_POSTS_QUERY = `
     }
   }
 `;
+
+export const GET_POSTS_BY_TITLE = `{
+  query GetPostsByTitle ($title: String) {
+    posts(where: {title: $title}){
+      nodes{
+        title
+        featuredImage{
+          node{
+            sourceUrl
+          }
+        }
+      }	
+    }
+  } 
+}`;
