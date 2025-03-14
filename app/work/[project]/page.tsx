@@ -2,10 +2,11 @@
 import { useParams } from 'next/navigation';
 import React from 'react';
 import Image from 'next/image';
+import { useProjectViewModel } from '@/src/viewmodels/ProjectViewModel';
 
 const Work = () => {
   const { project } = useParams();
-  console.log('project', project);
+  const view = useProjectViewModel(project as string);
   return (
     <div>
       <div className="w-screen h-screen">

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Project } from '../models/Project';
-import { getPosts } from '../repositories/ProjectRepositoryImpl';
+import { getPostsByTitle } from '../repositories/ProjectRepositoryImpl';
 
-export function usePortfolioViewModel() {
-  const [projects, setProjects] = useState<Project[]>([]);
+export function useProjectViewModel(title: string) {
+  const [project, setProject] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,8 +11,8 @@ export function usePortfolioViewModel() {
     async function fetchProjects() {
       try {
         setLoading(true);
-        const data = await getPosts();
-        setProjects(data);
+        const data = await getPostsByTitle(title);
+        setProject(data);
       } catch {
         setError('Failed to fetch');
       } finally {
@@ -20,7 +20,7 @@ export function usePortfolioViewModel() {
       }
     }
     fetchProjects();
-  }, []);
+  }, [title]);
 
-  return { projects, loading, error };
+  return { project, loading, error };
 }

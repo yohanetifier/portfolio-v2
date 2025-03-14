@@ -14,7 +14,7 @@ export const GET_POSTS_QUERY = `
   }
 `;
 
-export const GET_POSTS_BY_TITLE = `{
+export const GET_POSTS_BY_TITLE = `
   query GetPostsByTitle ($title: String) {
     posts(where: {title: $title}){
       nodes{
@@ -27,4 +27,4 @@ export const GET_POSTS_BY_TITLE = `{
       }	
     }
   } 
-}`;
+`;
