@@ -14,6 +14,7 @@ gsap.registerPlugin(Flip, ScrollTrigger);
 
 export default function Loading() {
   const { projects, loading, error } = usePortfolioViewModel();
+  console.log('projects', projects);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);

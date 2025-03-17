@@ -1,6 +1,6 @@
 import { Project } from '../models/Project';
 
-export interface ProjectRepositories {
-  getPosts: Promise<Project[]>;
-  getPostsByTitle(title: string): Promise<Project>;
+export interface ProjectRepository {
+  getProjects(): Promise<Project[]>;
+  getProjectsByTitle(title: string): Promise<Project>;
 }
