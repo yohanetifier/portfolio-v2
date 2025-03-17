@@ -10,4 +10,9 @@ export class ProjectService {
     const projects = await this.repository.getProjects();
     return projects;
   }
+  async getProjectByTitle(title: string) {
+    const project = this.repository.getProjectsByTitle(title);
+    console.log('project', project);
+    return project;
+  }
 }

@@ -1,12 +1,12 @@
 import { API_URL } from '@/config/constants';
 
-export const fetchData = async (query) => {
+export const fetchData = async (query, variables) => {
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, variables }),
   });
   if (!res.ok) {
     throw new Error('Failed to fetch posts');

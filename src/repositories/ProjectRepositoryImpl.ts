@@ -21,28 +21,14 @@ export class ProjectRepositoryImpl implements ProjectRepository {
     );
   }
   async getProjectsByTitle(title: string): Promise<Project> {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: GET_POSTS_BY_TITLE,
-        variables: { title },
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch posts by title');
-    }
-
-    const json = await res.json();
+    const { data } = await fetchData(GET_POSTS_BY_TITLE, title);
+    console.log('data', data);
 
     return {
-      title: json.data.posts.nodes[0].title,
+      title: data.posts.nodes[0].title,
       featuredImage: {
-        src: json.data.posts.nodes[0].featuredImage.sourceUrl,
-        alt: json.data.posts.nodes[0].featuredImage.altText,
+        src: data.posts.nodes[0].featuredImage.node.sourceUrl,
+        alt: data.posts.nodes[0].featuredImage.node.altText,
       },
     };
   }

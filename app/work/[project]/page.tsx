@@ -7,6 +7,7 @@ import { useProjectViewModel } from '@/src/viewmodels/ProjectViewModel';
 const Work = () => {
   const { project } = useParams();
   const view = useProjectViewModel(project as string);
+  console.log('viwe', view);
   return (
     <div>
       <div className="w-screen h-screen">

@@ -22,6 +22,7 @@ export const GET_POSTS_BY_TITLE = `
         featuredImage{
           node{
             sourceUrl
+            altText
           }
         }
       }	
