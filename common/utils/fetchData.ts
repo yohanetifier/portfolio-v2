@@ -1,6 +1,6 @@
 import { API_URL } from '@/config/constants';
 
-export const fetchData = async (query, variables) => {
+export const fetchData = async (query: string, variables = {}) => {
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: {

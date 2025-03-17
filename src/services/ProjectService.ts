@@ -11,8 +11,7 @@ export class ProjectService {
     return projects;
   }
   async getProjectByTitle(title: string) {
-    const project = this.repository.getProjectsByTitle(title);
-    console.log('project', project);
+    const project = await this.repository.getProjectsByTitle(title);
     return project;
   }
 }

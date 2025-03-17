@@ -21,7 +21,8 @@ export class ProjectRepositoryImpl implements ProjectRepository {
     );
   }
   async getProjectsByTitle(title: string): Promise<Project> {
-    const { data } = await fetchData(GET_POSTS_BY_TITLE, title);
+    console.log('title', title);
+    const { data } = await fetchData(GET_POSTS_BY_TITLE, { title });
     console.log('data', data);
 
     return {
