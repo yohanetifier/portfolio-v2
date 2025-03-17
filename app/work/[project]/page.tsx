@@ -1,18 +1,19 @@
-'use client';
-import { useParams } from 'next/navigation';
 import React from 'react';
 import Image from 'next/image';
-import { useProjectViewModel } from '@/src/viewmodels/ProjectViewModel';
+import { ProjectViewModel } from '@/src/viewmodels/ProjectViewModel';
 
-const Work = () => {
-  const { project } = useParams();
-  const view = useProjectViewModel(project as string);
-  console.log('viwe', view);
+const projectViewModel = new ProjectViewModel();
+
+const Work = async ({ params }: { params: { project: string } }) => {
+  const data = await projectViewModel.getProjectByTitle(
+    params.project as string,
+  );
+
   return (
     <div>
       <div className="w-screen h-screen">
         <Image
-          src={'/images/first-image.png'}
+          src={data!.featuredImage.src}
           alt={'first-image'}
           width={1000}
           height={1000}

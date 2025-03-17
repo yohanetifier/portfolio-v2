@@ -8,13 +8,12 @@ import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
 export default function Loading() {
   const { projects, loading, error } = usePortfolioViewModel();
-  console.log('projects', projects);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);
@@ -187,46 +186,46 @@ export default function Loading() {
     },
   ];
 
-  const assets = [
-    {
-      src: '/images/first-image.png',
-      alt: 'desktop',
-      className:
-        'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]',
-    },
-    {
-      src: '/images/second-image.png',
-      alt: 'tesla',
-      className: 'w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]',
-    },
-    {
-      src: '/images/third-image.png',
-      alt: 'holidays',
-      className:
-        'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
-    },
-    {
-      src: '/images/fourth-image.png',
-      alt: 'desktop',
-      className:
-        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
-    },
-    {
-      src: '/images/fifth-image.png',
-      alt: 'tesla',
-      className: 'opacity-0',
-    },
-    {
-      src: '/images/sixth-image.png',
-      alt: 'holidays',
-      className: 'opacity-0',
-    },
-    {
-      src: '/images/seventh-image.png',
-      alt: 'desktop',
-      className: 'opacity-0',
-    },
-  ];
+  // const assets = [
+  //   {
+  //     src: '/images/first-image.png',
+  //     alt: 'desktop',
+  //     className:
+  //       'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]',
+  //   },
+  //   {
+  //     src: '/images/second-image.png',
+  //     alt: 'tesla',
+  //     className: 'w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]',
+  //   },
+  //   {
+  //     src: '/images/third-image.png',
+  //     alt: 'holidays',
+  //     className:
+  //       'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
+  //   },
+  //   {
+  //     src: '/images/fourth-image.png',
+  //     alt: 'desktop',
+  //     className:
+  //       'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
+  //   },
+  //   {
+  //     src: '/images/fifth-image.png',
+  //     alt: 'tesla',
+  //     className: 'opacity-0',
+  //   },
+  //   {
+  //     src: '/images/sixth-image.png',
+  //     alt: 'holidays',
+  //     className: 'opacity-0',
+  //   },
+  //   {
+  //     src: '/images/seventh-image.png',
+  //     alt: 'desktop',
+  //     className: 'opacity-0',
+  //   },
+  // ];
 
   const fullscreenRef = useRef<HTMLDivElement | null>(null);
 
@@ -257,16 +256,30 @@ export default function Loading() {
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
     const tl = gsap.timeline({
-      onComplete: () => {
-        router.push(`/work/${title}`);
-      },
+      // onUpdate: () => {
+      //   router.push(`/work/${title}`);
+      // },
     });
 
     tl.to(childatTheBottom, {
       y: '100vh',
       rotate: -10,
       duration: 1,
-    }).to(childAtTheTop, { y: '-100vh', rotate: 10, duration: 1 }, '<');
+      onComplete: () => {
+        router.push(`/work/${title}`);
+      },
+      // onStart: () => {
+      //   router.push(`/work/${title}`);
+      // },
+    }).to(
+      childAtTheTop,
+      {
+        y: '-100vh',
+        rotate: 10,
+        duration: 1,
+      },
+      '<',
+    );
 
     Flip.from(state, {
       delay: 0.01,
@@ -294,7 +307,7 @@ export default function Loading() {
         {projects.map(({ featuredImage, title }, index) => (
           <Link
             key={index}
-            href={``}
+            href={`/work/${title}`}
             className={startingClass[index].className}
             onClick={(e) => handleTransition(e, title)}
           >
