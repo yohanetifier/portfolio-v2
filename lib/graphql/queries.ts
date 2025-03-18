@@ -19,6 +19,7 @@ export const GET_POSTS_BY_TITLE = `
     posts(where: {title: $title}){
       nodes{
         title
+        content
         featuredImage{
           node{
             sourceUrl
