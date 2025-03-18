@@ -1,6 +1,6 @@
 import { Project } from '../models/Project';
 
 export interface ProjectRepository {
-  getProjects(): Promise<Project[]>;
+  getProjects(): Promise<Pick<Project, 'title' | 'featuredImage'>[]>;
   getProjectsByTitle(title: string): Promise<Project>;
 }

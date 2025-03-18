@@ -4,7 +4,9 @@ import { ProjectService } from '../services/ProjectService';
 
 const projectService = new ProjectService();
 
-export async function portfolioViewModel(): Promise<Project[] | null> {
+export async function portfolioViewModel(): Promise<
+  Pick<Project, 'title' | 'featuredImage'>[] | null
+> {
   // const [projects, setProjects] = useState<Project[]>([]);
   // const [loading, setLoading] = useState(false);
   // const [error, setError] = useState<string | null>(null);

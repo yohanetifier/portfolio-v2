@@ -3,7 +3,7 @@ import Button from '@/common/components/Button/Button';
 import Header from '@/common/components/Header/Header';
 import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
-import { usePortfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
+// import { usePortfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
@@ -13,7 +13,11 @@ import React, { useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
-export default function Home({ projects }: { projects: Project[] }) {
+export default function Home({
+  projects,
+}: {
+  projects: Pick<Project, 'featuredImage' | 'title'>[];
+}) {
   //   const { projects } = usePortfolioViewModel();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
