@@ -7,19 +7,19 @@ import { Project } from '@/src/models/Project';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
-// import Link from 'next/link';
-import { Link, useTransitionRouter } from 'next-view-transitions';
+import Link from 'next/link';
+import { useTransitionRouter } from 'next-view-transitions';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import React, { useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
-export default function Home({
+export default function WorkList({
   projects,
 }: {
   projects: Pick<Project, 'featuredImage' | 'title'>[];
 }) {
-  //   const { projects } = usePortfolioViewModel();
+  // const { projects } = usePortfolioViewModel();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);
@@ -30,8 +30,7 @@ export default function Home({
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
   // const [imageArrived, setImageArrived] = useState(false);
   const tl = gsap.timeline({});
-  // const router = useRouter();
-  const router = useTransitionRouter();
+  const router = useRouter();
   // useEffect(() => {
   //   const arrayOfImages: HTMLElement[] = Array.from(
   //     wrapperImage.current!.children,
@@ -162,35 +161,35 @@ export default function Home({
     });
   };
 
-  const startingClass = [
-    {
-      className: `w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]`,
-    },
-    {
-      className: `w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]`,
-    },
-    {
-      className:
-        'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
-    },
-    {
-      className:
-        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
-    },
-    {
-      className:
-        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
-    },
-    {
-      className: 'opacity-0',
-    },
-    {
-      className: 'opacity-0',
-    },
-    {
-      className: 'opacity-0',
-    },
-  ];
+  // const startingClass = [
+  //   {
+  //     className: `w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]`,
+  //   },
+  //   {
+  //     className: `w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]`,
+  //   },
+  //   {
+  //     className:
+  //       'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
+  //   },
+  //   {
+  //     className:
+  //       'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
+  //   },
+  //   {
+  //     className:
+  //       'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
+  //   },
+  //   {
+  //     className: 'opacity-0',
+  //   },
+  //   {
+  //     className: 'opacity-0',
+  //   },
+  //   {
+  //     className: 'opacity-0',
+  //   },
+  // ];
 
   const fullscreenRef = useRef<HTMLDivElement | null>(null);
 
@@ -198,6 +197,8 @@ export default function Home({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
+    const fullscreenWrapper = document.getElementById('fullscreen');
+    fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
     const target = e.currentTarget;
     const state = Flip.getState(e.currentTarget);
@@ -217,7 +218,7 @@ export default function Home({
     });
 
     e.currentTarget.className = '';
-    fullscreenRef.current!.append(e.currentTarget);
+    fullscreenWrapper!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
     const tl = gsap.timeline({});
@@ -247,62 +248,66 @@ export default function Home({
         document.body.style.overflow = 'hidden';
         document.body.style.height = '100vh';
       },
+      onComplete: () => {
+        // fullscreenWrapper!.style.opacity = '0';
+      },
     });
   };
 
-  const slideOut = () => {
-    document.documentElement.animate(
-      [
-        {
-          transform: 'translateX(0px)',
-        },
-        {
-          transform: 'translateX(-500px)',
-        },
-      ],
-      {
-        duration: 400,
-        easing: 'ease',
-        fill: 'forwards',
-        pseudoElement: '::view-transition-old(project-0)',
-      },
-    );
+  // const slideOut = () => {
+  //   console.log('wrapperImage', wrapperImage.current);
+  //   document.documentElement.animate(
+  //     [
+  //       {
+  //         opacity: 1,
+  //         transform: 'translate(0,0)',
+  //       },
+  //       {
+  //         opacity: 0,
+  //         transform: 'translate(-100px,0)',
+  //       },
+  //     ],
+  //     {
+  //       duration: 400,
+  //       easing: 'ease',
+  //       fill: 'forwards',
+  //       pseudoElement: '::view-transition-old(root)',
+  //     },
+  //   );
 
-    document.documentElement.animate(
-      [
-        {
-          transform: 'translateX(120px) scale(1)', // Commence avec une position légèrement décalée
-          width: '16.641vw',
-          height: '19.943vw',
-          position: 'absolute',
-          right: '50%',
-        },
-        {
-          transform: 'translateX(0px) scale(2)', // Revient à la position normale
-        },
-      ],
-      {
-        duration: 400,
-        easing: 'ease',
-        fill: 'forwards',
-        pseudoElement: '::view-transition-new(project-0)',
-      },
-    );
-  };
+  //   document.documentElement.animate(
+  //     [
+  //       {
+  //         opacity: 0,
+  //         transform: 'translate(100px,0)',
+  //       },
+  //       {
+  //         opacity: 1,
+  //         transform: 'translate(0,0)',
+  //       },
+  //     ],
+  //     {
+  //       duration: 400,
+  //       easing: 'ease',
+  //       fill: 'forwards',
+  //       pseudoElement: '::view-transition-new(root)',
+  //     },
+  //   );
+  // };
 
-  const handleSubmit = () => {
-    router.push('/work', { onTransitionReady: slideOut });
-  };
+  // const handleSubmit = () => {
+  //   router.push('/work/hinderer', { onTransitionReady: slideOut });
+  // };
 
   return (
     <div
-      className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
+      className="flex justify-center items-center relative w-[100vw] h-[200vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
       <div className="opacity-0" ref={headerRef}>
         <Header />
       </div>
-      <div
+      {/* <div
         className="absolute w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
       >
@@ -319,18 +324,17 @@ export default function Home({
               width={1000}
               height={1000}
               className="w-full h-full"
-              style={{ viewTransitionName: `project-${index}` }}
             />
           </Link>
         ))}
-      </div>
-      <Button
+      </div> */}
+      {/* <Button
         onClick={handleSubmit}
         onMouseEnter={() => animateText(welcomeRef.current!)}
         title={'welcome'}
         ref={welcomeRef}
         className="z-10 absolute left-[400px] w-[200px] h-[50px]"
-      />
+      /> */}
 
       {/* <Link
         href={'/work/hinderer'}
@@ -338,21 +342,40 @@ export default function Home({
       >
         click
       </Link> */}
-      <Button
+      {/* <Button
         onClick={() => null}
         onMouseEnter={() => animateText(buttonRef.current!)}
         title={'click to start'}
         ref={buttonRef}
         className="z-10 absolute right-[500px] w-[200px] h-[50px]"
-      />
+      /> */}
 
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
         ref={gridRef}
-      ></div>
-      <div className="fixed top-0 w-screen h-screen z-0" ref={fullscreenRef}>
-        {' '}
+      >
+        {projects.map(({ featuredImage, title }, index) => (
+          <Link
+            key={index}
+            href={`/work/${title}`}
+            prefetch={true}
+            className={gridClasses[index]}
+            onClick={(e) => handleTransition(e, title)}
+          >
+            <Image
+              src={featuredImage.src}
+              alt={featuredImage.alt}
+              width={1000}
+              height={1000}
+              className="w-full h-full"
+            />
+          </Link>
+        ))}
       </div>
+      <div
+        className="fixed top-0 w-screen h-screen z-0"
+        ref={fullscreenRef}
+      ></div>
     </div>
   );
 }

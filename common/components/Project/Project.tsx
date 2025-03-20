@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import Image from 'next/image';
 import { Project as ProjectType } from '@/src/models/Project';
 
@@ -11,6 +11,7 @@ interface Props {
 const Project = ({ data, mediaUrls }: Props) => {
   document.body.style.overflow = 'visible';
   document.body.style.height = 'auto';
+
   return (
     <div className="w-screen h-screen">
       <div className="w-screen h-screen relative flex justify-center items-center">
