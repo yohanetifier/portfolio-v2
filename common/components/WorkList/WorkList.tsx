@@ -8,7 +8,6 @@ import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useTransitionRouter } from 'next-view-transitions';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -191,12 +190,11 @@ export default function WorkList({
   //   },
   // ];
 
-  const fullscreenRef = useRef<HTMLDivElement | null>(null);
-
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
+    console.log('infrjnfer');
     const fullscreenWrapper = document.getElementById('fullscreen');
     fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
@@ -258,85 +256,43 @@ export default function WorkList({
     });
   };
 
-  // const slideOut = () => {
-  //   console.log('wrapperImage', wrapperImage.current);
-  //   document.documentElement.animate(
-  //     [
-  //       {
-  //         opacity: 1,
-  //         transform: 'translate(0,0)',
-  //       },
-  //       {
-  //         opacity: 0,
-  //         transform: 'translate(-100px,0)',
-  //       },
-  //     ],
-  //     {
-  //       duration: 400,
-  //       easing: 'ease',
-  //       fill: 'forwards',
-  //       pseudoElement: '::view-transition-old(root)',
-  //     },
-  //   );
+  useEffect(() => {
+    document.body.style.overflow = 'visible';
+    const grid = document.getElementById('grid');
+    setTimeout(() => {
+      grid?.remove();
+    }, 300);
+    const handleScroll = () => {
+      const arrayOfImages = Array.from(gridRef.current!.children);
+      arrayOfImages.map((image) => {
+        gsap.to(image, {
+          scaleX: 0,
+          transformOrigin: 'center top',
+          scrollTrigger: {
+            trigger: image,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+            // markers: true,
+          },
+        });
+      });
+    };
 
-  //   document.documentElement.animate(
-  //     [
-  //       {
-  //         opacity: 0,
-  //         transform: 'translate(100px,0)',
-  //       },
-  //       {
-  //         opacity: 1,
-  //         transform: 'translate(0,0)',
-  //       },
-  //     ],
-  //     {
-  //       duration: 400,
-  //       easing: 'ease',
-  //       fill: 'forwards',
-  //       pseudoElement: '::view-transition-new(root)',
-  //     },
-  //   );
-  // };
-
-  // const handleSubmit = () => {
-  //   router.push('/work/hinderer', { onTransitionReady: slideOut });
-  // };
+    handleScroll();
+  }, []);
 
   return (
     <div
-      className="flex justify-center items-center relative w-[100vw] h-[200vh] transition-height duration-1000"
+      className="flex justify-center items-center relative w-[100vw] h-[300vh] transition-height duration-1000 z-[10]"
       ref={mainWrapperRef}
     >
-      <div className="opacity-0" ref={headerRef}>
+      <div className="opacity-1" ref={headerRef}>
         <Header />
       </div>
-      {/* <div
-        className="absolute w-full h-full rounded-xl flex justify-center items-center"
-        ref={wrapperImage}
-      >
-        {projects.map(({ featuredImage, title }, index) => (
-          <Link
-            key={index}
-            href={`/work/${title}`}
-            className={startingClass[index].className}
-            onClick={(e) => handleTransition(e, title)}
-          >
-            <Image
-              src={featuredImage.src}
-              alt={featuredImage.alt}
-              width={1000}
-              height={1000}
-              className="w-full h-full"
-            />
-          </Link>
-        ))}
-      </div> */}
-
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[2] `}
         ref={gridRef}
-        style={{ border: `2px solid red` }}
       >
         {projects.map(({ featuredImage, title }, index) => (
           <Link

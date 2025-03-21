@@ -7,8 +7,7 @@ import { Project } from '@/src/models/Project';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
-// import Link from 'next/link';
-import { Link, useTransitionRouter } from 'next-view-transitions';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useRef } from 'react';
 
@@ -30,8 +29,7 @@ export default function Home({
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
   // const [imageArrived, setImageArrived] = useState(false);
   const tl = gsap.timeline({});
-  // const router = useRouter();
-  const router = useTransitionRouter();
+  const router = useRouter();
   // useEffect(() => {
   //   const arrayOfImages: HTMLElement[] = Array.from(
   //     wrapperImage.current!.children,
@@ -122,9 +120,9 @@ export default function Home({
       (image as HTMLElement).style.transform = `rotate(0deg)`;
     });
 
-    tl.to(buttonRef.current, { opacity: 0, duration: 1 });
-    tl.to(welcomeRef.current, { opacity: 0, duration: 1 });
-    const thirdLastChildren = Array.from(grid!.children).slice(-3);
+    tl.to(buttonRef.current, { opacity: 0, duration: 0.5 });
+    tl.to(welcomeRef.current, { opacity: 0, duration: 0.5 });
+    // const thirdLastChildren = Array.from(grid!.children).slice(-3);
     // thirdLastChildren.forEach((children) => {
     //   (children as HTMLElement).style.opacity = '0';
     // });
@@ -133,38 +131,38 @@ export default function Home({
       duration: 1,
       ease: 'power2.inOut',
       stagger: 0.1,
-      onUpdate: () => {
-        wrapperImage.current!.style.display = 'none';
-        ScrollTrigger.update();
-      },
+      // onUpdate: () => {
+      //   wrapperImage.current!.style.display = 'none';
+      //   ScrollTrigger.update();
+      // },
       onComplete: () => {
         router.push(`/work`);
-        handleScroll();
-        gsap.to(
-          [thirdLastChildren[0], thirdLastChildren[1], thirdLastChildren[2]],
-          { opacity: 1 },
-        );
+        // handleScroll();
+        // gsap.to(
+        //   [thirdLastChildren[0], thirdLastChildren[1], thirdLastChildren[2]],
+        //   { opacity: 1 },
+        // );
         gsap.to(headerRef.current, { opacity: 1 });
       },
     });
   };
 
-  const handleScroll = () => {
-    const arrayOfImages = Array.from(gridRef.current!.children);
-    arrayOfImages.map((image) => {
-      gsap.to(image, {
-        scaleX: 0,
-        transformOrigin: 'center top',
-        scrollTrigger: {
-          trigger: image,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          // markers: true,
-        },
-      });
-    });
-  };
+  // const handleScroll = () => {
+  //   const arrayOfImages = Array.from(gridRef.current!.children);
+  //   arrayOfImages.map((image) => {
+  //     gsap.to(image, {
+  //       scaleX: 0,
+  //       transformOrigin: 'center top',
+  //       scrollTrigger: {
+  //         trigger: image,
+  //         start: 'top top',
+  //         end: 'bottom top',
+  //         scrub: true,
+  //         // markers: true,
+  //       },
+  //     });
+  //   });
+  // };
 
   const startingClass = [
     {
@@ -196,13 +194,11 @@ export default function Home({
     },
   ];
 
-  // const fullscreenRef = useRef<HTMLDivElement | null>(null);
-  const fullscreen = document.getElementById('fullscreen');
-
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
+    const fullscreen = document.getElementById('fullscreen');
     e.preventDefault();
     const target = e.currentTarget;
     const state = Flip.getState(e.currentTarget);
@@ -272,7 +268,7 @@ export default function Home({
             key={index}
             href={`/work/${title}`}
             className={startingClass[index].className}
-            onClick={(e) => handleTransition(e, title)}
+            // onClick={(e) => handleTransition(e, title)}
           >
             <Image
               src={featuredImage.src}
