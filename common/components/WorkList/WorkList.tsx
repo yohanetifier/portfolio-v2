@@ -248,9 +248,13 @@ export default function WorkList({
         document.body.style.overflow = 'hidden';
         document.body.style.height = '100vh';
       },
-      onComplete: () => {
-        // fullscreenWrapper!.style.opacity = '0';
-      },
+      // onComplete: () => {
+      //   const fullscreen = document.getElementById('fullscreen');
+      //   const link = fullscreen?.firstChild;
+      //   setTimeout(() => {
+      //     link?.remove();
+      //   }, 1000);
+      // },
     });
   };
 
@@ -328,31 +332,11 @@ export default function WorkList({
           </Link>
         ))}
       </div> */}
-      {/* <Button
-        onClick={handleSubmit}
-        onMouseEnter={() => animateText(welcomeRef.current!)}
-        title={'welcome'}
-        ref={welcomeRef}
-        className="z-10 absolute left-[400px] w-[200px] h-[50px]"
-      /> */}
-
-      {/* <Link
-        href={'/work/hinderer'}
-        className="z-10 absolute left-[400px] w-[200px] h-[50px]"
-      >
-        click
-      </Link> */}
-      {/* <Button
-        onClick={() => null}
-        onMouseEnter={() => animateText(buttonRef.current!)}
-        title={'click to start'}
-        ref={buttonRef}
-        className="z-10 absolute right-[500px] w-[200px] h-[50px]"
-      /> */}
 
       <div
-        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
+        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[2] `}
         ref={gridRef}
+        style={{ border: `2px solid red` }}
       >
         {projects.map(({ featuredImage, title }, index) => (
           <Link
@@ -372,10 +356,6 @@ export default function WorkList({
           </Link>
         ))}
       </div>
-      <div
-        className="fixed top-0 w-screen h-screen z-0"
-        ref={fullscreenRef}
-      ></div>
     </div>
   );
 }

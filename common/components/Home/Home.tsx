@@ -101,7 +101,10 @@ export default function Home({
   ];
 
   const handleClick = () => {
-    mainWrapperRef.current!.style.height = '300vh';
+    const grid = document.getElementById('grid');
+    document.body.style.overflow = 'visible';
+    // mainWrapperRef.current!.style.height = '300vh';
+    // grid!.style.height = '300vh';
     const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
 
     const state = Flip.getState(wrapperImage.current!.children);
@@ -111,7 +114,7 @@ export default function Home({
     children.forEach((child, index) => {
       child.className = gridClasses[index] || '';
     });
-    gridRef.current!.append(
+    grid!.append(
       ...Array.from(wrapperImage.current!.children as HTMLCollection),
     );
 
@@ -121,10 +124,10 @@ export default function Home({
 
     tl.to(buttonRef.current, { opacity: 0, duration: 1 });
     tl.to(welcomeRef.current, { opacity: 0, duration: 1 });
-    const thirdLastChildren = Array.from(gridRef.current!.children).slice(-3);
-    thirdLastChildren.forEach((children) => {
-      (children as HTMLElement).style.opacity = '0';
-    });
+    const thirdLastChildren = Array.from(grid!.children).slice(-3);
+    // thirdLastChildren.forEach((children) => {
+    //   (children as HTMLElement).style.opacity = '0';
+    // });
 
     Flip.from(state, {
       duration: 1,
@@ -135,6 +138,7 @@ export default function Home({
         ScrollTrigger.update();
       },
       onComplete: () => {
+        router.push(`/work`);
         handleScroll();
         gsap.to(
           [thirdLastChildren[0], thirdLastChildren[1], thirdLastChildren[2]],
@@ -192,7 +196,8 @@ export default function Home({
     },
   ];
 
-  const fullscreenRef = useRef<HTMLDivElement | null>(null);
+  // const fullscreenRef = useRef<HTMLDivElement | null>(null);
+  const fullscreen = document.getElementById('fullscreen');
 
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -217,7 +222,7 @@ export default function Home({
     });
 
     e.currentTarget.className = '';
-    fullscreenRef.current!.append(e.currentTarget);
+    fullscreen!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
     const tl = gsap.timeline({});
@@ -250,58 +255,14 @@ export default function Home({
     });
   };
 
-  const slideOut = () => {
-    document.documentElement.animate(
-      [
-        {
-          transform: 'translateX(0px)',
-        },
-        {
-          transform: 'translateX(-500px)',
-        },
-      ],
-      {
-        duration: 400,
-        easing: 'ease',
-        fill: 'forwards',
-        pseudoElement: '::view-transition-old(project-0)',
-      },
-    );
-
-    document.documentElement.animate(
-      [
-        {
-          transform: 'translateX(120px) scale(1)', // Commence avec une position légèrement décalée
-          width: '16.641vw',
-          height: '19.943vw',
-          position: 'absolute',
-          right: '50%',
-        },
-        {
-          transform: 'translateX(0px) scale(2)', // Revient à la position normale
-        },
-      ],
-      {
-        duration: 400,
-        easing: 'ease',
-        fill: 'forwards',
-        pseudoElement: '::view-transition-new(project-0)',
-      },
-    );
-  };
-
-  const handleSubmit = () => {
-    router.push('/work', { onTransitionReady: slideOut });
-  };
-
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
-      <div className="opacity-0" ref={headerRef}>
+      {/* <div className="opacity-0" ref={headerRef}>
         <Header />
-      </div>
+      </div> */}
       <div
         className="absolute w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
@@ -319,13 +280,12 @@ export default function Home({
               width={1000}
               height={1000}
               className="w-full h-full"
-              style={{ viewTransitionName: `project-${index}` }}
             />
           </Link>
         ))}
       </div>
       <Button
-        onClick={handleSubmit}
+        onClick={handleClick}
         onMouseEnter={() => animateText(welcomeRef.current!)}
         title={'welcome'}
         ref={welcomeRef}
@@ -346,13 +306,13 @@ export default function Home({
         className="z-10 absolute right-[500px] w-[200px] h-[50px]"
       />
 
-      <div
-        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2]`}
+      {/* <div
+        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2] border-2 border-orange-500`}
         ref={gridRef}
-      ></div>
-      <div className="fixed top-0 w-screen h-screen z-0" ref={fullscreenRef}>
+      ></div> */}
+      {/* <div className="fixed top-0 w-screen h-screen z-0" ref={fullscreenRef}>
         {' '}
-      </div>
+      </div> */}
     </div>
   );
 }

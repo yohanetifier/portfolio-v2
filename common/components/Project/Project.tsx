@@ -11,6 +11,7 @@ interface Props {
 const Project = ({ data, mediaUrls }: Props) => {
   document.body.style.overflow = 'visible';
   document.body.style.height = 'auto';
+
   useLayoutEffect(() => {
     const fullscreen = document.getElementById('fullscreen');
     const link = fullscreen?.firstChild;

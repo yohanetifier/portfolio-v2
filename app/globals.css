@@ -32,11 +32,6 @@ body {
   font-family: 'Fabrikat Mono', monospace;
 }
 
-/* * {
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-} */
-
 * {
   will-change: auto;
 }
