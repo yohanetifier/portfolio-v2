@@ -1,13 +1,11 @@
 'use client';
 import Button from '@/common/components/Button/Button';
-import Header from '@/common/components/Header/Header';
 import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
 // import { usePortfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useRef } from 'react';
 
@@ -16,7 +14,7 @@ gsap.registerPlugin(Flip, ScrollTrigger);
 export default function Home({
   projects,
 }: {
-  projects: Pick<Project, 'featuredImage' | 'title'>[];
+  projects: Pick<Project, 'featuredImage'>[];
 }) {
   //   const { projects } = usePortfolioViewModel();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -263,10 +261,10 @@ export default function Home({
         className="absolute w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
       >
-        {projects.map(({ featuredImage, title }, index) => (
-          <Link
+        {projects.map(({ featuredImage }, index) => (
+          <div
             key={index}
-            href={`/work/${title}`}
+            // href={`/work/${title}`}
             className={startingClass[index].className}
             // onClick={(e) => handleTransition(e, title)}
           >
@@ -277,7 +275,7 @@ export default function Home({
               height={1000}
               className="w-full h-full"
             />
-          </Link>
+          </div>
         ))}
       </div>
       <Button
