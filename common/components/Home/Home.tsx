@@ -197,20 +197,36 @@ export default function Home({
           </div>
         ))}
       </div>
-      <Button
+      <div className="border-2 border-red-500 absolute w-full h-[100px] md:w-[80%] z-20 flex items-center justify-between">
+        <Button
+          onClick={handleClick}
+          onMouseEnter={() => animateText(welcomeRef.current!)}
+          title={'welcome'}
+          ref={welcomeRef}
+          // className="left-[-20px] lg:left-[15.833vw]"
+        />
+        <Button
+          onClick={handleClick}
+          onMouseEnter={() => animateText(buttonRef.current!)}
+          title={'click to start'}
+          ref={buttonRef}
+          // className="right-[0px] lg:right-[16.042vw]"
+        />
+      </div>
+      {/* <Button
         onClick={handleClick}
         onMouseEnter={() => animateText(welcomeRef.current!)}
         title={'welcome'}
         ref={welcomeRef}
-        className="z-10 absolute left-[-20px] lg:left-[400px] w-[200px] h-[50px]"
+        className="left-[-20px] lg:left-[15.833vw]"
       />
       <Button
         onClick={handleClick}
         onMouseEnter={() => animateText(buttonRef.current!)}
         title={'click to start'}
         ref={buttonRef}
-        className="z-10 absolute right-[0px] lg:right-[500px] w-[200px] h-[50px]"
-      />
+        className="right-[0px] lg:right-[16.042vw]"
+      /> */}
     </div>
   );
 }
