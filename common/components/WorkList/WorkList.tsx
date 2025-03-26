@@ -99,7 +99,7 @@ export default function WorkList({
   };
 
   useEffect(() => {
-    // document.body.style.overflow = 'visible';
+    document.body.style.overflow = 'visible';
     const grid = document.getElementById('grid');
     setTimeout(() => {
       grid?.remove();

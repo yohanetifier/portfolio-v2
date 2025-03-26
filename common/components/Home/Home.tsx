@@ -148,15 +148,15 @@ export default function Home({
       className: `w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]`,
     },
     {
-      className: `w-[16.641vw] h-[19.943vw] absolute top-[40%] z-[6]`,
+      className: `w-[16.641vw] h-[19.943vw] absolute top-[48%] lg:top-[40%] z-[6]`,
     },
     {
       className:
-        'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[30%] z-[5]',
+        'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[42%] lg:top-[30%] z-[5]',
     },
     {
       className:
-        'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
+        'w-[16.641vw] h-[19.943vw] absolute top-[40%] lg:top-[25%] z-10 rotate-[1deg] z-[4]',
     },
     {
       className:
@@ -182,7 +182,7 @@ export default function Home({
         <Header />
       </div> */}
       <div
-        className="absolute w-full h-full rounded-xl flex justify-center items-center"
+        className="relative w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
       >
         {projects.map(({ featuredImage }, index) => (
@@ -202,14 +202,14 @@ export default function Home({
         onMouseEnter={() => animateText(welcomeRef.current!)}
         title={'welcome'}
         ref={welcomeRef}
-        className="z-10 absolute left-[400px] w-[200px] h-[50px]"
+        className="z-10 absolute left-[-20px] lg:left-[400px] w-[200px] h-[50px]"
       />
       <Button
         onClick={handleClick}
         onMouseEnter={() => animateText(buttonRef.current!)}
         title={'click to start'}
         ref={buttonRef}
-        className="z-10 absolute right-[500px] w-[200px] h-[50px]"
+        className="z-10 absolute right-[0px] lg:right-[500px] w-[200px] h-[50px]"
       />
     </div>
   );

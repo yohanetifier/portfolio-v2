@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ backgroundColor: '#f0f0f0' }}>
+    <html lang="en">
       <body
         className={`antialiased overflow-hidden`}
         style={{ backgroundColor: '#ffffff' }}
