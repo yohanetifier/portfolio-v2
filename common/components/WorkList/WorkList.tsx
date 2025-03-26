@@ -44,7 +44,6 @@ export default function WorkList({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
-    console.log('infrjnfer');
     const fullscreenWrapper = document.getElementById('fullscreen');
     fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
@@ -96,18 +95,11 @@ export default function WorkList({
         document.body.style.overflow = 'hidden';
         document.body.style.height = '100vh';
       },
-      // onComplete: () => {
-      //   const fullscreen = document.getElementById('fullscreen');
-      //   const link = fullscreen?.firstChild;
-      //   setTimeout(() => {
-      //     link?.remove();
-      //   }, 1000);
-      // },
     });
   };
 
   useEffect(() => {
-    document.body.style.overflow = 'visible';
+    // document.body.style.overflow = 'visible';
     const grid = document.getElementById('grid');
     setTimeout(() => {
       grid?.remove();

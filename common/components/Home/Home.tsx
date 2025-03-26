@@ -2,7 +2,6 @@
 import Button from '@/common/components/Button/Button';
 import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
-// import { usePortfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
@@ -16,12 +15,11 @@ export default function Home({
 }: {
   projects: Pick<Project, 'featuredImage'>[];
 }) {
-  //   const { projects } = usePortfolioViewModel();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
+  // const gridRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   // const [showWrapper, setShowWrapper] = React.useState(true);
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
@@ -134,7 +132,7 @@ export default function Home({
       //   ScrollTrigger.update();
       // },
       onComplete: () => {
-        router.push(`/work`);
+        router.push(`/work`, { scroll: false });
         // handleScroll();
         // gsap.to(
         //   [thirdLastChildren[0], thirdLastChildren[1], thirdLastChildren[2]],
@@ -144,23 +142,6 @@ export default function Home({
       },
     });
   };
-
-  // const handleScroll = () => {
-  //   const arrayOfImages = Array.from(gridRef.current!.children);
-  //   arrayOfImages.map((image) => {
-  //     gsap.to(image, {
-  //       scaleX: 0,
-  //       transformOrigin: 'center top',
-  //       scrollTrigger: {
-  //         trigger: image,
-  //         start: 'top top',
-  //         end: 'bottom top',
-  //         scrub: true,
-  //         // markers: true,
-  //       },
-  //     });
-  //   });
-  // };
 
   const startingClass = [
     {
@@ -192,63 +173,6 @@ export default function Home({
     },
   ];
 
-  const handleTransition = (
-    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-    title: string,
-  ) => {
-    const fullscreen = document.getElementById('fullscreen');
-    e.preventDefault();
-    const target = e.currentTarget;
-    const state = Flip.getState(e.currentTarget);
-    const otherChildren = Array.from(gridRef.current!.children).filter(
-      (child) => child !== e.currentTarget,
-    );
-    const childatTheBottom: HTMLElement[] = [];
-    const childAtTheTop: HTMLElement[] = [];
-    otherChildren.forEach((child) => {
-      const position = child.getBoundingClientRect();
-      const isAtTheBottom = position.top > target.getBoundingClientRect().top;
-      if (isAtTheBottom) {
-        childatTheBottom.push(child as HTMLElement);
-      } else {
-        childAtTheTop.push(child as HTMLElement);
-      }
-    });
-
-    e.currentTarget.className = '';
-    fullscreen!.append(e.currentTarget);
-    e.currentTarget.className = 'absolute w-screen h-screen ';
-
-    const tl = gsap.timeline({});
-
-    tl.to(childatTheBottom, {
-      y: '100vh',
-      rotate: -10,
-      duration: 1,
-      onComplete: () => {
-        router.push(`/work/${title}`);
-      },
-    }).to(
-      childAtTheTop,
-      {
-        y: '-100vh',
-        rotate: 10,
-        duration: 1,
-      },
-      '<',
-    );
-
-    Flip.from(state, {
-      delay: 0.01,
-      duration: 1,
-      ease: 'power2.inOut',
-      onStart: () => {
-        document.body.style.overflow = 'hidden';
-        document.body.style.height = '100vh';
-      },
-    });
-  };
-
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
@@ -262,12 +186,7 @@ export default function Home({
         ref={wrapperImage}
       >
         {projects.map(({ featuredImage }, index) => (
-          <div
-            key={index}
-            // href={`/work/${title}`}
-            className={startingClass[index].className}
-            // onClick={(e) => handleTransition(e, title)}
-          >
+          <div key={index} className={startingClass[index].className}>
             <Image
               src={featuredImage.src}
               alt={featuredImage.alt}
@@ -285,28 +204,13 @@ export default function Home({
         ref={welcomeRef}
         className="z-10 absolute left-[400px] w-[200px] h-[50px]"
       />
-
-      {/* <Link
-        href={'/work/hinderer'}
-        className="z-10 absolute left-[400px] w-[200px] h-[50px]"
-      >
-        click
-      </Link> */}
       <Button
-        onClick={() => null}
+        onClick={handleClick}
         onMouseEnter={() => animateText(buttonRef.current!)}
         title={'click to start'}
         ref={buttonRef}
         className="z-10 absolute right-[500px] w-[200px] h-[50px]"
       />
-
-      {/* <div
-        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] relative h-full z-[2] border-2 border-orange-500`}
-        ref={gridRef}
-      ></div> */}
-      {/* <div className="fixed top-0 w-screen h-screen z-0" ref={fullscreenRef}>
-        {' '}
-      </div> */}
     </div>
   );
 }

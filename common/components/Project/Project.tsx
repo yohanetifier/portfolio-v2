@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useLayoutEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import Image from 'next/image';
 import { Project as ProjectType } from '@/src/models/Project';
 
