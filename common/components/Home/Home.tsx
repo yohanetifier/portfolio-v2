@@ -197,7 +197,7 @@ export default function Home({
           </div>
         ))}
       </div>
-      <div className="border-2 border-red-500 absolute w-full h-[100px] md:w-[80%] z-20 flex items-center justify-between">
+      <div className="absolute w-full h-[100px] md:w-[80%]  2xl:w-[60%] z-20 flex items-center justify-between">
         <Button
           onClick={handleClick}
           onMouseEnter={() => animateText(welcomeRef.current!)}
