@@ -186,7 +186,7 @@ export default function Home({
         ref={wrapperImage}
       >
         {projects.map(({ featuredImage }, index) => (
-          <div key={index} className={startingClass[index].className}>
+          <div key={index} className={`${startingClass[index].className}`}>
             <Image
               src={featuredImage.src}
               alt={featuredImage.alt}
