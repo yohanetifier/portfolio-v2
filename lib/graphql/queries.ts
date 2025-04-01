@@ -1,6 +1,6 @@
 export const GET_POSTS_QUERY = `
   query GetPosts {
-    posts {
+    works {
       nodes {
         title
         featuredImage {
@@ -16,8 +16,8 @@ export const GET_POSTS_QUERY = `
 
 export const GET_POSTS_BY_TITLE = `
   query GetPostsByTitle ($title: String) {
-    posts(where: {title: $title}){
-      nodes{
+    works(where: {title: $title}){
+      nodes {
         title
         content
         featuredImage{

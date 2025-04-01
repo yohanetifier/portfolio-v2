@@ -9,14 +9,15 @@ interface Props {
 }
 
 const Project = ({ data, mediaUrls }: Props) => {
-  document.body.style.overflow = 'visible';
-  document.body.style.height = 'auto';
-
   useLayoutEffect(() => {
+    document.body.style.overflow = 'visible';
+    document.body.style.height = 'auto';
     const fullscreen = document.getElementById('fullscreen');
+    const grid = document.getElementById('grid');
     const link = fullscreen?.firstChild;
     setTimeout(() => {
       link?.remove();
+      grid?.remove();
     }, 1000);
   }, []);
 

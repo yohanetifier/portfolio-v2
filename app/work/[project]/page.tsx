@@ -6,6 +6,7 @@ const projectViewModel = new ProjectViewModel();
 
 const Work = async ({ params }: { params: { project: string } }) => {
   const { project } = await params;
+  console.log('project', project);
   const data = await projectViewModel.getProjectByTitle(project as string);
   const mediaUrls = [];
 
