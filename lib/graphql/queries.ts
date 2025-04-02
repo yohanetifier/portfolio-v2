@@ -30,3 +30,15 @@ export const GET_PROJECT_BY_TITLE = `
     }
   } 
 `;
+
+export const GET_POSTS = `
+  query GetPosts {
+    posts {
+      nodes {
+        title
+        slug
+        content
+      }
+    }
+  }
+`;
