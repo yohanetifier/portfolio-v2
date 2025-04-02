@@ -1,20 +1,4 @@
-// 'use client';
-// import Button from '@/common/components/Button/Button';
-// import Header from '@/common/components/Header/Header';
-// import { animateText } from '@/common/utils/animateText';
-// import { usePortfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
-// import gsap from 'gsap';
-// import { Flip, ScrollTrigger } from 'gsap/all';
-// import Image from 'next/image';
-// import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
-// import React, { useRef } from 'react';
-
-// gsap.registerPlugin(Flip, ScrollTrigger);
-
-import Home from '@/common/components/Home/Home';
 import { portfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
-import Work from './[project]/page';
 import WorkList from '@/common/components/WorkList/WorkList';
 // export default function Loading() {
 //   const { projects } = usePortfolioViewModel();

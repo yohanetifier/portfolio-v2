@@ -6,9 +6,9 @@ import { ProjectRepositoryImpl } from '@/src/repositories/ProjectRepositoryImpl'
 const projectRepositoryImpl = new ProjectRepositoryImpl();
 const projectViewModel = new ProjectViewModel(projectRepositoryImpl);
 
-const Work = async ({ params }: { params: { project: string } }) => {
+const Work = async ({ params }: { params: Promise<{ project: string }> }) => {
   const { project } = await params;
-  const data = await projectViewModel.getProjectByTitle(project as string);
+  const data = await projectViewModel.getProjectByTitle(project);
   const mediaUrls = [];
 
   const regex = /<(img|video|source)[^>]+src="([^">]+)"/g;
