@@ -1,31 +1,14 @@
 // import { useState, useEffect } from 'react';
 import { Project } from '../models/Project';
+import { ProjectRepositoryImpl } from '../repositories/ProjectRepositoryImpl';
 import { ProjectService } from '../services/ProjectService';
 
-const projectService = new ProjectService();
+const projectRepository = new ProjectRepositoryImpl();
+const projectService = new ProjectService(projectRepository);
 
 export async function portfolioViewModel(): Promise<
   Pick<Project, 'title' | 'featuredImage'>[] | null
 > {
-  // const [projects, setProjects] = useState<Project[]>([]);
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState<string | null>(null);
-  // useEffect(() => {
-  //   async function fetchProjects() {
-  //     try {
-  //       setLoading(true);
-  //       const projects = await projectService.getProjects();
-  //       setProjects(projects);
-  //     } catch {
-  //       setError('Failed to fetch');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-  //   fetchProjects();
-  // }, []);
-  // return { projects, loading, error };
-
   try {
     const data = await projectService.getProjects();
     return data;

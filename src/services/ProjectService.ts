@@ -1,9 +1,9 @@
-import { ProjectRepositoryImpl } from '../repositories/ProjectRepositoryImpl';
+import { ProjectRepository } from '../repositories/ProjectRepository';
 
 export class ProjectService {
-  private repository: ProjectRepositoryImpl;
-  constructor() {
-    this.repository = new ProjectRepositoryImpl();
+  private repository: ProjectRepository;
+  constructor(repository: ProjectRepository) {
+    this.repository = repository;
   }
 
   async getProjects() {

@@ -1,9 +1,10 @@
+import { ProjectRepository } from '../repositories/ProjectRepository';
 import { ProjectService } from '../services/ProjectService';
 
 export class ProjectViewModel {
   private projectService: ProjectService;
-  constructor() {
-    this.projectService = new ProjectService();
+  constructor(repository: ProjectRepository) {
+    this.projectService = new ProjectService(repository);
   }
 
   async getProjectByTitle(title: string) {

@@ -1,12 +1,13 @@
 import React from 'react';
 import { ProjectViewModel } from '@/src/viewmodels/ProjectViewModel';
 import Project from '@/common/components/Project/Project';
+import { ProjectRepositoryImpl } from '@/src/repositories/ProjectRepositoryImpl';
 
-const projectViewModel = new ProjectViewModel();
+const projectRepositoryImpl = new ProjectRepositoryImpl();
+const projectViewModel = new ProjectViewModel(projectRepositoryImpl);
 
 const Work = async ({ params }: { params: { project: string } }) => {
   const { project } = await params;
-  console.log('project', project);
   const data = await projectViewModel.getProjectByTitle(project as string);
   const mediaUrls = [];
 
