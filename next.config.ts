@@ -8,9 +8,12 @@ const nextConfig: NextConfig = {
         hostname: 'localhost',
         port: '10073',
       },
+      {
+        protocol: 'https',
+        hostname: 'cornflowerblue-crane-660265.hostingersite.com',
+      },
     ],
   },
-  /* config options here */
 };
 
 export default nextConfig;
