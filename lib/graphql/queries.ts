@@ -1,5 +1,5 @@
-export const GET_POSTS_QUERY = `
-  query GetPosts {
+export const GET_PROJECTS = `
+  query GetProjects {
     works {
       nodes {
         title
@@ -14,8 +14,8 @@ export const GET_POSTS_QUERY = `
   }
 `;
 
-export const GET_POSTS_BY_TITLE = `
-  query GetPostsByTitle ($title: String) {
+export const GET_PROJECT_BY_TITLE = `
+  query GetProjectByTitle ($title: String) {
     works(where: {title: $title}){
       nodes {
         title

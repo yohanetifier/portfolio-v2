@@ -1,13 +1,12 @@
-// import { API_URL } from '@/config/constants';
-import { GET_POSTS_BY_TITLE, GET_POSTS_QUERY } from '@/lib/graphql/queries';
 import { Project } from '../models/Project';
 import { ProjectRepository } from './ProjectRepository';
 import { fetchData } from '@/common/utils/fetchData';
 import { Data } from '../types/Data';
+import { GET_PROJECT_BY_TITLE, GET_PROJECTS } from '@/lib/graphql/queries';
 
 export class ProjectRepositoryImpl implements ProjectRepository {
   async getProjects(): Promise<Pick<Project, 'featuredImage' | 'title'>[]> {
-    const { data } = await fetchData(GET_POSTS_QUERY);
+    const { data } = await fetchData(GET_PROJECTS);
 
     return data.works.nodes.map((projects: Data) => ({
       featuredImage: {
@@ -18,7 +17,7 @@ export class ProjectRepositoryImpl implements ProjectRepository {
     }));
   }
   async getProjectsByTitle(title: string): Promise<Project> {
-    const { data } = await fetchData(GET_POSTS_BY_TITLE, { title });
+    const { data } = await fetchData(GET_PROJECT_BY_TITLE, { title });
 
     return {
       title: data.works.nodes[0].title,
