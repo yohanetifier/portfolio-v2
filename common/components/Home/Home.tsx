@@ -96,6 +96,7 @@ export default function Home({
 
   const handleClick = () => {
     const grid = document.getElementById('grid');
+    grid!.style.transform = 'scale(1)';
     document.body.style.overflow = 'visible';
     // mainWrapperRef.current!.style.height = '300vh';
     // grid!.style.height = '300vh';
@@ -175,7 +176,7 @@ export default function Home({
 
   useEffect(() => {
     const grid = document.getElementById('grid');
-    grid!.style.transform = 'scale(1)';
+    grid!.style.transform = 'scale(0)';
   }, []);
 
   return (
