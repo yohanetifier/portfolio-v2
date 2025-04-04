@@ -1,13 +1,11 @@
 'use client';
-import Button from '@/common/components/Button/Button';
 import Header from '@/common/components/Header/Header';
-import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
@@ -23,7 +21,7 @@ export default function WorkList({
   // const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement | null>(null);
+  // const headerRef = useRef<HTMLDivElement | null>(null);
   // const [showWrapper, setShowWrapper] = React.useState(true);
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
   // const [imageArrived, setImageArrived] = useState(false);
@@ -65,6 +63,7 @@ export default function WorkList({
     });
 
     e.currentTarget.className = '';
+    console.log('e.currentTarget', e.currentTarget);
     fullscreenWrapper!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
@@ -101,8 +100,13 @@ export default function WorkList({
   useEffect(() => {
     document.body.style.overflow = 'visible';
     const grid = document.getElementById('grid');
+    // const fullscreen = document.getElementById('fullscreen');
+    // fullscreen!.style.zIndex = '10';
     setTimeout(() => {
-      grid?.remove();
+      while (grid?.firstChild) {
+        grid?.removeChild(grid.firstChild);
+      }
+      // grid?.remove();
     }, 300);
     const handleScroll = () => {
       const arrayOfImages = Array.from(gridRef.current!.children);
@@ -129,9 +133,9 @@ export default function WorkList({
       className="flex justify-center items-center relative w-[100vw] h-[300vh] transition-height duration-1000 z-[10]"
       ref={mainWrapperRef}
     >
-      <div className="opacity-1" ref={headerRef}>
+      {/* <div className="opacity-1" ref={headerRef}>
         <Header />
-      </div>
+      </div> */}
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[2] `}
         ref={gridRef}
@@ -149,7 +153,7 @@ export default function WorkList({
               alt={featuredImage.alt}
               width={1000}
               height={1000}
-              className="w-full h-full"
+              className="w-full h-full object-cover"
             />
           </Link>
         ))}
