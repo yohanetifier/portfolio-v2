@@ -19,23 +19,25 @@ const Project = ({ data, mediaUrls }: Props) => {
     const link = fullscreen?.firstChild;
     setTimeout(() => {
       link?.remove();
-      grid?.remove();
+      // while (grid?.firstChild) {
+      //   grid.removeChild(grid.firstChild);
+      // }
+      grid!.style.transform = 'scale(0)';
     }, 1000);
   }, []);
 
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-screen relative z-[3]">
       <div className="w-screen h-screen relative flex justify-center items-center">
         <Image
           src={data!.featuredImage.src}
           alt={'first-image'}
           width={1000}
           height={1000}
-          className="w-full h-full absolute top-0 left-0"
+          className="w-full h-full absolute top-0 left-0 object-cover"
         />
         <h1
-          className="relative z-1"
-          style={{ fontSize: '5vw' }}
+          className="relative z-1 text-[5vw] text-white"
           ref={titleRef}
           onPointerEnter={() => animateText(titleRef.current!)}
         >

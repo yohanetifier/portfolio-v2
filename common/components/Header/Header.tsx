@@ -32,7 +32,7 @@ const Header = () => {
           )}
           <div className="pl-[55px] col-start-2 col-end-3 flex justify-between">
             <Link
-              className="absolute left-[55px] cursor-pointer"
+              className="absolute left-[55px] cursor-pointer pointer-events-auto"
               ref={personalRef}
               href={'/'}
               onMouseEnter={() => animateText(personalRef.current!)}

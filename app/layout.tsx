@@ -23,11 +23,11 @@ export default function RootLayout({
         style={{ backgroundColor: '#ffffff' }}
       >
         <div
-          className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[2] absolute top-0 bg-white`}
+          className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[1] absolute top-0 bg-white`}
           id={'grid'}
         ></div>
         <div
-          className="fixed top-0 w-screen h-screen z-0"
+          className="fixed top-0 w-screen h-screen z-[2]"
           id="fullscreen"
         ></div>
         <Header />

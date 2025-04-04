@@ -21,7 +21,7 @@ export default function WorkList({
   // const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement | null>(null);
+  // const headerRef = useRef<HTMLDivElement | null>(null);
   // const [showWrapper, setShowWrapper] = React.useState(true);
   // const titleRef = useRef<HTMLHeadingElement | null>(null);
   // const [imageArrived, setImageArrived] = useState(false);
@@ -63,6 +63,7 @@ export default function WorkList({
     });
 
     e.currentTarget.className = '';
+    console.log('e.currentTarget', e.currentTarget);
     fullscreenWrapper!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
@@ -99,8 +100,13 @@ export default function WorkList({
   useEffect(() => {
     document.body.style.overflow = 'visible';
     const grid = document.getElementById('grid');
+    // const fullscreen = document.getElementById('fullscreen');
+    // fullscreen!.style.zIndex = '10';
     setTimeout(() => {
-      grid?.remove();
+      while (grid?.firstChild) {
+        grid?.removeChild(grid.firstChild);
+      }
+      // grid?.remove();
     }, 300);
     const handleScroll = () => {
       const arrayOfImages = Array.from(gridRef.current!.children);
@@ -147,7 +153,7 @@ export default function WorkList({
               alt={featuredImage.alt}
               width={1000}
               height={1000}
-              className="w-full h-full"
+              className="w-full h-full object-cover"
             />
           </Link>
         ))}
