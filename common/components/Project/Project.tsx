@@ -3,8 +3,6 @@ import React, { useLayoutEffect } from 'react';
 import Image from 'next/image';
 import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
 
 interface Props {
   data: ProjectType;
@@ -29,9 +27,9 @@ const Project = ({ data, mediaUrls }: Props) => {
     }, 1000);
   }, []);
 
-  useGSAP(() => {
-    gsap.to(featureImageRef.current, { filter: 'brightness(0.5)' });
-  });
+  // useGSAP(() => {
+  //   gsap.to(featureImageRef.current, { filter: 'brightness(0.5)' });
+  // });
 
   return (
     <div className="w-screen h-screen relative z-[3]">
@@ -42,7 +40,7 @@ const Project = ({ data, mediaUrls }: Props) => {
           alt={'first-image'}
           width={1000}
           height={1000}
-          className="w-full h-full absolute top-0 left-0 object-cover"
+          className="w-full h-full absolute top-0 left-0 object-cover filter brightness-50"
         />
         <h1
           className="relative z-1 text-[5vw] text-white"

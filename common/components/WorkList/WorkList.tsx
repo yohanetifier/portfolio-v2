@@ -63,7 +63,6 @@ export default function WorkList({
     });
 
     e.currentTarget.className = '';
-    console.log('e.currentTarget', e.currentTarget);
     fullscreenWrapper!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
@@ -94,7 +93,7 @@ export default function WorkList({
         document.body.style.overflow = 'hidden';
         document.body.style.height = '100vh';
       },
-    });
+    }).to(e.currentTarget, { filter: 'brightness(0.5)' }, '-=0.5');
   };
 
   useEffect(() => {
@@ -133,9 +132,6 @@ export default function WorkList({
       className="flex justify-center items-center relative w-[100vw] h-[300vh] transition-height duration-1000 z-[10]"
       ref={mainWrapperRef}
     >
-      {/* <div className="opacity-1" ref={headerRef}>
-        <Header />
-      </div> */}
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[2] `}
         ref={gridRef}
