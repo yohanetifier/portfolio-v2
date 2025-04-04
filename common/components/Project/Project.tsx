@@ -78,7 +78,7 @@ const Project = ({ data, mediaUrls }: Props) => {
               alt={'first-image'}
               width={1000}
               height={1000}
-              className="w-full h-full relative z-20 p-4"
+              className="w-full h-full relative z-20 p-4 object-cover"
             />
           );
         }
