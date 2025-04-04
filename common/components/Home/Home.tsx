@@ -2,6 +2,7 @@
 import Button from '@/common/components/Button/Button';
 import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
+import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
@@ -178,6 +179,24 @@ export default function Home({
     const grid = document.getElementById('grid');
     grid!.style.transform = 'scale(0)';
   }, []);
+
+  useGSAP(
+    () => {
+      const images = Array.from(wrapperImage.current!.children).reverse();
+      const tl = gsap.timeline();
+      tl.from(images, {
+        y: '100vh',
+        stagger: 0.5,
+        duration: 1,
+        ease: 'power2.inOut',
+      }).from([welcomeRef.current, buttonRef.current], {
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.5,
+      });
+    },
+    { scope: wrapperImage },
+  );
 
   return (
     <div
