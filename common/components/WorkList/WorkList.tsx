@@ -1,13 +1,11 @@
 'use client';
-import Button from '@/common/components/Button/Button';
 import Header from '@/common/components/Header/Header';
-import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
@@ -129,9 +127,9 @@ export default function WorkList({
       className="flex justify-center items-center relative w-[100vw] h-[300vh] transition-height duration-1000 z-[10]"
       ref={mainWrapperRef}
     >
-      <div className="opacity-1" ref={headerRef}>
+      {/* <div className="opacity-1" ref={headerRef}>
         <Header />
-      </div>
+      </div> */}
       <div
         className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[2] `}
         ref={gridRef}
