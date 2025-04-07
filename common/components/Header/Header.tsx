@@ -23,16 +23,16 @@ const Header = () => {
   return (
     <>
       {pathname === '/' ? null : (
-        <header className="text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 w-full pt-[50px] absolute top-0 z-[100]  h-[150px]">
+        <header className="text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[95%] left-1/2 transform -translate-x-1/2">
           {pathname && (
             <FaArrowLeft
               onClick={handleClick}
-              className=" absolute bottom-0 left-[55px] w-[30px] h-[30px] cursor-pointer"
+              className=" absolute bottom-0 w-[30px] h-[30px] cursor-pointer"
             />
           )}
-          <div className="pl-[55px] col-start-2 col-end-3 flex justify-between">
+          <div className="col-start-1 col-end-3 flex justify-between ">
             <Link
-              className="absolute left-[55px] cursor-pointer pointer-events-auto"
+              // className="absolute left-[55px] cursor-pointer pointer-events-auto"
               ref={personalRef}
               href={'/'}
               onMouseEnter={() => animateText(personalRef.current!)}
@@ -62,8 +62,8 @@ const Header = () => {
             About
           </p>
           <p
-            className="absolute right-[55px] top-[50px] cursor-pointer"
-            style={{ right: '55px', top: '50px', cursor: 'pointer' }}
+            className="absolute right-[0px] top-[50px] cursor-pointer"
+            // style={{ right: '55px', top: '50px', cursor: 'pointer' }}
             ref={contactRef}
             onPointerEnter={() => animateText(contactRef.current!)}
           >
