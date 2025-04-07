@@ -2,11 +2,12 @@
 import Button from '@/common/components/Button/Button';
 import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
+import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -85,17 +86,18 @@ export default function Home({
   // }, [imageArrived]);
 
   const gridClasses = [
-    'col-start-3 col-end-5 row-start-3 w-[20.208vw] h-[24.219vw] relative right-[120px] bottom-[100px] z-[10]',
-    'col-start-6 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative bottom-[100px] left-[100px] z-[10]',
-    'col-start-5 col-end-8 row-start-2 w-[28.542vw] h-[18.854vw] relative left-[120px] bottom-[100px]',
-    'col-start-7 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative top-[150px]',
-    'col-start-3 col-end-5 row-start-5 w-[20.208vw] h-[24.219vw] relative bottom-[65px]',
+    'col-start-3 col-end-5 row-start-3 w-[20.208vw] h-[24.219vw] relative right-[6.25vw] bottom-[5.208vw] z-[10]',
+    'col-start-6 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative left-[5.208vw] bottom-[5.208vw] z-[10]',
+    'col-start-5 col-end-8 row-start-2 w-[28.542vw] h-[18.854vw] relative left-[6.25vw] bottom-[5.208vw]',
+    'col-start-7 col-end-9 row-start-4 w-[20.208vw] h-[24.219vw] relative top-[7.813vw]',
+    'col-start-3 col-end-5 row-start-5 w-[20.208vw] h-[24.219vw] relative bottom-[3.385vw]',
     'col-start-2 col-end-5 row-start-7 w-[28.542vw] h-[18.854vw]',
-    'col-start-7 col-end-9 row-start-8 w-[20.208vw] h-[24.219vw] relative bottom-[100px]',
+    'col-start-7 col-end-9 row-start-8 w-[20.208vw] h-[24.219vw] relative bottom-[5.208vw]',
   ];
 
   const handleClick = () => {
     const grid = document.getElementById('grid');
+    grid!.style.transform = 'scale(1)';
     document.body.style.overflow = 'visible';
     // mainWrapperRef.current!.style.height = '300vh';
     // grid!.style.height = '300vh';
@@ -173,14 +175,34 @@ export default function Home({
     },
   ];
 
+  useEffect(() => {
+    const grid = document.getElementById('grid');
+    grid!.style.transform = 'scale(0)';
+  }, []);
+
+  useGSAP(
+    () => {
+      const images = Array.from(wrapperImage.current!.children).reverse();
+      const tl = gsap.timeline();
+      tl.from(images, {
+        y: '100vh',
+        stagger: 0.5,
+        duration: 1,
+        ease: 'power2.inOut',
+      }).from([welcomeRef.current, buttonRef.current], {
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.5,
+      });
+    },
+    { scope: wrapperImage },
+  );
+
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
-      {/* <div className="opacity-0" ref={headerRef}>
-        <Header />
-      </div> */}
       <div
         className="relative w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
@@ -192,7 +214,7 @@ export default function Home({
               alt={featuredImage.alt}
               width={1000}
               height={1000}
-              className="w-full h-full"
+              className="w-full h-full object-cover"
             />
           </div>
         ))}
