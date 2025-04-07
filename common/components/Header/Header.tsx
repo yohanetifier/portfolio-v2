@@ -37,29 +37,29 @@ const Header = () => {
               href={'/'}
               onMouseEnter={() => animateText(personalRef.current!)}
             >
-              Ncstr
+              Yeti
             </Link>
-            <p
+            {/* <p
               className="text-right justify-self-end cursor-pointer"
               ref={jobRef}
               onMouseEnter={() => animateText(jobRef.current!)}
             >
               Art director
-            </p>
+            </p> */}
           </div>
           <p
             ref={workRef}
             className="col-start-3 col-end-5 row-start-1 justify-self-end relative right-[20px] cursor-pointer md:right-[-30px]"
             onMouseEnter={() => animateText(workRef.current!)}
           >
-            Travaux
+            Works
           </p>
           <p
             className="col-start-5 col-end-8 justify-self-end justify-items-end relative right-[20px] cursor-pointer"
             ref={aboutRef}
             onPointerEnter={() => animateText(aboutRef.current!)}
           >
-            À propos
+            About
           </p>
           <p
             className="absolute right-[55px] top-[50px] cursor-pointer"
