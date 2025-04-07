@@ -6,7 +6,7 @@ export class PostService {
   constructor(repository: PostRepository) {
     this.repository = repository;
   }
-  getPosts(): Promise<Post[]> {
+  getPosts(): Promise<Omit<Post, 'content'>[]> {
     const posts = this.repository.getPosts();
     return posts;
   }

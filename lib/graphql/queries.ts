@@ -35,9 +35,9 @@ export const GET_POSTS = `
   query GetPosts {
     posts {
       nodes {
+        date
         title
         slug
-        content
       }
     }
   }

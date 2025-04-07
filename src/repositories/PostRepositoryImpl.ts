@@ -4,17 +4,11 @@ import { PostRepository } from './PostRepository';
 import { fetchData } from '@/common/utils/fetchData';
 
 export class PostRepositoryImpl implements PostRepository {
-  async getPosts(): Promise<Post[]> {
+  async getPosts(): Promise<Omit<Post, 'content'>[]> {
     const posts = await fetchData(GET_POSTS);
-    // if (!response.ok) {
-    //   throw new Error('failed to fetch');
-    // }
-    // const posts = await response.json();
-    // console.log('posts', posts);
-    console.log('posts', posts.data.posts.nodes);
     return posts.data.posts.nodes.map((post) => ({
+      date: post.date,
       title: post.title,
-      content: post.content,
       slug: post.slug,
     }));
   }
