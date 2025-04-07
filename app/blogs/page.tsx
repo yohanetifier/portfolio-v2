@@ -1,5 +1,6 @@
 import AlignWrapper from '@/common/components/AlignWrapper/AlignWrapper';
 import { postsViewModel } from '@/src/viewmodels/PostViewModel';
+import { Link } from 'next-view-transitions';
 import React from 'react';
 
 const page = async () => {
@@ -28,15 +29,18 @@ const page = async () => {
   };
   return (
     <AlignWrapper>
-      <div>
+      <div className="">
         {data?.map((blog, index) => {
           const dateFormat = formatedDate(blog.date);
-          console.log(dateFormat);
           return (
-            <div key={index}>
-              <p>{blog.date}</p>
-              <h2>{blog.title}</h2>
-            </div>
+            <Link
+              href={`/blogs/${blog.slug}`}
+              key={index}
+              className="w-[33%] bg-gray-500 h-[300px] rounded-[20px] p-5 flex flex-col gap-[30px] relative z-10"
+            >
+              <p>{dateFormat}</p>
+              <h2 className="text-[25px]">{blog.title}</h2>
+            </Link>
           );
         })}
       </div>

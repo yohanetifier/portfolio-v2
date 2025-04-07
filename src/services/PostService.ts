@@ -10,4 +10,8 @@ export class PostService {
     const posts = this.repository.getPosts();
     return posts;
   }
+  getPostsBySlug(slug: string): Promise<Omit<Post, 'slug'>> {
+    const posts = this.repository.getPostsBySlug(slug);
+    return posts;
+  }
 }

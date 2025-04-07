@@ -5,11 +5,7 @@ interface AlignWrapperProps {
 }
 
 const AlignWrapper: React.FC<AlignWrapperProps> = ({ children }) => {
-  return (
-    <div className="border-2 border-red-500 pt-[200px] w-[94%] mx-auto">
-      {children}
-    </div>
-  );
+  return <div className="pt-[200px] w-[95%] mx-auto">{children}</div>;
 };
 
 export default AlignWrapper;

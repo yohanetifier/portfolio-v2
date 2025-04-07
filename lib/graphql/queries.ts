@@ -42,3 +42,13 @@ export const GET_POSTS = `
     }
   }
 `;
+
+export const GET_POSTS_BY_SLUG = `
+ query GetPostsBySlug($slug: ID!) {
+  post(id: $slug, idType: SLUG){
+		content
+    date
+    title
+  }
+}
+`;
