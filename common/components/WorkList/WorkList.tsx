@@ -37,50 +37,10 @@ export default function WorkList({
       otherChildren,
       target,
     );
-    // const childatTheBottom: HTMLElement[] = [];
-    // const childAtTheTop: HTMLElement[] = [];
-    // otherChildren.forEach((child) => {
-    //   const position = child.getBoundingClientRect();
-    //   const isAtTheBottom = position.top > target.getBoundingClientRect().top;
-    //   if (isAtTheBottom) {
-    //     childatTheBottom.push(child as HTMLElement);
-    //   } else {
-    //     childAtTheTop.push(child as HTMLElement);
-    //   }
-    // });
-
     e.currentTarget.className = '';
     fullscreenWrapper!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
-    // const tl = gsap.timeline({});
-
-    // tl.to(childatTheBottom, {
-    //   y: '100vh',
-    //   rotate: -10,
-    //   duration: 1,
-    //   onComplete: () => {
-    //     router.push(`/work/${title}`);
-    //   },
-    // }).to(
-    //   childAtTheTop,
-    //   {
-    //     y: '-100vh',
-    //     rotate: 10,
-    //     duration: 1,
-    //   },
-    //   '<',
-    // );
-
-    // Flip.from(state, {
-    //   delay: 0.01,
-    //   duration: 1,
-    //   ease: 'power2.inOut',
-    //   onStart: () => {
-    //     document.body.style.overflow = 'hidden';
-    //     document.body.style.height = '100vh';
-    //   },
-    // }).to(e.currentTarget, { filter: 'brightness(0.5)' }, '-=0.5');
     applyGsapTransition(
       childAtTheBottom,
       childAtTheTop,
