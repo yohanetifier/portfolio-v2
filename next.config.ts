@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         hostname: 'localhost',
         port: '10073',
       },
+      {
+        protocol: 'https',
+        hostname: 'ivory-bat-745340.hostingersite.com',
+      },
     ],
   },
   /* config options here */

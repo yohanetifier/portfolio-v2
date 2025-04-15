@@ -3,6 +3,8 @@ import React, { useLayoutEffect } from 'react';
 import Image from 'next/image';
 import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
+import { useParams } from 'next/navigation';
+import { getFullSizeImage } from '@/utils/getFullSizeImage';
 
 interface Props {
   data: ProjectType;
@@ -12,6 +14,7 @@ interface Props {
 const Project = ({ data, mediaUrls }: Props) => {
   const titleRef = React.useRef<HTMLHeadingElement | null>(null);
   const featureImageRef = React.useRef<HTMLImageElement | null>(null);
+  const { project } = useParams();
   useLayoutEffect(() => {
     document.body.style.overflow = 'visible';
     document.body.style.height = 'auto';
@@ -54,7 +57,10 @@ const Project = ({ data, mediaUrls }: Props) => {
       {mediaUrls.map((element, index) => {
         if (element.endsWith('mp4')) {
           return (
-            <div key={index} className="w-full h-full overflow-hidden p-4">
+            <div
+              key={index}
+              className="md:w-full md:h-full overflow-hidden p-4"
+            >
               <video
                 key={index}
                 loop
@@ -72,11 +78,11 @@ const Project = ({ data, mediaUrls }: Props) => {
           return (
             <Image
               key={index}
-              src={element}
-              alt={'first-image'}
+              src={getFullSizeImage(element)}
+              alt={`Image du projet ${project}`}
               width={1000}
               height={1000}
-              className="w-full h-full relative z-20 p-4 object-cover"
+              className="md:w-full md:h-full relative z-20 p-4 object-cover"
             />
           );
         }
