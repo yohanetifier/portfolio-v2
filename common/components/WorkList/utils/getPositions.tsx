@@ -1,4 +1,4 @@
-export const getPositions = (children, target) => {
+export const getPositions = (children: HTMLElement[], target: HTMLElement) => {
   const childAtTheBottom: HTMLElement[] = [];
   const childAtTheTop: HTMLElement[] = [];
   children.forEach((child) => {
