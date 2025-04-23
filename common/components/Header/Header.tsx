@@ -2,7 +2,7 @@
 import React, { useRef } from 'react';
 import { animateText } from '@/common/utils/animateText';
 import { FaArrowLeft } from 'react-icons/fa';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 
 const Header = () => {
@@ -13,6 +13,7 @@ const Header = () => {
   const contactRef = useRef<HTMLParagraphElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { project } = useParams();
 
   const handleClick = () => {
     if (pathname) {
@@ -23,7 +24,9 @@ const Header = () => {
   return (
     <>
       {pathname === '/' ? null : (
-        <header className="text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[95%] left-1/2 transform -translate-x-1/2">
+        <header
+          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[95%] left-1/2 transform -translate-x-1/2 transition-colors duration-500 ease-in-out ${project ? 'text-white' : 'text-black'}`}
+        >
           {pathname && (
             <FaArrowLeft
               onClick={handleClick}
