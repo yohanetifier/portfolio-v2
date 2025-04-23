@@ -6,7 +6,7 @@ import { fetchData } from '@/common/utils/fetchData';
 export class PostRepositoryImpl implements PostRepository {
   async getPosts(): Promise<Omit<Post, 'content'>[]> {
     const posts = await fetchData(GET_POSTS);
-    return posts.data.posts.nodes.map((post) => ({
+    return posts.data.posts.nodes.map((post: Omit<Post, 'content'>) => ({
       date: post.date,
       title: post.title,
       slug: post.slug,
