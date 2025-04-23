@@ -25,6 +25,7 @@ export default function WorkList({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
+    const decodedTitle = decodeURIComponent(title);
     const fullscreenWrapper = document.getElementById('fullscreen');
     fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
@@ -41,10 +42,12 @@ export default function WorkList({
     fullscreenWrapper!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
+    console.log('decodedTitle', decodedTitle);
+
     applyGsapTransition(
       childAtTheBottom,
       childAtTheTop,
-      title,
+      decodedTitle,
       state,
       e.currentTarget,
       router,
@@ -90,7 +93,7 @@ export default function WorkList({
         {projects.map(({ featuredImage, title }, index) => (
           <Link
             key={index}
-            href={`/work/${title}`}
+            href={`/work/${title.replaceAll(' ', '-')}`}
             prefetch={true}
             className={gridClasses[index]}
             onClick={(e) => handleTransition(e, title)}
