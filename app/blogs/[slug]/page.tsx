@@ -2,16 +2,12 @@ import AlignWrapper from '@/common/components/AlignWrapper/AlignWrapper';
 import { postsBySlugViewModel } from '@/src/viewmodels/PostsBySlugViewModel';
 import React from 'react';
 
-interface Props {
-  params: {
-    slug: string;
-  };
-}
+type Params = Promise<{ slug: string }>;
 
-const page = async ({ params }: Props) => {
-  const { slug } = await params;
+const BlogsPage = async (props: { params: Params }) => {
+  const { slug } = await props.params;
   const data = await postsBySlugViewModel(slug);
-  console.log('data', data);
+
   return (
     <AlignWrapper>
       <h1>{data?.title}</h1>
@@ -19,4 +15,4 @@ const page = async ({ params }: Props) => {
   );
 };
 
-export default page;
+export default BlogsPage;

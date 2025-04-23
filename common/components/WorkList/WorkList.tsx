@@ -34,7 +34,7 @@ export default function WorkList({
       (child) => child !== e.currentTarget,
     );
     const { childAtTheBottom, childAtTheTop } = getPositions(
-      otherChildren,
+      otherChildren as HTMLElement[],
       target,
     );
     e.currentTarget.className = '';

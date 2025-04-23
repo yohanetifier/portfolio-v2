@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Header from '@/common/components/Header/Header';
-import { FullscreenProvider } from '@/contexts/FullscreenContext';
-import Fullscreen from '@/common/components/Fullscreen/Fullscreen';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
