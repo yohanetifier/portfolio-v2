@@ -42,6 +42,7 @@ export default function WorkList({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
+    const decodedTitle = decodeURIComponent(title);
     const fullscreenWrapper = document.getElementById('fullscreen');
     fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
@@ -73,7 +74,7 @@ export default function WorkList({
       rotate: -10,
       duration: 1,
       onComplete: () => {
-        router.push(`/work/${title}`);
+        router.push(`/work/${decodedTitle}`);
       },
     }).to(
       childAtTheTop,
@@ -139,7 +140,7 @@ export default function WorkList({
         {projects.map(({ featuredImage, title }, index) => (
           <Link
             key={index}
-            href={`/work/${title}`}
+            href={`/work/${title.replaceAll('%20', '-')}`}
             prefetch={true}
             className={gridClasses[index]}
             onClick={(e) => handleTransition(e, title)}
