@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Header from '@/common/components/Header/Header';
+import Menu from '@/common/components/Menu/Menu';
+import MenuProvider from '@/contexts/MenuProvider';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -30,7 +32,10 @@ export default function RootLayout({
           className="fixed top-0 w-screen h-screen z-[2]"
           id="fullscreen"
         ></div>
-        <Header />
+        <MenuProvider>
+          <Menu />
+          <Header />
+        </MenuProvider>
         {children}
       </body>
     </html>
