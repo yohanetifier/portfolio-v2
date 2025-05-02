@@ -6,9 +6,22 @@ import { ProjectRepositoryImpl } from '@/src/repositories/ProjectRepositoryImpl'
 const projectRepositoryImpl = new ProjectRepositoryImpl();
 const projectViewModel = new ProjectViewModel(projectRepositoryImpl);
 
+export async function generateMetaData({
+  params,
+}: {
+  params: Promise<{ project: string }>;
+}) {
+  const { project } = await params;
+  const formattedProject = project.replace(/-/g, ' ');
+  return {
+    title: `good | Portfolio Yohan Etifier`,
+  };
+}
+
 const Work = async ({ params }: { params: Promise<{ project: string }> }) => {
   const { project } = await params;
-  const data = await projectViewModel.getProjectByTitle(project);
+  const formattedProject = project.replace(/-/g, ' ');
+  const data = await projectViewModel.getProjectByTitle(formattedProject);
   const mediaUrls = [];
 
   const regex = /<(img|video|source)[^>]+src="([^">]+)"/g;

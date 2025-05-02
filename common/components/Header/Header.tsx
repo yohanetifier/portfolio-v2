@@ -1,17 +1,16 @@
 'use client';
 import React, { useContext, useRef } from 'react';
-import { animateText } from '@/common/utils/animateText';
 import { FaArrowLeft } from 'react-icons/fa';
 import { usePathname, useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import MenuProvider, { ThemeContext } from '@/contexts/MenuProvider';
+import { ThemeContext } from '@/contexts/MenuProvider';
 
 const Header = () => {
-  const workRef = useRef<HTMLParagraphElement | null>(null);
+  const workRef = useRef<HTMLAnchorElement | null>(null);
   const personalRef = useRef<HTMLAnchorElement | null>(null);
-  const jobRef = useRef<HTMLParagraphElement | null>(null);
+  // const jobRef = useRef<HTMLParagraphElement | null>(null);
   const aboutRef = useRef<HTMLParagraphElement | null>(null);
-  const contactRef = useRef<HTMLParagraphElement | null>(null);
+  const contactRef = useRef<HTMLAnchorElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const { project } = useParams();
@@ -41,10 +40,9 @@ const Header = () => {
           )}
           <div className="col-start-1 col-end-3 flex justify-between ">
             <Link
-              // className="absolute left-[55px] cursor-pointer pointer-events-auto"
               ref={personalRef}
               href={'/'}
-              onMouseEnter={() => animateText(personalRef.current!)}
+              // onMouseEnter={() => animateText(personalRef.current!)}
             >
               Yeti
             </Link>
@@ -56,28 +54,29 @@ const Header = () => {
               Art director
             </p> */}
           </div>
-          <p
+          <Link
             ref={workRef}
             className="col-start-3 col-end-5 row-start-1 justify-self-end relative right-[20px] cursor-pointer md:right-[-30px] hidden md:block"
-            onMouseEnter={() => animateText(workRef.current!)}
+            // onMouseEnter={() => animateText(workRef.current!)}
+            href={'/work'}
           >
             Works
-          </p>
+          </Link>
           <p
             className="col-start-5 col-end-8 justify-self-end justify-items-end relative right-[20px] cursor-pointer hidden md:block"
             ref={aboutRef}
-            onPointerEnter={() => animateText(aboutRef.current!)}
+            // onPointerEnter={() => animateText(aboutRef.current!)}
           >
             About
           </p>
-          <p
+          <Link
             className="absolute right-[0px] top-[50px] cursor-pointer hidden md:block"
-            // style={{ right: '55px', top: '50px', cursor: 'pointer' }}
             ref={contactRef}
-            onPointerEnter={() => animateText(contactRef.current!)}
+            // onPointerEnter={() => animateText(contactRef.current!)}
+            href={'/contact'}
           >
             Contact
-          </p>
+          </Link>
           <div
             className=" absolute right-[0px] top-[50px] cursor-pointer w-[30px] h-[20px] flex flex-col justify-between visible md:hidden z-[100]"
             onClick={() => setIsOpen(!isOpen)}

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { gridClasses } from './constants';
+import { gridClasses } from './utils/classes';
 import { getPositions } from './utils/getPositions';
 import { applyGsapTransition } from './utils/applyGsapTransition';
 
@@ -25,6 +25,7 @@ export default function WorkList({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
+    const formatedTitle = title.replace(/\s+/g, '-');
     const fullscreenWrapper = document.getElementById('fullscreen');
     fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
@@ -44,7 +45,7 @@ export default function WorkList({
     applyGsapTransition(
       childAtTheBottom,
       childAtTheTop,
-      title,
+      formatedTitle,
       state,
       e.currentTarget,
       router,
@@ -90,7 +91,7 @@ export default function WorkList({
         {projects.map(({ featuredImage, title }, index) => (
           <Link
             key={index}
-            href={`/work/${title}`}
+            href={` `}
             prefetch={true}
             className={gridClasses[index]}
             onClick={(e) => handleTransition(e, title)}
