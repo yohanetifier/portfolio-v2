@@ -18,9 +18,12 @@ const Header = () => {
   const { isOpen, setIsOpen } = useContext(ThemeContext);
 
   const handleClick = () => {
-    setIsOpen(false);
-    if (pathname) {
-      router.back();
+    if (isOpen) {
+      setIsOpen(false);
+    } else {
+      if (pathname) {
+        router.back();
+      }
     }
   };
 
@@ -28,7 +31,7 @@ const Header = () => {
     <>
       {pathname === '/' ? null : (
         <header
-          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[95%] left-1/2 transform -translate-x-1/2 transition-colors duration-500 ease-in-out ${project ? 'text-white' : 'text-black'}`}
+          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[95%] left-1/2 transform -translate-x-1/2 transition-colors duration-500 ease-in-out ${project || isOpen ? 'text-white' : 'text-black'}`}
         >
           {pathname && (
             <FaArrowLeft
