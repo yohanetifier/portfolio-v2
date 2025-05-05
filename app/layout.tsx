@@ -5,7 +5,10 @@ import Menu from '@/common/components/Menu/Menu';
 import MenuProvider from '@/contexts/MenuProvider';
 
 export const metadata: Metadata = {
-  title: 'Yohan Etifier | Portfolio Yohan Etifier',
+  title: {
+    template: '%s | Portfolio Yohan Etifier',
+    default: 'Yohan Etifier | Portfolio Yohan Etifier'
+  },
   icons: {
     icon: '/favicon-16x16.png',
   },

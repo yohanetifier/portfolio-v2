@@ -1,9 +1,14 @@
 import { portfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 import WorkList from '@/common/components/WorkList/WorkList';
+import { Metadata } from 'next';
 
-const HomePage = async () => {
+export const metadata: Metadata = {
+  title: 'Works' 
+}
+
+const WorkPage = async () => {
   const projects = await portfolioViewModel();
   return <WorkList projects={projects!} />;
 };
 
-export default HomePage;
+export default WorkPage;
