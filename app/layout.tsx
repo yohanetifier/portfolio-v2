@@ -9,8 +9,58 @@ export const metadata: Metadata = {
     template: '%s | Portfolio Yohan Etifier',
     default: 'Yohan Etifier | Portfolio Yohan Etifier'
   },
+  description: 'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+  keywords: ['portfolio', 'developer', 'designer', 'creative', 'projects', 'web development', 'design'],
+  authors: [{ name: 'Yohan Etifier' }],
+  creator: 'Yohan Etifier',
+  publisher: 'Yohan Etifier',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://yohanetifier.com',
+    siteName: 'Portfolio Yohan Etifier',
+    title: 'Yohan Etifier | Portfolio',
+    description: 'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Yohan Etifier Portfolio',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Yohan Etifier | Portfolio',
+    description: 'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+    images: ['/og-image.jpg'],
+    creator: '@yohanetifier',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: '/favicon-16x16.png',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  verification: {
+    google: 'your-google-site-verification',
   },
 };
 

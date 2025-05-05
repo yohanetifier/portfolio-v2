@@ -6,15 +6,37 @@ import { ProjectRepositoryImpl } from '@/src/repositories/ProjectRepositoryImpl'
 const projectRepositoryImpl = new ProjectRepositoryImpl();
 const projectViewModel = new ProjectViewModel(projectRepositoryImpl);
 
-export async function generateMetaData({
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ project: string }>;
 }) {
   const { project } = await params;
   const formattedProject = project.replace(/-/g, ' ');
+  const data = await projectViewModel.getProjectByTitle(formattedProject);
+
+  if (!data) {
+    return {
+      title: 'Project Not Found',
+      description: 'The requested project could not be found.',
+    };
+  }
+
   return {
-    title: `good | Portfolio Yohan Etifier`,
+    title: `${data.title}`,
+    description: `View ${data.title} project by Yohan Etifier. ${data.content.substring(0, 160)}...`,
+    openGraph: {
+      title: data.title,
+      description: data.content.substring(0, 160),
+      images: [
+        {
+          url: data.featuredImage.src,
+          width: 1200,
+          height: 630,
+          alt: data.featuredImage.alt,
+        },
+      ],
+    },
   };
 }
 
