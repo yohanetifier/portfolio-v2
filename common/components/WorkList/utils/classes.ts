@@ -7,6 +7,7 @@ export const gridClasses = [
   'col-start-2 col-end-5 row-start-7 w-[28.542vw] h-[18.854vw] ',
   'col-start-7 col-end-9 row-start-8 w-[20.208vw] h-[24.219vw] relative bottom-[5.208vw]',
   'col-start-3 col-end-5 row-start-9 w-[20.208vw] h-[24.219vw] relative bottom-[5.208vw]',
+  'col-start-6 col-end-9 row-start-10 w-[20.208vw] h-[24.219vw] relative bottom-[5.208vw]',
 ];
 
 export const startingClass = [
@@ -39,5 +40,9 @@ export const startingClass = [
   {
     className:
       'w-[16.641vw] h-[19.943vw] absolute top-[25%] rotate-[1deg] opacity-0',
+  },
+  {
+    className:
+      'w-[16.641vw] h-[19.943vw] absolute top-[25%] rotate-[1deg] opacity-0 ',
   },
 ];
