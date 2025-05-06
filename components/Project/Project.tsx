@@ -34,7 +34,7 @@ const Project = ({ data, mediaUrls }: Props) => {
         <Image
           ref={featureImageRef}
           src={data!.featuredImage.src}
-          alt={'first-image'}
+          alt={data.featuredImage.alt}
           width={1000}
           height={1000}
           className="w-full h-full absolute top-0 left-0 object-cover filter brightness-50"
