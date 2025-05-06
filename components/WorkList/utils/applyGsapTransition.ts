@@ -1,12 +1,14 @@
 import gsap from 'gsap';
 import { Flip } from 'gsap/all';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+
 export const applyGsapTransition = (
   childatTheBottom: HTMLElement[],
   childAtTheTop: HTMLElement[],
   title: string,
   state: Flip.FlipState,
   target: HTMLElement,
-  router: any,
+  router: AppRouterInstance,
 ) => {
   const tl = gsap.timeline({});
 
