@@ -1,4 +1,4 @@
-import AlignWrapper from '@/common/components/AlignWrapper/AlignWrapper';
+import AlignWrapper from '@/components/AlignWrapper/AlignWrapper';
 import { postsViewModel } from '@/src/viewmodels/PostViewModel';
 import { Link } from 'next-view-transitions';
 import React from 'react';

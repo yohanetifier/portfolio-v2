@@ -1,4 +1,4 @@
-import Home from '@/common/components/Home/Home';
+import Home from '@/components/Home/Home';
 import { portfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 
 const HomePage = async () => {

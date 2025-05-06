@@ -1,6 +1,6 @@
 import React from 'react';
 import { ProjectViewModel } from '@/src/viewmodels/ProjectViewModel';
-import Project from '@/common/components/Project/Project';
+import Project from '@/components/Project/Project';
 import { ProjectRepositoryImpl } from '@/src/repositories/ProjectRepositoryImpl';
 
 const projectRepositoryImpl = new ProjectRepositoryImpl();

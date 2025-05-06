@@ -1,4 +1,4 @@
-import AlignWrapper from '@/common/components/AlignWrapper/AlignWrapper';
+import AlignWrapper from '@/components/AlignWrapper/AlignWrapper';
 import { postsBySlugViewModel } from '@/src/viewmodels/PostsBySlugViewModel';
 import React from 'react';
 

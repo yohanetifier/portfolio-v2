@@ -16,27 +16,21 @@ const Project = ({ data, mediaUrls }: Props) => {
   const featureImageRef = React.useRef<HTMLImageElement | null>(null);
   const { project } = useParams();
   useLayoutEffect(() => {
-    document.body.style.overflow = 'visible';
+    // document.body.style.overflow = 'visible';
     document.body.style.height = 'auto';
     const fullscreen = document.getElementById('fullscreen');
     const grid = document.getElementById('grid');
     const link = fullscreen?.firstChild;
     setTimeout(() => {
       link?.remove();
-      // while (grid?.firstChild) {
-      //   grid.removeChild(grid.firstChild);
-      // }
       grid!.style.transform = 'scale(0)';
+      document.body.style.overflow = 'visible';
     }, 1000);
   }, []);
 
-  // useGSAP(() => {
-  //   gsap.to(featureImageRef.current, { filter: 'brightness(0.5)' });
-  // });
-
   return (
     <div className="w-screen h-screen relative z-[3]">
-      <div className="w-screen h-screen relative flex justify-center items-center">
+      <div className="w-screen h-screen relative flex justify-center items-center p-4">
         <Image
           ref={featureImageRef}
           src={data!.featuredImage.src}

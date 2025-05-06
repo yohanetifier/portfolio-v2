@@ -4,6 +4,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 import { usePathname, useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ThemeContext } from '@/contexts/MenuProvider';
+import Burger from '../Burger/Burger';
 
 const Header = () => {
   const workRef = useRef<HTMLAnchorElement | null>(null);
@@ -30,7 +31,7 @@ const Header = () => {
     <>
       {pathname === '/' ? null : (
         <header
-          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[95%] left-1/2 transform -translate-x-1/2 transition-colors duration-500 ease-in-out ${project || isOpen ? 'text-white' : 'text-black'}`}
+          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-colors duration-500 ease-in-out ${project || isOpen ? 'text-white' : 'text-black'}`}
         >
           {pathname && (
             <FaArrowLeft
@@ -42,6 +43,7 @@ const Header = () => {
             <Link
               ref={personalRef}
               href={'/'}
+              className="text-[16px]"
               // onMouseEnter={() => animateText(personalRef.current!)}
             >
               Yeti
@@ -77,21 +79,7 @@ const Header = () => {
           >
             Contact
           </Link>
-          <div
-            className=" absolute right-[0px] top-[50px] cursor-pointer w-[30px] h-[20px] flex flex-col justify-between visible md:hidden z-[100]"
-            onClick={() => setIsOpen(!isOpen)}
-            style={{ zIndex: '100' }}
-          >
-            <span
-              className={`transition-transform duration-300 block h-[1px] border-2 border-gray-700 ${isOpen ? 'translate-y-[10px] rotate-[45deg]' : 'translate-y-0 rotate-0'}`}
-            ></span>
-            <span
-              className={`transition-opacity duration-300 block h-[1px] border-2 border-gray-700 ${isOpen ? 'opacity-0' : 'opacity-1'}`}
-            ></span>
-            <span
-              className={`transition-transform duration-300 block h-[1px] border-2 border-gray-700  ${isOpen ? 'translate-y-[-6px] rotate-[-45deg]' : 'translate-y-0 rotate-0'} `}
-            ></span>
-          </div>
+          <Burger />
         </header>
       )}
     </>

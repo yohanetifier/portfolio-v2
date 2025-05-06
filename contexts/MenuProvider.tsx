@@ -1,6 +1,4 @@
 'use client';
-import Header from '@/common/components/Header/Header';
-import Menu from '@/common/components/Menu/Menu';
 import { createContext, SetStateAction, useState } from 'react';
 
 interface MenuContext {

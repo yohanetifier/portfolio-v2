@@ -1,5 +1,5 @@
 'use client';
-import Button from '@/common/components/Button/Button';
+import Button from '@/components/Button/Button';
 import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
 import { useGSAP } from '@gsap/react';

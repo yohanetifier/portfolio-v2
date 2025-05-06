@@ -1,16 +1,25 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import Header from '@/common/components/Header/Header';
-import Menu from '@/common/components/Menu/Menu';
+import Header from '@/components/Header/Header';
+import Menu from '@/components/Menu/Menu';
 import MenuProvider from '@/contexts/MenuProvider';
 
 export const metadata: Metadata = {
   title: {
     template: '%s | Portfolio Yohan Etifier',
-    default: 'Yohan Etifier | Portfolio Yohan Etifier'
+    default: 'Yohan Etifier | Portfolio Yohan Etifier',
   },
-  description: 'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
-  keywords: ['portfolio', 'developer', 'designer', 'creative', 'projects', 'web development', 'design'],
+  description:
+    'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+  keywords: [
+    'portfolio',
+    'developer',
+    'designer',
+    'creative',
+    'projects',
+    'web development',
+    'design',
+  ],
   authors: [{ name: 'Yohan Etifier' }],
   creator: 'Yohan Etifier',
   publisher: 'Yohan Etifier',
@@ -20,7 +29,8 @@ export const metadata: Metadata = {
     url: 'https://yohanetifier.com',
     siteName: 'Portfolio Yohan Etifier',
     title: 'Yohan Etifier | Portfolio',
-    description: 'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+    description:
+      'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
     images: [
       {
         url: '/og-image.jpg',
@@ -33,7 +43,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Yohan Etifier | Portfolio',
-    description: 'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+    description:
+      'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
     images: ['/og-image.jpg'],
     creator: '@yohanetifier',
   },
