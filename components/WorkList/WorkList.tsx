@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { gridClasses } from './utils/classes';
 import { getPositions } from './utils/getPositions';
 import { applyGsapTransition } from './utils/applyGsapTransition';
+import ProjectCanvas from '../ProjectCanvas/ProjectCanvas';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -96,13 +97,14 @@ export default function WorkList({
             className={gridClasses[index]}
             onClick={(e) => handleTransition(e, title)}
           >
-            <Image
+            {/* <Image
               src={featuredImage.src}
               alt={featuredImage.alt}
               width={1000}
               height={1000}
               className="w-full h-full object-cover"
-            />
+            /> */}
+            <ProjectCanvas />
           </Link>
         ))}
       </div>
