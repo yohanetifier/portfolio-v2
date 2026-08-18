@@ -16,6 +16,7 @@ export class ProjectRepositoryImpl implements ProjectRepository {
       title: projects.title,
     }));
   }
+
   async getProjectsByTitle(title: string): Promise<Project> {
     const { data } = await fetchData(GET_PROJECT_BY_TITLE, { title });
 

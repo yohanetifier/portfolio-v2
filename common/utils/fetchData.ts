@@ -1,16 +1,14 @@
-// import { API_URL } from '@/config/constants';
+import { API_URL } from '@/config/constants';
 
 export const fetchData = async (query: string, variables = {}) => {
-  const res = await fetch(
-    'https://ivory-bat-745340.hostingersite.com/graphql',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query, variables }),
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({ query, variables }),
+    next: { revalidate: 60 },
+  });
   if (!res.ok) {
     throw new Error('Failed to fetch posts');
   }

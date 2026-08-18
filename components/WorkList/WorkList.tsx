@@ -6,7 +6,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { gridClasses } from './utils/classes';
+import {
+  getGridMetrics,
+  getGridPlacement,
+} from './utils/classes';
 import { getPositions } from './utils/getPositions';
 import { applyGsapTransition } from './utils/applyGsapTransition';
 
@@ -20,6 +23,7 @@ export default function WorkList({
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const metrics = getGridMetrics(projects.length);
 
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -81,30 +85,41 @@ export default function WorkList({
 
   return (
     <div
-      className="flex justify-center items-center relative w-[100vw] h-[300vh] transition-height duration-1000 z-[10]"
+      className="flex justify-center items-center relative w-[100vw] transition-height duration-1000 z-[10]"
       ref={mainWrapperRef}
+      style={{
+        height: metrics.height,
+      }}
     >
       <div
-        className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[2] `}
+        className={`w-full grid grid-cols-10 gap-[20px] z-[2] `}
         ref={gridRef}
+        style={{
+          height: metrics.height,
+          gridTemplateRows: `repeat(${metrics.rows}, minmax(0, 1fr))`,
+        }}
       >
-        {projects.map(({ featuredImage, title }, index) => (
-          <Link
-            key={index}
-            href={` `}
-            prefetch={true}
-            className={gridClasses[index]}
-            onClick={(e) => handleTransition(e, title)}
-          >
-            <Image
-              src={featuredImage.src}
-              alt={featuredImage.alt}
-              width={1000}
-              height={1000}
-              className="w-full h-full object-cover"
-            />
-          </Link>
-        ))}
+        {projects.map(({ featuredImage, title }, index) => {
+          const placement = getGridPlacement(index);
+          return (
+            <Link
+              key={index}
+              href={`/work/${title.replace(/\s+/g, '-')}`}
+              prefetch={true}
+              className={placement.className}
+              onClick={(e) => handleTransition(e, title)}
+              style={placement.style}
+            >
+              <Image
+                src={featuredImage.src}
+                alt={featuredImage.alt}
+                width={1000}
+                height={1000}
+                className="w-full h-full object-cover"
+              />
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

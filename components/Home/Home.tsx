@@ -7,8 +7,13 @@ import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef } from 'react';
-import { gridClasses, startingClass } from '../WorkList/utils/classes';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import {
+  getGridMetrics,
+  getGridPlacement,
+  getStartingClass,
+  INTRO_VISIBLE_COUNT,
+} from '../WorkList/utils/classes';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -27,7 +32,13 @@ export default function Home({
 
   const handleClick = () => {
     const grid = document.getElementById('grid');
-    grid!.style.transform = 'scale(1)';
+    const metrics = getGridMetrics(projects.length);
+    if (!grid) return;
+    {
+      grid.style.height = metrics.height;
+      grid.style.gridTemplateRows = `repeat(${metrics.rows}, minmax(0, 1fr))`;
+    }
+    grid.style.transform = 'scale(1)';
     document.body.style.overflow = 'visible';
     const arrayOfImages: Element[] = Array.from(wrapperImage.current!.children);
 
@@ -36,7 +47,11 @@ export default function Home({
       wrapperImage.current!.children,
     ) as HTMLElement[];
     children.forEach((child, index) => {
-      child.className = gridClasses[index] || '';
+      const placement = getGridPlacement(index);
+      child.className = placement.className;
+      child.style.gridColumnStart = String(placement.style.gridColumnStart);
+      child.style.gridColumnEnd = String(placement.style.gridColumnEnd);
+      child.style.gridRowStart = String(placement.style.gridRowStart);
     });
     grid!.append(
       ...Array.from(wrapperImage.current!.children as HTMLCollection),
@@ -65,12 +80,27 @@ export default function Home({
     grid!.style.transform = 'scale(0)';
   }, []);
 
+  // GSAP `.from()` runs after the first paint, so images briefly flash at y=0.
+  // Set the initial off-screen position before paint to avoid that flicker.
+  useLayoutEffect(() => {
+    if (!wrapperImage.current) return;
+
+    const introImages = Array.from(wrapperImage.current.children).slice(
+      0,
+      INTRO_VISIBLE_COUNT,
+    ) as HTMLElement[];
+
+    gsap.set(introImages, { y: '100vh' });
+  }, [projects.length]);
+
   useGSAP(
     () => {
-      const images = Array.from(wrapperImage.current!.children).reverse();
+      const introImages = Array.from(wrapperImage.current!.children)
+        .slice(0, INTRO_VISIBLE_COUNT)
+        .reverse();
       const tl = gsap.timeline();
-      tl.from(images, {
-        y: '100vh',
+      tl.to(introImages, {
+        y: 0,
         stagger: 0.5,
         duration: 1,
         ease: 'power2.inOut',
@@ -92,8 +122,8 @@ export default function Home({
         className="relative w-full h-full rounded-xl flex justify-center items-center"
         ref={wrapperImage}
       >
-        {projects.map(({ featuredImage }, index) => (
-          <div key={index} className={`${startingClass[index].className}`}>
+        {projects.slice(0, INTRO_VISIBLE_COUNT).map(({ featuredImage }, index) => (
+          <div key={index} className={getStartingClass(index)}>
             <Image
               src={featuredImage.src}
               alt={featuredImage.alt}

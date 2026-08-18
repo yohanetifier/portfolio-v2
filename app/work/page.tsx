@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 const WorkPage = async () => {
   const projects = await portfolioViewModel();
-  return <WorkList projects={projects!} />;
+  return <WorkList projects={projects ?? []} />;
 };
 
 export default WorkPage;
