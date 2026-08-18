@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Header from '@/components/Header/Header';
 import Menu from '@/components/Menu/Menu';
-import MenuProvider from '@/contexts/MenuProvider';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: {
@@ -93,11 +93,11 @@ export default function RootLayout({
           className="fixed top-0 w-screen h-screen z-[2]"
           id="fullscreen"
         ></div>
-        <MenuProvider>
+        <Providers>
           <Menu />
           <Header />
-        </MenuProvider>
-        {children}
+          {children}
+        </Providers>
       </body>
     </html>
   );

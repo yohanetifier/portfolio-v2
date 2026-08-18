@@ -14,6 +14,7 @@ import {
   getStartingClass,
   INTRO_VISIBLE_COUNT,
 } from '../WorkList/utils/classes';
+import { useHeaderContext } from '@/contexts/HeaderContext';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -26,9 +27,9 @@ export default function Home({
   const welcomeRef = useRef<HTMLButtonElement>(null);
   const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement | null>(null);
   const tl = gsap.timeline({});
   const router = useRouter();
+  const { setHeaderVisible } = useHeaderContext();
 
   const handleClick = () => {
     const grid = document.getElementById('grid');
@@ -70,15 +71,18 @@ export default function Home({
       stagger: 0.1,
       onComplete: () => {
         router.push(`/work`, { scroll: false });
-        gsap.to(headerRef.current, { opacity: 1 });
+        setHeaderVisible(true);
       },
     });
   };
 
   useEffect(() => {
+    setHeaderVisible(false);
     const grid = document.getElementById('grid');
     grid!.style.transform = 'scale(0)';
-  }, []);
+
+    return () => setHeaderVisible(true);
+  }, [setHeaderVisible]);
 
   // GSAP `.from()` runs after the first paint, so images briefly flash at y=0.
   // Set the initial off-screen position before paint to avoid that flicker.

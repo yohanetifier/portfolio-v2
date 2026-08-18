@@ -1,6 +1,6 @@
 export const GET_PROJECTS = `
   query GetProjects {
-    works {
+    works(first: 100) {
       nodes {
         title
         featuredImage {

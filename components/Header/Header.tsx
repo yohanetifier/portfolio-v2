@@ -4,6 +4,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 import { usePathname, useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ThemeContext } from '@/contexts/MenuProvider';
+import { useHeaderContext } from '@/contexts/HeaderContext';
 import Burger from '../Burger/Burger';
 
 const Header = () => {
@@ -16,6 +17,8 @@ const Header = () => {
   const pathname = usePathname();
   const { project } = useParams();
   const { isOpen, setIsOpen } = useContext(ThemeContext);
+  const { isHeaderVisible } = useHeaderContext();
+  const isIntro = !pathname || pathname === '/';
 
   const handleClick = () => {
     if (isOpen) {
@@ -29,9 +32,9 @@ const Header = () => {
 
   return (
     <>
-      {pathname === '/' ? null : (
+      {isIntro ? null : (
         <header
-          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-colors duration-500 ease-in-out ${project || isOpen ? 'text-white' : 'text-black'}`}
+          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out ${project || isOpen ? 'text-white' : 'text-black'} ${isHeaderVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
           {pathname && (
             <FaArrowLeft
