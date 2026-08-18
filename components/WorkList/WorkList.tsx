@@ -29,7 +29,11 @@ export default function WorkList({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
   ) => {
+<<<<<<< HEAD:components/WorkList/WorkList.tsx
     const formatedTitle = title.replace(/\s+/g, '-');
+=======
+    const decodedTitle = decodeURIComponent(title);
+>>>>>>> c812c1535d9a066fee8c13b4c9bee60efe263ec9:common/components/WorkList/WorkList.tsx
     const fullscreenWrapper = document.getElementById('fullscreen');
     fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
@@ -46,10 +50,16 @@ export default function WorkList({
     fullscreenWrapper!.append(e.currentTarget);
     e.currentTarget.className = 'absolute w-screen h-screen ';
 
+    console.log('decodedTitle', decodedTitle);
+
     applyGsapTransition(
       childAtTheBottom,
       childAtTheTop,
+<<<<<<< HEAD:components/WorkList/WorkList.tsx
       formatedTitle,
+=======
+      decodedTitle,
+>>>>>>> c812c1535d9a066fee8c13b4c9bee60efe263ec9:common/components/WorkList/WorkList.tsx
       state,
       e.currentTarget,
       router,
