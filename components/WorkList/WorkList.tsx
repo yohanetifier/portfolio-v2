@@ -11,6 +11,7 @@ import { getPositions } from './utils/getPositions';
 import { applyGsapTransition } from './utils/applyGsapTransition';
 import { Canvas } from '@react-three/fiber';
 import Plane from '../Plane/Plane';
+import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -19,6 +20,8 @@ export default function WorkList({
 }: {
   projects: Pick<Project, 'featuredImage' | 'title'>[];
 }) {
+  const { projectsDetails, setProjects } = useThreeJsContext();
+  const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -33,29 +36,37 @@ export default function WorkList({
     fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
     const target = e.currentTarget;
-    const state = Flip.getState(e.currentTarget);
-    const otherChildren = Array.from(gridRef.current!.children).filter(
-      (child) => child !== e.currentTarget,
-    );
-    const { childAtTheBottom, childAtTheTop } = getPositions(
-      otherChildren as HTMLElement[],
-      target,
-    );
-    e.currentTarget.className = '';
-    fullscreenWrapper!.append(e.currentTarget);
-    e.currentTarget.className = 'absolute w-screen h-screen ';
+    console.log('e.current.target', target);
+    // const state = Flip.getState(e.currentTarget);
+    // const otherChildren = Array.from(gridRef.current!.children).filter(
+    //   (child) => child !== e.currentTarget,
+    // );
+    // const { childAtTheBottom, childAtTheTop } = getPositions(
+    //   otherChildren as HTMLElement[],
+    //   target,
+    // );
+    // e.currentTarget.className = '';
+    // fullscreenWrapper!.append(e.currentTarget);
+    // e.currentTarget.className = 'absolute w-screen h-screen ';
 
-    applyGsapTransition(
-      childAtTheBottom,
-      childAtTheTop,
-      formatedTitle,
-      state,
-      e.currentTarget,
-      router,
-    );
+    // applyGsapTransition(
+    //   childAtTheBottom,
+    //   childAtTheTop,
+    //   formatedTitle,
+    //   state,
+    //   e.currentTarget,
+    //   router,
+    // );
   };
 
   useEffect(() => {
+    const rects = linkArray.current.map((el, i) => {
+      return {
+        rects: el.getBoundingClientRect(),
+        imageUrl: projects[i].featuredImage.src,
+      };
+    });
+    setProjects(rects);
     document.body.style.overflow = 'visible';
     const grid = document.getElementById('grid');
     setTimeout(() => {
@@ -98,28 +109,20 @@ export default function WorkList({
           gridTemplateRows: `repeat(${metrics.rows}, minmax(0, 1fr))`,
         }}
       >
-        {projects.map(({ featuredImage, title }, index) => {
+        {projects.map(({ title }, index) => {
           const placement = getGridPlacement(index);
           return (
             <Link
               key={index}
               href={`/work/${title.replace(/\s+/g, '-')}`}
               prefetch={true}
-              className={placement.className}
+              className={`${placement.className}`}
               onClick={(e) => handleTransition(e, title)}
               style={placement.style}
-            >
-              {/* <Image
-                src={featuredImage.src}
-                alt={featuredImage.alt}
-                width={1000}
-                height={1000}
-                className="w-full h-full object-cover"
-              /> */}
-              <Canvas>
-                <Plane imageUrl={featuredImage.src} />
-              </Canvas>
-            </Link>
+              ref={(el) => {
+                linkArray.current[index] = el!;
+              }}
+            ></Link>
           );
         })}
       </div>

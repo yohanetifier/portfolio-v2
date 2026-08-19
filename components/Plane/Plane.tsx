@@ -1,5 +1,5 @@
 'use client';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import React, { useRef } from 'react';
 import * as THREE from 'three';
 
@@ -64,7 +64,7 @@ void main() {
   pos = position;
   vUv = uv;
   vWave = snoise(pos + uTime);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime), 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime) * 0.4, 1.0);
 }
 `;
 
@@ -79,17 +79,20 @@ void main() {
 `;
 
 interface Props {
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 const Plane = ({ imageUrl }: Props) => {
-  const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl)}`;
+  const proxiedUrl = imageUrl
+    ? `/api/image?url=${encodeURIComponent(imageUrl)}`
+    : './images/fifth-image.png';
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
   const uniforms = {
     uTime: { value: 1.0 },
     uTexture: { value: texture },
   };
+  const { viewport } = useThree();
 
   useFrame((_, delta) => {
     materialRef.current!.uniforms.uTime.value += delta;
@@ -97,7 +100,7 @@ const Plane = ({ imageUrl }: Props) => {
 
   return (
     <mesh>
-      <planeGeometry args={[5, 5, 16, 16]} />
+      <planeGeometry args={[1, 1, 16, 16]} />
       <shaderMaterial
         // wireframe={true}
         fragmentShader={fragmentShader}

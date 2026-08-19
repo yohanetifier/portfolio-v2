@@ -17,7 +17,7 @@ export const applyGsapTransition = (
     rotate: -10,
     duration: 1,
     onComplete: () => {
-      router.push(`/work/${title}`);
+      // router.push(`/work/${title}`);
     },
   }).to(
     childAtTheTop,

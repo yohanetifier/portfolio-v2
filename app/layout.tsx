@@ -3,6 +3,8 @@ import './globals.css';
 import Header from '@/components/Header/Header';
 import Menu from '@/components/Menu/Menu';
 import { Providers } from './providers';
+import { Canvas } from '@react-three/fiber';
+import FullscreenCanvas from '@/components/FullscreenCanvas/FullscreenCanvas';
 
 export const metadata: Metadata = {
   title: {
@@ -81,19 +83,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`antialiased overflow-hidden`}
-        style={{ backgroundColor: '#ffffff' }}
-      >
+      <body className={`antialiased`} style={{ backgroundColor: '#ffffff' }}>
         <div
           className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[1] scale-0 absolute top-0 bg-white`}
           id={'grid'}
         ></div>
-        <div
+        {/* <div
           className="fixed top-0 w-screen h-screen z-[2]"
           id="fullscreen"
-        ></div>
+        ></div> */}
         <Providers>
+          <FullscreenCanvas />
           <Menu />
           <Header />
           {children}
