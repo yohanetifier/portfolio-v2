@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation';
 import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { getPositions } from './utils/getPositions';
 import { applyGsapTransition } from './utils/applyGsapTransition';
+import { Canvas } from '@react-three/fiber';
+import Plane from '../Plane/Plane';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -107,13 +109,16 @@ export default function WorkList({
               onClick={(e) => handleTransition(e, title)}
               style={placement.style}
             >
-              <Image
+              {/* <Image
                 src={featuredImage.src}
                 alt={featuredImage.alt}
                 width={1000}
                 height={1000}
                 className="w-full h-full object-cover"
-              />
+              /> */}
+              <Canvas>
+                <Plane imageUrl={featuredImage.src} />
+              </Canvas>
             </Link>
           );
         })}

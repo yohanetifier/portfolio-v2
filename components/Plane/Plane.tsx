@@ -1,11 +1,12 @@
 'use client';
-import gsap from 'gsap';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import React, { useRef } from 'react';
-import { ShaderMaterial } from 'three';
+import * as THREE from 'three';
 
 const vertexShader = `
 uniform float uTime;
+varying vec2 vUv;
+varying float vWave;
 vec3 permute(vec3 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
 vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
 vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
@@ -57,25 +58,39 @@ float snoise(vec3 v) {
 }
 
 
+
 void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, position.y, snoise(position + uTime), 1.0);
+  vec3 pos;
+  pos = position;
+  vUv = uv;
+  vWave = snoise(pos + uTime);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime), 1.0);
 }
 `;
 
 const fragmentShader = `
 uniform float uTime;
+uniform sampler2D uTexture;
+varying vec2 vUv;
+varying float vWave;
 void main() {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+  gl_FragColor = texture2D(uTexture, vUv);
 }
-
 `;
 
-const uniforms = {
-  uTime: { value: 1.0 },
-};
+interface Props {
+  imageUrl: string;
+}
 
-const Plane = () => {
-  const materialRef = useRef<ShaderMaterial>();
+const Plane = ({ imageUrl }: Props) => {
+  const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl)}`;
+  const texture = useLoader(THREE.TextureLoader, proxiedUrl);
+  const materialRef = useRef<THREE.ShaderMaterial>();
+  const uniforms = {
+    uTime: { value: 1.0 },
+    uTexture: { value: texture },
+  };
+
   useFrame((_, delta) => {
     materialRef.current!.uniforms.uTime.value += delta;
   });
@@ -84,7 +99,7 @@ const Plane = () => {
     <mesh>
       <planeGeometry args={[5, 5, 16, 16]} />
       <shaderMaterial
-        wireframe={true}
+        // wireframe={true}
         fragmentShader={fragmentShader}
         vertexShader={vertexShader}
         uniforms={uniforms}
