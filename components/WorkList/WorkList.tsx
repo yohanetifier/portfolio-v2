@@ -4,14 +4,14 @@ import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { getPositions } from './utils/getPositions';
 import { applyGsapTransition } from './utils/applyGsapTransition';
 import { Canvas } from '@react-three/fiber';
 import Plane from '../Plane/Plane';
-import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -20,7 +20,8 @@ export default function WorkList({
 }: {
   projects: Pick<Project, 'featuredImage' | 'title'>[];
 }) {
-  const { projectsDetails, setProjects } = useThreeJsContext();
+  const { projectsDetails, setProjects, selectedIndex, setSelectedIndex } =
+    useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -30,18 +31,21 @@ export default function WorkList({
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
+    index: number,
   ) => {
-    const formatedTitle = title.replace(/\s+/g, '-');
-    const fullscreenWrapper = document.getElementById('fullscreen');
-    fullscreenWrapper!.style.opacity = '1';
     e.preventDefault();
-    const target = e.currentTarget;
-    console.log('e.current.target', target);
+    setSelectedIndex(index);
+
+    // const formatedTitle = title.replace(/\s+/g, '-');
+    // const fullscreenWrapper = document.getElementById('fullscreen');
+    // fullscreenWrapper!.style.opacity = '1';
+    // e.preventDefault();
+    // const target = e.currentTarget;
     // const state = Flip.getState(e.currentTarget);
     // const otherChildren = Array.from(gridRef.current!.children).filter(
     //   (child) => child !== e.currentTarget,
     // );
-    // const { childAtTheBottom, childAtTheTop } = getPositions(
+    // const { childAtTheTop, childAtTheTop } = getPositions(
     //   otherChildren as HTMLElement[],
     //   target,
     // );
@@ -59,38 +63,38 @@ export default function WorkList({
     // );
   };
 
-  useEffect(() => {
-    const rects = linkArray.current.map((el, i) => {
-      return {
-        rects: el.getBoundingClientRect(),
-        imageUrl: projects[i].featuredImage.src,
-      };
-    });
+  const updateProjects = () => {
+    const rects = linkArray.current
+      .map((el, i) => {
+        return {
+          rects: el.getBoundingClientRect(),
+          imageUrl: projects[i].featuredImage.src,
+        };
+      })
+      .filter(Boolean);
     setProjects(rects);
+  };
+
+  useLayoutEffect(() => {
+    updateProjects();
+  }, []);
+
+  useEffect(() => {
     document.body.style.overflow = 'visible';
+
     const grid = document.getElementById('grid');
     setTimeout(() => {
       while (grid?.firstChild) {
-        grid?.removeChild(grid.firstChild);
+        grid.removeChild(grid.firstChild);
       }
     }, 300);
-    const handleScroll = () => {
-      const arrayOfImages = Array.from(gridRef.current!.children);
-      arrayOfImages.map((image) => {
-        gsap.to(image, {
-          scaleX: 0,
-          transformOrigin: 'center top',
-          scrollTrigger: {
-            trigger: image,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-        });
-      });
-    };
 
-    handleScroll();
+    window.addEventListener('scroll', updateProjects);
+    window.addEventListener('resize', updateProjects);
+    return () => {
+      window.removeEventListener('scroll', updateProjects);
+      window.removeEventListener('resize', updateProjects);
+    };
   }, []);
 
   return (
@@ -117,7 +121,7 @@ export default function WorkList({
               href={`/work/${title.replace(/\s+/g, '-')}`}
               prefetch={true}
               className={`${placement.className}`}
-              onClick={(e) => handleTransition(e, title)}
+              onClick={(e) => handleTransition(e, title, index)}
               style={placement.style}
               ref={(el) => {
                 linkArray.current[index] = el!;

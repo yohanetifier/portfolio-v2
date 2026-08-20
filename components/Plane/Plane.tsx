@@ -92,7 +92,6 @@ const Plane = ({ imageUrl }: Props) => {
     uTime: { value: 1.0 },
     uTexture: { value: texture },
   };
-  const { viewport } = useThree();
 
   useFrame((_, delta) => {
     materialRef.current!.uniforms.uTime.value += delta;
