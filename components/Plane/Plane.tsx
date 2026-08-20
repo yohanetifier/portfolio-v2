@@ -1,12 +1,16 @@
 'use client';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import gsap from 'gsap';
+import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { useRouter } from 'next/navigation';
 
 const vertexShader = `
 uniform float uTime;
 varying vec2 vUv;
 varying float vWave;
+uniform float uAmplitude;
 vec3 permute(vec3 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
 vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
 vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
@@ -64,7 +68,7 @@ void main() {
   pos = position;
   vUv = uv;
   vWave = snoise(pos + uTime);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime) * 0.4, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime) * uAmplitude, 1.0);
 }
 `;
 
@@ -79,23 +83,41 @@ void main() {
 `;
 
 interface Props {
-  imageUrl?: string;
+  imageUrl: string;
+  animationIsOver: boolean;
 }
 
-const Plane = ({ imageUrl }: Props) => {
-  const proxiedUrl = imageUrl
-    ? `/api/image?url=${encodeURIComponent(imageUrl)}`
-    : './images/fifth-image.png';
+const Plane = ({ imageUrl, animationIsOver }: Props) => {
+  const { size } = useThree();
+  const router = useRouter();
+  const { selectedSlug } = useThreeJsContext();
+  const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
   const uniforms = {
     uTime: { value: 1.0 },
     uTexture: { value: texture },
+    uAmplitude: { value: 0.4 },
   };
 
   useFrame((_, delta) => {
     materialRef.current!.uniforms.uTime.value += delta;
   });
+
+  useEffect(() => {
+    if (!animationIsOver) return;
+    const amplitude = materialRef.current?.uniforms.uAmplitude;
+    if (!amplitude) return;
+
+    gsap.to(amplitude, {
+      value: 0,
+      duration: 1,
+      ease: 'power2.out',
+      onComplete: () => {
+        router.push(`/work/${selectedSlug}`);
+      },
+    });
+  }, [animationIsOver]);
 
   return (
     <mesh>

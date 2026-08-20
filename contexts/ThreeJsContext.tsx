@@ -10,6 +10,10 @@ interface ThreeJsContextType {
   setProjects: (projectsDetails: ProjectItem[]) => void;
   selectedIndex: number | null;
   setSelectedIndex: (selectedIndex: number | null) => void;
+  selectedSlug: string;
+  setSelectedSlug: (slug: string) => void;
+  projectImageSelected: string;
+  setProjectImageSelected: (image: string) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
@@ -17,10 +21,21 @@ const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
 export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [projectsDetails, setProjects] = useState<ProjectItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedSlug, setSelectedSlug] = useState<string>('');
+  const [projectImageSelected, setProjectImageSelected] = useState<string>('');
 
   return (
     <ThreeJsContext.Provider
-      value={{ projectsDetails, setProjects, selectedIndex, setSelectedIndex }}
+      value={{
+        projectsDetails,
+        setProjects,
+        selectedIndex,
+        setSelectedIndex,
+        selectedSlug,
+        setSelectedSlug,
+        projectImageSelected,
+        setProjectImageSelected,
+      }}
     >
       {children}
     </ThreeJsContext.Provider>

@@ -5,6 +5,9 @@ import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
 import { useParams } from 'next/navigation';
 import { getFullSizeImage } from '@/utils/getFullSizeImage';
+import { Canvas } from '@react-three/fiber';
+import Plane from '../Plane/Plane';
+import HeroPlane from '../HeroPlane/HeroPlane';
 
 interface Props {
   data: ProjectType;
@@ -31,14 +34,15 @@ const Project = ({ data, mediaUrls }: Props) => {
   return (
     <div className="w-screen h-screen relative z-[3]">
       <div className="w-screen h-screen relative flex justify-center items-center p-4">
-        <Image
+        {/* <Image
           ref={featureImageRef}
           src={data!.featuredImage.src}
           alt={data.featuredImage.alt}
           width={1000}
           height={1000}
           className="w-full h-full absolute top-0 left-0 object-cover filter brightness-50"
-        />
+        /> */}
+
         <h1
           className="relative z-1 text-[5vw] text-white"
           ref={titleRef}

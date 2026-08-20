@@ -20,8 +20,12 @@ export default function WorkList({
 }: {
   projects: Pick<Project, 'featuredImage' | 'title'>[];
 }) {
-  const { projectsDetails, setProjects, selectedIndex, setSelectedIndex } =
-    useThreeJsContext();
+  const {
+    setProjects,
+    setSelectedIndex,
+    setSelectedSlug,
+    setProjectImageSelected,
+  } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -32,11 +36,14 @@ export default function WorkList({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     title: string,
     index: number,
+    featuredImage: { src: string; alt: string },
   ) => {
     e.preventDefault();
+    const formatedTitle = title.replace(/\s+/g, '-');
     setSelectedIndex(index);
+    setSelectedSlug(formatedTitle);
+    setProjectImageSelected(featuredImage.src);
 
-    // const formatedTitle = title.replace(/\s+/g, '-');
     // const fullscreenWrapper = document.getElementById('fullscreen');
     // fullscreenWrapper!.style.opacity = '1';
     // e.preventDefault();
@@ -113,7 +120,7 @@ export default function WorkList({
           gridTemplateRows: `repeat(${metrics.rows}, minmax(0, 1fr))`,
         }}
       >
-        {projects.map(({ title }, index) => {
+        {projects.map(({ title, featuredImage }, index) => {
           const placement = getGridPlacement(index);
           return (
             <Link
@@ -121,7 +128,7 @@ export default function WorkList({
               href={`/work/${title.replace(/\s+/g, '-')}`}
               prefetch={true}
               className={`${placement.className}`}
-              onClick={(e) => handleTransition(e, title, index)}
+              onClick={(e) => handleTransition(e, title, index, featuredImage)}
               style={placement.style}
               ref={(el) => {
                 linkArray.current[index] = el!;

@@ -1,12 +1,13 @@
 'use client';
 
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Plane from '../Plane/Plane';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { getPositions } from '../WorkList/utils/getPositions';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -15,17 +16,25 @@ type Props = {
 const Scene = ({ projectsDetails }: Props) => {
   const { viewport, size } = useThree();
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
-  const { selectedIndex, setSelectedIndex } = useThreeJsContext();
+  const { selectedIndex, setSelectedIndex, setSelectedSlug } =
+    useThreeJsContext();
+  const [animationIsOver, setIsAnimationIsOver] = useState(false);
+  const router = useRouter();
+
   useEffect(() => {
+    // const slug = selectedSlug;
     if (selectedIndex === null) return;
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setIsAnimationIsOver(true);
+        setSelectedIndex(null);
+      },
+    });
+
     const { childAtTheBottom, childAtTheTop } = getPositions(
       groupRefArray.current,
       groupRefArray.current[selectedIndex],
     );
-
-    console.log('childAtTheTop', childAtTheTop);
-    console.log('childAtTheBottom', childAtTheBottom[2].position);
 
     tl.to(groupRefArray.current[selectedIndex]!.scale, {
       x: viewport.width,
@@ -40,8 +49,15 @@ const Scene = ({ projectsDetails }: Props) => {
       tl.to(element.position, { y: -viewport.height }, '<');
     });
     childAtTheTop.forEach((element) => {
-      tl.to(element.position, { y: viewport.height }, '<');
+      tl.to(
+        element.position,
+        {
+          y: viewport.height,
+        },
+        '<',
+      );
     });
+
     // return () => setSelectedIndex(null);
   }, [selectedIndex]);
 
@@ -61,7 +77,7 @@ const Scene = ({ projectsDetails }: Props) => {
           groupRefArray.current[i] = el;
         }}
       >
-        <Plane imageUrl={imageUrl} />
+        <Plane imageUrl={imageUrl} animationIsOver={animationIsOver} />
       </group>
     );
   });
