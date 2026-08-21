@@ -4,18 +4,13 @@ import { Canvas } from '@react-three/fiber';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import Scene from '../Scene/Scene';
 import { usePathname } from 'next/navigation';
-import Plane from '../Plane/Plane';
-import HeroPlane from '../HeroPlane/HeroPlane';
 
 const FullscreenCanvas = () => {
   const { projectsDetails } = useThreeJsContext();
   const pathname = usePathname();
-  const projectPath = pathname.split('/')[2];
 
   return (
     <Canvas
-      // gl={{ alpha: true }}
-      // onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
       style={{
         width: '100vw',
         height: '100vh',
@@ -28,10 +23,8 @@ const FullscreenCanvas = () => {
       }}
       id="fullscreen"
     >
-      {pathname === '/work' ? (
+      {pathname.startsWith('/work') ? (
         <Scene projectsDetails={projectsDetails} />
-      ) : projectPath ? (
-        <HeroPlane />
       ) : null}
     </Canvas>
   );

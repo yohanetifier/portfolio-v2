@@ -18,7 +18,7 @@ const Scene = ({ projectsDetails }: Props) => {
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
   const { selectedIndex, setSelectedIndex, setSelectedSlug } =
     useThreeJsContext();
-  const [animationIsOver, setIsAnimationIsOver] = useState(false);
+  const [settledIndex, setSettledIndex] = useState<number | null>();
   const router = useRouter();
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Scene = ({ projectsDetails }: Props) => {
     if (selectedIndex === null) return;
     const tl = gsap.timeline({
       onComplete: () => {
-        setIsAnimationIsOver(true);
+        setSettledIndex(selectedIndex!);
         setSelectedIndex(null);
       },
     });
@@ -77,7 +77,7 @@ const Scene = ({ projectsDetails }: Props) => {
           groupRefArray.current[i] = el;
         }}
       >
-        <Plane imageUrl={imageUrl} animationIsOver={animationIsOver} />
+        <Plane imageUrl={imageUrl} isSelected={settledIndex === i} />
       </group>
     );
   });

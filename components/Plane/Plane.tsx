@@ -84,28 +84,29 @@ void main() {
 
 interface Props {
   imageUrl: string;
-  animationIsOver: boolean;
+  isSelected: boolean;
+  fullscreen?: boolean;
 }
 
-const Plane = ({ imageUrl, animationIsOver }: Props) => {
-  const { size } = useThree();
+const Plane = ({ imageUrl, isSelected, fullscreen = false }: Props) => {
+  const { size, viewport } = useThree();
   const router = useRouter();
   const { selectedSlug } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
-  const uniforms = {
+  const uniforms = useRef({
     uTime: { value: 1.0 },
     uTexture: { value: texture },
     uAmplitude: { value: 0.4 },
-  };
+  });
 
   useFrame((_, delta) => {
     materialRef.current!.uniforms.uTime.value += delta;
   });
 
   useEffect(() => {
-    if (!animationIsOver) return;
+    if (!isSelected) return;
     const amplitude = materialRef.current?.uniforms.uAmplitude;
     if (!amplitude) return;
 
@@ -114,19 +115,20 @@ const Plane = ({ imageUrl, animationIsOver }: Props) => {
       duration: 1,
       ease: 'power2.out',
       onComplete: () => {
-        router.push(`/work/${selectedSlug}`);
+        if (!fullscreen) {
+          router.push(`/work/${selectedSlug}`);
+        }
       },
     });
-  }, [animationIsOver]);
+  }, [isSelected, fullscreen]);
 
   return (
-    <mesh>
+    <mesh scale={[1, 1, 1]}>
       <planeGeometry args={[1, 1, 16, 16]} />
       <shaderMaterial
-        // wireframe={true}
         fragmentShader={fragmentShader}
         vertexShader={vertexShader}
-        uniforms={uniforms}
+        uniforms={uniforms.current}
         ref={materialRef}
       />
     </mesh>

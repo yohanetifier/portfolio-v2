@@ -5,9 +5,7 @@ import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
 import { useParams } from 'next/navigation';
 import { getFullSizeImage } from '@/utils/getFullSizeImage';
-import { Canvas } from '@react-three/fiber';
-import Plane from '../Plane/Plane';
-import HeroPlane from '../HeroPlane/HeroPlane';
+import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 interface Props {
   data: ProjectType;
@@ -18,17 +16,19 @@ const Project = ({ data, mediaUrls }: Props) => {
   const titleRef = React.useRef<HTMLHeadingElement | null>(null);
   const featureImageRef = React.useRef<HTMLImageElement | null>(null);
   const { project } = useParams();
+  const { projectsDetails } = useThreeJsContext();
+  console.log('projectsDetails', projectsDetails);
   useLayoutEffect(() => {
     // document.body.style.overflow = 'visible';
-    document.body.style.height = 'auto';
-    const fullscreen = document.getElementById('fullscreen');
-    const grid = document.getElementById('grid');
-    const link = fullscreen?.firstChild;
-    setTimeout(() => {
-      link?.remove();
-      grid!.style.transform = 'scale(0)';
-      document.body.style.overflow = 'visible';
-    }, 1000);
+    // document.body.style.height = 'auto';
+    // const fullscreen = document.getElementById('fullscreen');
+    // const grid = document.getElementById('grid');
+    // const link = fullscreen?.firstChild;
+    // setTimeout(() => {
+    //   link?.remove();
+    //   grid!.style.transform = 'scale(0)';
+    //   document.body.style.overflow = 'visible';
+    // }, 1000);
   }, []);
 
   return (
