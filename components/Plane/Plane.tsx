@@ -86,16 +86,16 @@ void main() {
 interface Props {
   imageUrl: string;
   isSelected: boolean;
+  isFullscreen: boolean;
 }
 
-const Plane = ({ imageUrl, isSelected }: Props) => {
-  const { size, viewport } = useThree();
+const Plane = ({ imageUrl, isSelected, isFullscreen }: Props) => {
   const router = useRouter();
-  const { selectedSlug, projectsDetails } = useThreeJsContext();
+  const { selectedSlug } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
-  const { isReturning, setIsReturning } = useHeaderContext();
+  const { isReturning } = useHeaderContext();
 
   const uniforms = useRef({
     uTime: { value: 1.0 },
@@ -136,7 +136,7 @@ const Plane = ({ imageUrl, isSelected }: Props) => {
   }, [isSelected, isReturning]);
 
   return (
-    <mesh scale={[1, 1, 1]}>
+    <mesh scale={[1, 1, 1]} position={[0.0, 0.0, 0.0]}>
       <planeGeometry args={[1, 1, 16, 16]} />
       <shaderMaterial
         fragmentShader={fragmentShader}

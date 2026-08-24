@@ -2,16 +2,12 @@
 import { Project } from '@/src/models/Project';
 import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
-import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGridMetrics, getGridPlacement } from './utils/classes';
-import { getPositions } from './utils/getPositions';
-import { applyGsapTransition } from './utils/applyGsapTransition';
-import { Canvas } from '@react-three/fiber';
-import Plane from '../Plane/Plane';
-import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { slugify } from '@/utils/slugify';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -23,6 +19,7 @@ export default function WorkList({
   const {
     setProjects,
     projectsDetails,
+    selectedIndex,
     setSelectedIndex,
     setSelectedSlug,
     setProjectImageSelected,
@@ -40,7 +37,7 @@ export default function WorkList({
     featuredImage: { src: string; alt: string },
   ) => {
     e.preventDefault();
-    const formatedTitle = title.replace(/\s+/g, '-');
+    const formatedTitle = slugify(title);
     setSelectedIndex(index);
     setSelectedSlug(formatedTitle);
     setProjectImageSelected(featuredImage.src);
@@ -128,7 +125,7 @@ export default function WorkList({
           return (
             <Link
               key={index}
-              href={`/work/${title.replace(/\s+/g, '-')}`}
+              href={`/work/${slugify(title)}`}
               prefetch={true}
               className={`${placement.className}`}
               onClick={(e) => handleTransition(e, title, index, featuredImage)}

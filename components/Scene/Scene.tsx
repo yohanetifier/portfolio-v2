@@ -9,6 +9,7 @@ import gsap from 'gsap';
 import { getPositions } from '../WorkList/utils/getPositions';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
+import { usePathname } from 'next/navigation';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -17,10 +18,11 @@ type Props = {
 const Scene = ({ projectsDetails }: Props) => {
   const { viewport, size } = useThree();
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
-  const { selectedIndex, setSelectedIndex, projectImageSelected } =
-    useThreeJsContext();
+  const { selectedIndex, setSelectedIndex } = useThreeJsContext();
   const [settledIndex, setSettledIndex] = useState<number | null>();
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
+  const workPath = usePathname().split('/')[2];
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     if (reset) {
@@ -34,10 +36,11 @@ const Scene = ({ projectsDetails }: Props) => {
     const tl = gsap.timeline({
       onComplete: () => {
         setSettledIndex(selectedIndex!);
-        // setSelectedIndex(null);
       },
     });
 
+    if (!groupRefArray.current) return;
+    if (!groupRefArray.current[selectedIndex]) return;
     const { childAtTheBottom, childAtTheTop } = getPositions(
       groupRefArray.current,
       groupRefArray.current[selectedIndex],
@@ -94,7 +97,6 @@ const Scene = ({ projectsDetails }: Props) => {
                 setSelectedIndex(null);
                 setSettledIndex(null);
                 setIsReturning(false);
-                // setSettledIndex(null);
               },
             },
             '<',
@@ -138,6 +140,12 @@ const Scene = ({ projectsDetails }: Props) => {
     // return () => setSelectedIndex(null);
   }, [selectedIndex, isReturning, reset]);
 
+  useEffect(() => {
+    if (selectedIndex) {
+      setIsFullscreen(true);
+    }
+  }, [isFullscreen]);
+
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
       const centerX = rects.left + rects.width / 2;
@@ -146,26 +154,38 @@ const Scene = ({ projectsDetails }: Props) => {
       const worldY = -(centerY / size.height - 0.5) * viewport.height;
       const worldW = (rects.width / size.width) * viewport.width;
       const worldH = (rects.height / size.height) * viewport.height;
+
       return (
         <group
+          visible={selectedIndex === null || selectedIndex === i}
           key={i}
-          position={[worldX, worldY, 0]}
+          // position={selectedIndex === i ? [0.0, 0.0, 0.0] : [worldX, worldY, 0]}
+          position={
+            selectedIndex === i && workPath
+              ? [0.0, 0.0, 0]
+              : [worldX, worldY, 0]
+          }
           scale={[worldW, worldH, 1]}
           ref={(el) => {
             groupRefArray.current[i] = el;
           }}
         >
-          <Plane imageUrl={imageUrl} isSelected={settledIndex === i} />
+          <Plane
+            imageUrl={imageUrl}
+            isSelected={settledIndex === i}
+            isFullscreen={isFullscreen}
+          />
         </group>
       );
     });
-  } else {
-    return (
-      <group position={[0, 0, 0]} scale={[viewport.width, viewport.height, 1]}>
-        <Plane imageUrl={projectImageSelected} isSelected={true} />
-      </group>
-    );
   }
+  // else {
+  //   return (
+  //     <group position={[0, 0, 0]} scale={[viewport.width, viewport.height, 1]}>
+  //       <Plane imageUrl={projectImageSelected} isSelected={true} />
+  //     </group>
+  //   );
+  // }
 };
 
 export default Scene;

@@ -1,5 +1,5 @@
 'use client';
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
@@ -11,6 +11,7 @@ import { getGridMetrics, getGridPlacement } from '../WorkList/utils/classes';
 import { Project as ProjectModel } from '@/src/models/Project';
 import Link from 'next/link';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
+import { slugify } from '@/utils/slugify';
 
 interface Props {
   data: ProjectType;
@@ -25,8 +26,12 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   const metrics = getGridMetrics(projects.length);
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const { project } = useParams();
-  const { setProjectImageSelected, setProjects, setSelectedIndex } =
-    useThreeJsContext();
+  const {
+    setProjectImageSelected,
+    setProjects,
+    setSelectedIndex,
+    selectedIndex,
+  } = useThreeJsContext();
   const workPath = usePathname().split('/')[2];
 
   const updateProjects = () => {
@@ -44,7 +49,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     setProjects(rects);
     setSelectedIndex(
       projects.findIndex((project) => {
-        return project.title === workPath;
+        return slugify(project.title) === workPath;
       }),
     );
     const localStorageValue = JSON.stringify({ rects });
