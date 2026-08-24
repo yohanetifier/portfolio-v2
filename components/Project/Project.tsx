@@ -1,48 +1,100 @@
 'use client';
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { getFullSizeImage } from '@/utils/getFullSizeImage';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { useHeaderContext } from '@/contexts/HeaderContext';
+import { getGridMetrics, getGridPlacement } from '../WorkList/utils/classes';
+import { Project as ProjectModel } from '@/src/models/Project';
+import Link from 'next/link';
+import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 
 interface Props {
   data: ProjectType;
   mediaUrls: string[];
+  projects: Pick<ProjectModel, 'featuredImage' | 'title'>[];
 }
 
-const Project = ({ data, mediaUrls }: Props) => {
-  const titleRef = React.useRef<HTMLHeadingElement | null>(null);
-  const featureImageRef = React.useRef<HTMLImageElement | null>(null);
+const Project = ({ data, mediaUrls, projects }: Props) => {
+  const titleRef = useRef<HTMLHeadingElement | null>(null);
+  const mainWrapperRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const metrics = getGridMetrics(projects.length);
+  const linkArray = useRef<HTMLAnchorElement[]>([]);
   const { project } = useParams();
-  const { projectsDetails } = useThreeJsContext();
-  console.log('projectsDetails', projectsDetails);
+  const { setProjectImageSelected, setProjects, setSelectedIndex } =
+    useThreeJsContext();
+  const workPath = usePathname().split('/')[2];
+
+  const updateProjects = () => {
+    const checkIfProjectsAlreadySet =
+      getProjectsFromLocalStorage('projectsDetails');
+    if (checkIfProjectsAlreadySet) return;
+    const rects = linkArray.current
+      .map((el, i) => {
+        return {
+          rects: el.getBoundingClientRect(),
+          imageUrl: projects[i].featuredImage.src,
+        };
+      })
+      .filter(Boolean);
+    setProjects(rects);
+    setSelectedIndex(
+      projects.findIndex((project) => {
+        return project.title === workPath;
+      }),
+    );
+    const localStorageValue = JSON.stringify({ rects });
+    localStorage.setItem('projectDetails', localStorageValue);
+  };
+
   useLayoutEffect(() => {
-    // document.body.style.overflow = 'visible';
-    // document.body.style.height = 'auto';
-    // const fullscreen = document.getElementById('fullscreen');
-    // const grid = document.getElementById('grid');
-    // const link = fullscreen?.firstChild;
-    // setTimeout(() => {
-    //   link?.remove();
-    //   grid!.style.transform = 'scale(0)';
-    //   document.body.style.overflow = 'visible';
-    // }, 1000);
+    updateProjects();
+    setProjectImageSelected(data.featuredImage.src);
   }, []);
 
   return (
     <div className="w-screen h-screen relative z-[3]">
+      <div
+        className="flex justify-center items-center relative w-[100vw] transition-height duration-1000 z-[1] pointer-events-none"
+        ref={mainWrapperRef}
+        style={{
+          height: metrics.height,
+          opacity: 0,
+        }}
+      >
+        <div
+          className={`w-full grid grid-cols-10 gap-[20px] z-[2]`}
+          ref={gridRef}
+          style={{
+            height: metrics.height,
+            gridTemplateRows: `repeat(${metrics.rows}, minmax(0, 1fr))`,
+          }}
+        >
+          {projects.map(({ title }, index) => {
+            const placement = getGridPlacement(index);
+            return (
+              <Link
+                key={index}
+                href={`/work/${title.replace(/\s+/g, '-')}`}
+                prefetch={true}
+                className={`${placement.className} `}
+                // onClick={(e) =>
+                //   handleTransition(e, title, index, featuredImage)
+                // }
+                style={placement.style}
+                ref={(el) => {
+                  linkArray.current[index] = el!;
+                }}
+              ></Link>
+            );
+          })}
+        </div>
+      </div>
       <div className="w-screen h-screen relative flex justify-center items-center p-4">
-        {/* <Image
-          ref={featureImageRef}
-          src={data!.featuredImage.src}
-          alt={data.featuredImage.alt}
-          width={1000}
-          height={1000}
-          className="w-full h-full absolute top-0 left-0 object-cover filter brightness-50"
-        /> */}
-
         <h1
           className="relative z-1 text-[5vw] text-white"
           ref={titleRef}

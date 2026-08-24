@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ThemeContext } from '@/contexts/MenuProvider';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import Burger from '../Burger/Burger';
+import { getProjectPath } from '@/utils/getProjectPath';
 
 const Header = () => {
   const workRef = useRef<HTMLAnchorElement | null>(null);
@@ -17,10 +18,11 @@ const Header = () => {
   const pathname = usePathname();
   const { project } = useParams();
   const { isOpen, setIsOpen } = useContext(ThemeContext);
-  const { isHeaderVisible } = useHeaderContext();
+  const { isHeaderVisible, setIsReturning, setReset } = useHeaderContext();
   const isIntro = !pathname || pathname === '/';
 
   const handleClick = () => {
+    setIsReturning(true);
     if (isOpen) {
       setIsOpen(false);
     } else {
@@ -28,6 +30,24 @@ const Header = () => {
         router.back();
       }
     }
+  };
+
+  const handleWorkPath = () => {
+    const projectPath = getProjectPath(pathname);
+    if (projectPath) {
+      setIsReturning(true);
+    } else {
+      setReset(true);
+    }
+  };
+
+  const handleNav = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    path: string,
+  ) => {
+    e.preventDefault();
+    router.push(path);
+    setReset(true);
   };
 
   return (
@@ -39,7 +59,7 @@ const Header = () => {
           {pathname && (
             <FaArrowLeft
               onClick={handleClick}
-              className=" absolute bottom-0 w-[30px] h-[30px] cursor-pointer"
+              className="absolute bottom-0 w-[30px] h-[30px] cursor-pointer"
             />
           )}
           <div className="col-start-1 col-end-3 flex justify-between ">
@@ -48,6 +68,7 @@ const Header = () => {
               href={'/'}
               className="text-[16px]"
               // onMouseEnter={() => animateText(personalRef.current!)}
+              onClick={(e) => handleNav(e, '/')}
             >
               Yeti
             </Link>
@@ -64,6 +85,7 @@ const Header = () => {
             className="col-start-3 col-end-5 row-start-1 justify-self-end relative right-[20px] cursor-pointer md:right-[-30px] hidden md:block"
             // onMouseEnter={() => animateText(workRef.current!)}
             href={'/work'}
+            onClick={handleWorkPath}
           >
             Works
           </Link>
@@ -79,6 +101,7 @@ const Header = () => {
             ref={contactRef}
             // onPointerEnter={() => animateText(contactRef.current!)}
             href={'/contact'}
+            onClick={(e) => handleNav(e, '/contact')}
           >
             Contact
           </Link>

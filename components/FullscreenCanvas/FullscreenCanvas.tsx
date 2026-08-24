@@ -19,7 +19,6 @@ const FullscreenCanvas = () => {
         left: '0px',
         zIndex: 1,
         pointerEvents: 'none',
-        border: '10px solid red',
       }}
       id="fullscreen"
     >

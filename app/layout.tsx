@@ -3,7 +3,6 @@ import './globals.css';
 import Header from '@/components/Header/Header';
 import Menu from '@/components/Menu/Menu';
 import { Providers } from './providers';
-import { Canvas } from '@react-three/fiber';
 import FullscreenCanvas from '@/components/FullscreenCanvas/FullscreenCanvas';
 
 export const metadata: Metadata = {

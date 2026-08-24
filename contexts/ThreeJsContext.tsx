@@ -14,12 +14,17 @@ interface ThreeJsContextType {
   setSelectedSlug: (slug: string) => void;
   projectImageSelected: string;
   setProjectImageSelected: (image: string) => void;
+  fetchFromWorkProjectPage: ProjectItem[];
+  setFetchFromWorkProjectPage: (arg: ProjectItem[]) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
 
 export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [projectsDetails, setProjects] = useState<ProjectItem[]>([]);
+  const [fetchFromWorkProjectPage, setFetchFromWorkProjectPage] = useState<
+    ProjectItem[]
+  >([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string>('');
   const [projectImageSelected, setProjectImageSelected] = useState<string>('');
@@ -35,6 +40,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setSelectedSlug,
         projectImageSelected,
         setProjectImageSelected,
+        fetchFromWorkProjectPage,
+        setFetchFromWorkProjectPage,
       }}
     >
       {children}

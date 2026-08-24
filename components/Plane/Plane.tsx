@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { useRouter } from 'next/navigation';
+import { useHeaderContext } from '@/contexts/HeaderContext';
 
 const vertexShader = `
 uniform float uTime;
@@ -85,16 +86,17 @@ void main() {
 interface Props {
   imageUrl: string;
   isSelected: boolean;
-  fullscreen?: boolean;
 }
 
-const Plane = ({ imageUrl, isSelected, fullscreen = false }: Props) => {
+const Plane = ({ imageUrl, isSelected }: Props) => {
   const { size, viewport } = useThree();
   const router = useRouter();
-  const { selectedSlug } = useThreeJsContext();
+  const { selectedSlug, projectsDetails } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
+  const { isReturning, setIsReturning } = useHeaderContext();
+
   const uniforms = useRef({
     uTime: { value: 1.0 },
     uTexture: { value: texture },
@@ -106,21 +108,32 @@ const Plane = ({ imageUrl, isSelected, fullscreen = false }: Props) => {
   });
 
   useEffect(() => {
-    if (!isSelected) return;
+    // if (!isSelected) return;
     const amplitude = materialRef.current?.uniforms.uAmplitude;
-    if (!amplitude) return;
-
-    gsap.to(amplitude, {
-      value: 0,
-      duration: 1,
-      ease: 'power2.out',
-      onComplete: () => {
-        if (!fullscreen) {
-          router.push(`/work/${selectedSlug}`);
-        }
-      },
-    });
-  }, [isSelected, fullscreen]);
+    if (isSelected) {
+      if (!isReturning) {
+        if (!amplitude) return;
+        gsap.to(amplitude, {
+          value: 0,
+          duration: 1,
+          ease: 'power2.out',
+          onComplete: () => {
+            if (!selectedSlug) return;
+            router.push(`/work/${selectedSlug}`);
+          },
+        });
+      } else {
+        if (!amplitude) return;
+        gsap.to(amplitude, {
+          value: 0.4,
+          duration: 1,
+          ease: 'power2.out',
+        });
+      }
+    } else {
+      return;
+    }
+  }, [isSelected, isReturning]);
 
   return (
     <mesh scale={[1, 1, 1]}>

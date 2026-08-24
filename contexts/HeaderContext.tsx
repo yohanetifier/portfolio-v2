@@ -12,6 +12,10 @@ import { usePathname } from 'next/navigation';
 interface HeaderContextType {
   isHeaderVisible: boolean;
   setHeaderVisible: (visible: boolean) => void;
+  isReturning: boolean;
+  setIsReturning: (arg: boolean) => void;
+  reset: boolean;
+  setReset: (arg: boolean) => void;
 }
 
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
@@ -19,6 +23,8 @@ const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 export function HeaderProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isHeaderVisible, setHeaderVisible] = useState(true);
+  const [isReturning, setIsReturning] = useState(false);
+  const [reset, setReset] = useState(false);
 
   // On prod, pathname can be null on first paint — keep header hidden on intro.
   useEffect(() => {
@@ -28,7 +34,16 @@ export function HeaderProvider({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   return (
-    <HeaderContext.Provider value={{ isHeaderVisible, setHeaderVisible }}>
+    <HeaderContext.Provider
+      value={{
+        isHeaderVisible,
+        setHeaderVisible,
+        isReturning,
+        setIsReturning,
+        reset,
+        setReset,
+      }}
+    >
       {children}
     </HeaderContext.Provider>
   );
