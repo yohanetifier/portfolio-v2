@@ -58,7 +58,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     const itemCoords = rects[itemIndex];
     if (!scrollY) {
       const { rects } = itemCoords;
-      const isInFirstScreen = rects.top + rects.width < window.innerHeight;
+      const isInFirstScreen = rects.top + rects.height < window.innerHeight;
       setScrollY(isInFirstScreen ? 0 : rects.top);
 
       const updatedProjectCoord: DOMRect = {
