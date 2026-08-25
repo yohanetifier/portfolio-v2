@@ -18,16 +18,16 @@ export default function WorkList({
 }) {
   const {
     setProjects,
-    projectsDetails,
-    selectedIndex,
     setSelectedIndex,
     setSelectedSlug,
     setProjectImageSelected,
+    setProjectSelectedCoords,
+    setScrollY,
+    scrollY,
   } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const metrics = getGridMetrics(projects.length);
 
   const handleTransition = (
@@ -41,7 +41,8 @@ export default function WorkList({
     setSelectedIndex(index);
     setSelectedSlug(formatedTitle);
     setProjectImageSelected(featuredImage.src);
-
+    setProjectSelectedCoords(e.currentTarget.getBoundingClientRect());
+    setScrollY(window.scrollY);
     // const fullscreenWrapper = document.getElementById('fullscreen');
     // fullscreenWrapper!.style.opacity = '1';
     // e.preventDefault();
@@ -102,6 +103,10 @@ export default function WorkList({
       window.removeEventListener('scroll', updateProjects);
       window.removeEventListener('resize', updateProjects);
     };
+  }, []);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, scrollY!);
   }, []);
 
   return (

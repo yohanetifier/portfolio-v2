@@ -6,7 +6,6 @@ import { animateText } from '@/common/utils/animateText';
 import { useParams, usePathname } from 'next/navigation';
 import { getFullSizeImage } from '@/utils/getFullSizeImage';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
-import { useHeaderContext } from '@/contexts/HeaderContext';
 import { getGridMetrics, getGridPlacement } from '../WorkList/utils/classes';
 import { Project as ProjectModel } from '@/src/models/Project';
 import Link from 'next/link';
@@ -26,12 +25,8 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   const metrics = getGridMetrics(projects.length);
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const { project } = useParams();
-  const {
-    setProjectImageSelected,
-    setProjects,
-    setSelectedIndex,
-    selectedIndex,
-  } = useThreeJsContext();
+  const { setProjectImageSelected, setProjects, setSelectedIndex } =
+    useThreeJsContext();
   const workPath = usePathname().split('/')[2];
 
   const updateProjects = () => {
@@ -61,10 +56,28 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     setProjectImageSelected(data.featuredImage.src);
   }, []);
 
+  // useEffect(() => {
+  //   document.body.style.overflow = 'visible';
+
+  //   const grid = document.getElementById('grid');
+  //   setTimeout(() => {
+  //     while (grid?.firstChild) {
+  //       grid.removeChild(grid.firstChild);
+  //     }
+  //   }, 300);
+
+  //   window.addEventListener('scroll', updateProjects);
+  //   window.addEventListener('resize', updateProjects);
+  //   return () => {
+  //     window.removeEventListener('scroll', updateProjects);
+  //     window.removeEventListener('resize', updateProjects);
+  //   };
+  // }, []);
+
   return (
     <div className="w-screen h-screen relative z-[3]">
       <div
-        className="flex justify-center items-center relative w-[100vw] transition-height duration-1000 z-[1] pointer-events-none"
+        className="flex justify-center items-center absolute w-[100vw] transition-height duration-1000 z-[1] pointer-events-none"
         ref={mainWrapperRef}
         style={{
           height: metrics.height,

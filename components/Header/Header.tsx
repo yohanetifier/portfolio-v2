@@ -7,6 +7,7 @@ import { ThemeContext } from '@/contexts/MenuProvider';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import Burger from '../Burger/Burger';
 import { getProjectPath } from '@/utils/getProjectPath';
+import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 const Header = () => {
   const workRef = useRef<HTMLAnchorElement | null>(null);
@@ -20,6 +21,7 @@ const Header = () => {
   const { isOpen, setIsOpen } = useContext(ThemeContext);
   const { isHeaderVisible, setIsReturning, setReset } = useHeaderContext();
   const isIntro = !pathname || pathname === '/';
+  const { projectsDetails, selectedIndex } = useThreeJsContext();
 
   const handleClick = () => {
     setIsReturning(true);
@@ -32,10 +34,16 @@ const Header = () => {
     }
   };
 
-  const handleWorkPath = () => {
+  const handleWorkPath = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    href: string,
+  ) => {
+    // e.preventDefault();
     const projectPath = getProjectPath(pathname);
     if (projectPath) {
+      if (selectedIndex === null) return;
       setIsReturning(true);
+      // router.push(href, { scroll: false });
     } else {
       setReset(true);
     }
@@ -85,7 +93,7 @@ const Header = () => {
             className="col-start-3 col-end-5 row-start-1 justify-self-end relative right-[20px] cursor-pointer md:right-[-30px] hidden md:block"
             // onMouseEnter={() => animateText(workRef.current!)}
             href={'/work'}
-            onClick={handleWorkPath}
+            onClick={(e) => handleWorkPath(e, `/work`)}
           >
             Works
           </Link>

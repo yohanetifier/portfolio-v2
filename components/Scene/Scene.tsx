@@ -10,6 +10,7 @@ import { getPositions } from '../WorkList/utils/getPositions';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { usePathname } from 'next/navigation';
+import { getProjectPath } from '@/utils/getProjectPath';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -18,11 +19,11 @@ type Props = {
 const Scene = ({ projectsDetails }: Props) => {
   const { viewport, size } = useThree();
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
-  const { selectedIndex, setSelectedIndex } = useThreeJsContext();
+  const { selectedIndex, setSelectedIndex, projectSelectedCoords, scrollY } =
+    useThreeJsContext();
   const [settledIndex, setSettledIndex] = useState<number | null>();
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
-  const workPath = usePathname().split('/')[2];
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const workPath = getProjectPath(usePathname());
 
   useEffect(() => {
     if (reset) {
@@ -31,7 +32,6 @@ const Scene = ({ projectsDetails }: Props) => {
       setIsReturning(false);
       setReset(false);
     }
-    console.log('selectedIndex', selectedIndex);
     if (selectedIndex === null) return;
     const tl = gsap.timeline({
       onComplete: () => {
@@ -69,19 +69,22 @@ const Scene = ({ projectsDetails }: Props) => {
         );
       });
     } else {
+      if (scrollY === null) return;
+      if (!projectSelectedCoords) return;
+      // window.scrollTo({ top: scrollY });
+
       const projectCoords = getProjectsFromLocalStorage('projectDetails');
       if (projectCoords.rects.length > 0) {
-        const projectSelected = projectCoords.rects[selectedIndex];
         const centerX =
-          projectSelected.rects.left + projectSelected.rects.width / 2;
+          projectSelectedCoords.left + projectSelectedCoords.width / 2;
         const centerY =
-          projectSelected.rects.top + projectSelected.rects.height / 2;
+          projectSelectedCoords.top + projectSelectedCoords.height / 2;
         const worldX = (centerX / size.width - 0.5) * viewport.width;
         const worldY = -(centerY / size.height - 0.5) * viewport.height;
         const worldW =
-          (projectSelected.rects.width / size.width) * viewport.width;
+          (projectSelectedCoords.width / size.width) * viewport.width;
         const worldH =
-          (projectSelected.rects.height / size.height) * viewport.height;
+          (projectSelectedCoords.height / size.height) * viewport.height;
         const reverseTl = gsap.timeline();
         reverseTl
           .to(groupRefArray.current[selectedIndex]!.position, {
@@ -140,11 +143,9 @@ const Scene = ({ projectsDetails }: Props) => {
     // return () => setSelectedIndex(null);
   }, [selectedIndex, isReturning, reset]);
 
-  useEffect(() => {
-    if (selectedIndex) {
-      setIsFullscreen(true);
-    }
-  }, [isFullscreen]);
+  const handleClick = () => {
+    alert('grijgreioj');
+  };
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
@@ -169,12 +170,9 @@ const Scene = ({ projectsDetails }: Props) => {
           ref={(el) => {
             groupRefArray.current[i] = el;
           }}
+          onClick={handleClick}
         >
-          <Plane
-            imageUrl={imageUrl}
-            isSelected={settledIndex === i}
-            isFullscreen={isFullscreen}
-          />
+          <Plane imageUrl={imageUrl} isSelected={settledIndex === i} />
         </group>
       );
     });

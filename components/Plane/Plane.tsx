@@ -86,10 +86,9 @@ void main() {
 interface Props {
   imageUrl: string;
   isSelected: boolean;
-  isFullscreen: boolean;
 }
 
-const Plane = ({ imageUrl, isSelected, isFullscreen }: Props) => {
+const Plane = ({ imageUrl, isSelected }: Props) => {
   const router = useRouter();
   const { selectedSlug } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
