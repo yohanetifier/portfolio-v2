@@ -69,12 +69,8 @@ const Scene = ({ projectsDetails }: Props) => {
         );
       });
     } else {
-      if (scrollY === null) return;
-      if (!projectSelectedCoords) return;
-      // window.scrollTo({ top: scrollY });
-
-      const projectCoords = getProjectsFromLocalStorage('projectDetails');
-      if (projectCoords.rects.length > 0) {
+      window.scrollTo(0, scrollY!);
+      if (projectSelectedCoords) {
         const centerX =
           projectSelectedCoords.left + projectSelectedCoords.width / 2;
         const centerY =
@@ -104,8 +100,42 @@ const Scene = ({ projectsDetails }: Props) => {
             },
             '<',
           );
+        childAtTheBottom.forEach((element) => {
+          tl.to(element.position, { y: -viewport.height }, '<');
+        });
       } else {
-        null;
+        window.scrollTo(0, scrollY!);
+        const projectSelected = projectsDetails[selectedIndex];
+        const centerX =
+          projectSelected.rects.left + projectSelected.rects.width / 2;
+        const centerY =
+          projectSelected.rects.top + projectSelected.rects.height / 2;
+        const worldX = (centerX / size.width - 0.5) * viewport.width;
+        const worldY = -(centerY / size.height - 0.5) * viewport.height;
+        const worldW =
+          (projectSelected.rects.width / size.width) * viewport.width;
+        const worldH =
+          (projectSelected.rects.height / size.height) * viewport.height;
+        const reverseTl = gsap.timeline();
+        reverseTl
+          .to(groupRefArray.current[selectedIndex]!.position, {
+            x: worldX,
+            y: worldY,
+          })
+          .to(
+            groupRefArray.current[selectedIndex]!.scale,
+            {
+              x: worldW,
+              y: worldH,
+              onComplete: () => {
+                setSelectedIndex(null);
+                setSettledIndex(null);
+                setIsReturning(false);
+                // setSettledIndex(null);
+              },
+            },
+            '<',
+          );
         // const projectSelected = projectsDetails[selectedIndex];
         // const centerX =
         //   projectSelected.rects.left + projectSelected.rects.width / 2;

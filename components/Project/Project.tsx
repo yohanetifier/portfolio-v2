@@ -25,8 +25,17 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   const metrics = getGridMetrics(projects.length);
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const { project } = useParams();
-  const { setProjectImageSelected, setProjects, setSelectedIndex } =
-    useThreeJsContext();
+  const {
+    setProjectImageSelected,
+    setProjects,
+    setSelectedIndex,
+    setScrollY,
+    scrollY,
+    projectsDetails,
+    selectedIndex,
+    setProjectSelectedCoords,
+    projectSelectedCoords,
+  } = useThreeJsContext();
   const workPath = usePathname().split('/')[2];
 
   const updateProjects = () => {
@@ -42,11 +51,31 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
       })
       .filter(Boolean);
     setProjects(rects);
-    setSelectedIndex(
-      projects.findIndex((project) => {
-        return slugify(project.title) === workPath;
-      }),
-    );
+    const itemIndex = projects.findIndex((project) => {
+      return slugify(project.title) === workPath;
+    });
+    setSelectedIndex(itemIndex);
+    const itemCoords = rects[itemIndex];
+    if (!scrollY) {
+      const { rects } = itemCoords;
+      const isInFirstScreen = rects.top + rects.width < window.innerHeight;
+      setScrollY(isInFirstScreen ? 0 : rects.top);
+
+      const updatedProjectCoord: DOMRect = {
+        x: rects.x,
+        height: rects.height,
+        width: rects.width,
+        top: isInFirstScreen ? rects.top : 0,
+        y: 0,
+        bottom: rects.bottom,
+        left: rects.left,
+        right: rects.right,
+        toJSON: function () {
+          throw new Error('Function not implemented.');
+        },
+      };
+      setProjectSelectedCoords(updatedProjectCoord);
+    }
     const localStorageValue = JSON.stringify({ rects });
     localStorage.setItem('projectDetails', localStorageValue);
   };
@@ -55,24 +84,6 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     updateProjects();
     setProjectImageSelected(data.featuredImage.src);
   }, []);
-
-  // useEffect(() => {
-  //   document.body.style.overflow = 'visible';
-
-  //   const grid = document.getElementById('grid');
-  //   setTimeout(() => {
-  //     while (grid?.firstChild) {
-  //       grid.removeChild(grid.firstChild);
-  //     }
-  //   }, 300);
-
-  //   window.addEventListener('scroll', updateProjects);
-  //   window.addEventListener('resize', updateProjects);
-  //   return () => {
-  //     window.removeEventListener('scroll', updateProjects);
-  //     window.removeEventListener('resize', updateProjects);
-  //   };
-  // }, []);
 
   return (
     <div className="w-screen h-screen relative z-[3]">
