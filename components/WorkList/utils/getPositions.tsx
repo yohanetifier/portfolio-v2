@@ -1,5 +1,4 @@
-import { ProjectItem } from '@/contexts/ThreeJsContext';
-import { Group, Object3DEventMap } from 'three';
+import { Group } from 'three';
 
 export const getPositions = (allMeshs: Group[], target: Group | null) => {
   const filterMeshes = allMeshs.filter((el) => {

@@ -80,7 +80,7 @@ export default function WorkList({
       .filter(Boolean);
     setProjects(rects);
     const localStorageValue = JSON.stringify({ rects });
-    localStorage.setItem('projectDetails', localStorageValue);
+    localStorage.setItem('projectsDetails', localStorageValue);
   };
 
   useLayoutEffect(() => {

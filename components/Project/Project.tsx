@@ -11,6 +11,8 @@ import { Project as ProjectModel } from '@/src/models/Project';
 import Link from 'next/link';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { slugify } from '@/utils/slugify';
+import { getPositions } from '../WorkList/utils/getPositions';
+import { GiConsoleController } from 'react-icons/gi';
 
 interface Props {
   data: ProjectType;
@@ -31,17 +33,13 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     setSelectedIndex,
     setScrollY,
     scrollY,
-    projectsDetails,
-    selectedIndex,
     setProjectSelectedCoords,
-    projectSelectedCoords,
   } = useThreeJsContext();
   const workPath = usePathname().split('/')[2];
 
   const updateProjects = () => {
     const checkIfProjectsAlreadySet =
       getProjectsFromLocalStorage('projectsDetails');
-    if (checkIfProjectsAlreadySet) return;
     const rects = linkArray.current
       .map((el, i) => {
         return {
@@ -50,34 +48,40 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
         };
       })
       .filter(Boolean);
-    setProjects(rects);
+    if (checkIfProjectsAlreadySet === null) {
+      setProjects(rects);
+    } else {
+      setProjects(checkIfProjectsAlreadySet.rects);
+    }
     const itemIndex = projects.findIndex((project) => {
       return slugify(project.title) === workPath;
     });
     setSelectedIndex(itemIndex);
     const itemCoords = rects[itemIndex];
-    if (!scrollY) {
-      const { rects } = itemCoords;
-      const isInFirstScreen = rects.top + rects.height < window.innerHeight;
-      setScrollY(isInFirstScreen ? 0 : rects.top);
+    if (scrollY === null) {
+      const isInFirstScreen =
+        itemCoords.rects.top + itemCoords.rects.height < window.innerHeight;
+
+      setScrollY(isInFirstScreen ? 0 : itemCoords.rects.top);
 
       const updatedProjectCoord: DOMRect = {
-        x: rects.x,
-        height: rects.height,
-        width: rects.width,
-        top: isInFirstScreen ? rects.top : 0,
+        x: itemCoords.rects.x,
+        height: itemCoords.rects.height,
+        width: itemCoords.rects.width,
+        top: isInFirstScreen ? itemCoords.rects.top : 0,
         y: 0,
-        bottom: rects.bottom,
-        left: rects.left,
-        right: rects.right,
+        bottom: itemCoords.rects.bottom,
+        left: itemCoords.rects.left,
+        right: itemCoords.rects.right,
         toJSON: function () {
           throw new Error('Function not implemented.');
         },
       };
+
       setProjectSelectedCoords(updatedProjectCoord);
     }
     const localStorageValue = JSON.stringify({ rects });
-    localStorage.setItem('projectDetails', localStorageValue);
+    localStorage.setItem('projectsDetails', localStorageValue);
   };
 
   useLayoutEffect(() => {
