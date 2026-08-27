@@ -27,6 +27,7 @@ const Scene = ({ projectsDetails }: Props) => {
     // groupRefArray,
     fromHome,
     projectsCoords,
+    setFromHome,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
@@ -38,13 +39,17 @@ const Scene = ({ projectsDetails }: Props) => {
   const projectsAtTheTop = useRef<Record<string, number>>({});
   const projectsAtTheBottomRef = useRef<THREE.Group[]>([]);
   const projectsAtTheTopRef = useRef<THREE.Group[]>([]);
-  let initHomeCoords = useRef({});
   const router = useRouter();
 
   useEffect(() => {
     const fromWorkList = getFlag();
     if (fromHome) {
-      const homeTl = gsap.timeline();
+      const homeTl = gsap.timeline({
+        onComplete: () => {
+          router.push(`/work`);
+          setFromHome(false);
+        },
+      });
       projectsCoords?.map(({ rects }, i) => {
         const centerX = rects.left + rects.width / 2;
         const centerY = rects.top + rects.height / 2;
@@ -52,7 +57,7 @@ const Scene = ({ projectsDetails }: Props) => {
         const worldY = -(centerY / size.height - 0.5) * viewport.height;
         homeTl.to(
           groupRefArray.current[i]?.position,
-          { y: worldY, x: worldX, onComplete: () => router.push(`/work`) },
+          { y: worldY, x: worldX },
           '<',
         );
       });
