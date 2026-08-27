@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
@@ -11,8 +11,6 @@ import { Project as ProjectModel } from '@/src/models/Project';
 import Link from 'next/link';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { slugify } from '@/utils/slugify';
-import { getPositions } from '../WorkList/utils/getPositions';
-import { GiConsoleController } from 'react-icons/gi';
 
 interface Props {
   data: ProjectType;
@@ -48,6 +46,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
         };
       })
       .filter(Boolean);
+
     if (checkIfProjectsAlreadySet === null) {
       setProjects(rects);
     } else {

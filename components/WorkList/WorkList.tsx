@@ -4,10 +4,10 @@ import gsap from 'gsap';
 import { Flip, ScrollTrigger } from 'gsap/all';
 import Link from 'next/link';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
+import { setFlag } from '@/utils/fromWorkList';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -43,30 +43,7 @@ export default function WorkList({
     setProjectImageSelected(featuredImage.src);
     setProjectSelectedCoords(e.currentTarget.getBoundingClientRect());
     setScrollY(window.scrollY);
-    // const fullscreenWrapper = document.getElementById('fullscreen');
-    // fullscreenWrapper!.style.opacity = '1';
-    // e.preventDefault();
-    // const target = e.currentTarget;
-    // const state = Flip.getState(e.currentTarget);
-    // const otherChildren = Array.from(gridRef.current!.children).filter(
-    //   (child) => child !== e.currentTarget,
-    // );
-    // const { childAtTheTop, childAtTheTop } = getPositions(
-    //   otherChildren as HTMLElement[],
-    //   target,
-    // );
-    // e.currentTarget.className = '';
-    // fullscreenWrapper!.append(e.currentTarget);
-    // e.currentTarget.className = 'absolute w-screen h-screen ';
-
-    // applyGsapTransition(
-    //   childAtTheBottom,
-    //   childAtTheTop,
-    //   formatedTitle,
-    //   state,
-    //   e.currentTarget,
-    //   router,
-    // );
+    setFlag();
   };
 
   const updateProjects = () => {
