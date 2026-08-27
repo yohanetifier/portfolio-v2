@@ -11,6 +11,7 @@ import { useHeaderContext } from '@/contexts/HeaderContext';
 import { usePathname } from 'next/navigation';
 import { getProjectPath } from '@/utils/getProjectPath';
 import { clearFlag, getFlag } from '@/utils/fromWorkList';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -18,8 +19,15 @@ type Props = {
 
 const Scene = ({ projectsDetails }: Props) => {
   const { viewport, size } = useThree();
-  const { selectedIndex, setSelectedIndex, projectSelectedCoords, scrollY } =
-    useThreeJsContext();
+  const {
+    selectedIndex,
+    setSelectedIndex,
+    projectSelectedCoords,
+    scrollY,
+    // groupRefArray,
+    fromHome,
+    projectsCoords,
+  } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
@@ -30,9 +38,25 @@ const Scene = ({ projectsDetails }: Props) => {
   const projectsAtTheTop = useRef<Record<string, number>>({});
   const projectsAtTheBottomRef = useRef<THREE.Group[]>([]);
   const projectsAtTheTopRef = useRef<THREE.Group[]>([]);
+  let initHomeCoords = useRef({});
+  const router = useRouter();
 
   useEffect(() => {
     const fromWorkList = getFlag();
+    if (fromHome) {
+      const homeTl = gsap.timeline();
+      projectsCoords?.map(({ rects }, i) => {
+        const centerX = rects.left + rects.width / 2;
+        const centerY = rects.top + rects.height / 2;
+        const worldX = (centerX / size.width - 0.5) * viewport.width;
+        const worldY = -(centerY / size.height - 0.5) * viewport.height;
+        homeTl.to(
+          groupRefArray.current[i]?.position,
+          { y: worldY, x: worldX, onComplete: () => router.push(`/work`) },
+          '<',
+        );
+      });
+    }
 
     if (reset) {
       setSelectedIndex(null);
@@ -51,6 +75,7 @@ const Scene = ({ projectsDetails }: Props) => {
     if (!groupRefArray.current[selectedIndex]) return;
 
     if (!isReturning) {
+      console.log('jriejiroejg');
       if (
         groupRefArray.current[selectedIndex].position.x === 0.0 &&
         groupRefArray.current[selectedIndex].position.y === 0.0 &&
@@ -217,7 +242,7 @@ const Scene = ({ projectsDetails }: Props) => {
         });
       }
     }
-  }, [selectedIndex, isReturning, reset]);
+  }, [selectedIndex, isReturning, reset, fromHome]);
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {

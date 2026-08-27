@@ -19,10 +19,11 @@ const FullscreenCanvas = () => {
         left: '0px',
         zIndex: 1,
         pointerEvents: 'none',
+        border: '2px solid red',
       }}
       id="fullscreen"
     >
-      {pathname.startsWith('/work') ? (
+      {pathname.startsWith('/work') || pathname === '/' ? (
         <Scene projectsDetails={projectsDetails} />
       ) : null}
     </Canvas>

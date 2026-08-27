@@ -24,6 +24,10 @@ interface ThreeJsContextType {
   setProjectSelectedCoords: (arg: DOMRect) => void;
   scrollY: number | null;
   setScrollY: (arg: number) => void;
+  projectsCoords: DOMRect[] | null;
+  setProjectsCoords: (arg: DOMRect[] | null) => void;
+  fromHome: boolean;
+  setFromHome: (arg: boolean) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
@@ -36,6 +40,9 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [projectSelectedCoords, setProjectSelectedCoords] =
     useState<DOMRect | null>(null);
   const [scrollY, setScrollY] = useState<number | null>(null);
+  // const groupRefArray = useRef<(THREE.Group | null)[]>([]);
+  const [fromHome, setFromHome] = useState(false);
+  const [projectsCoords, setProjectsCoords] = useState([]);
 
   return (
     <ThreeJsContext.Provider
@@ -52,6 +59,11 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setProjectSelectedCoords,
         scrollY,
         setScrollY,
+        // groupRefArray,
+        fromHome,
+        setFromHome,
+        projectsCoords,
+        setProjectsCoords,
       }}
     >
       {children}
