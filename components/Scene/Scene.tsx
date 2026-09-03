@@ -31,7 +31,6 @@ const Scene = ({ projectsDetails }: Props) => {
     setReturnHome,
     returnHome,
     projectsHomeCoords,
-    selectedSlug,
     setSelectedSlug,
     setIsAnimating,
   } = useThreeJsContext();
@@ -127,10 +126,6 @@ const Scene = ({ projectsDetails }: Props) => {
             )
             .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<');
         }
-
-        // returnHomeTl
-        //   .to(groupRefArray.current[i]?.position, { y: worldY, x: worldX }, '<')
-        //   .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<');
       });
     }
 

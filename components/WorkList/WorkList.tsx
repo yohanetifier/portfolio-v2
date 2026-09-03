@@ -26,10 +26,8 @@ export default function WorkList({
     setScrollY,
     scrollY,
     fromHome,
-    setFromHome,
     isAnimating,
     setIsAnimating,
-    projectsHomeCoords,
   } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);

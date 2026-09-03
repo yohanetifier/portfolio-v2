@@ -2,10 +2,7 @@
 import { Project } from '@/src/models/Project';
 import Image from 'next/image';
 import React, { useEffect, useRef } from 'react';
-import {
-  getStartingClass,
-  INTRO_VISIBLE_COUNT,
-} from '../WorkList/utils/classes';
+import { getStartingClass } from '../WorkList/utils/classes';
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 export default function IntroPhantomGrid({

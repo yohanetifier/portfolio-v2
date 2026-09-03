@@ -9,6 +9,7 @@ export const postsViewModel = async () => {
     const data = await postService.getPosts();
     return data;
   } catch (e) {
-    console.log('Failed to fetch posts', e);
+    console.error('Failed to fetch posts', e);
+    return null;
   }
 };

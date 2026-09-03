@@ -50,11 +50,7 @@ const GRID_PATTERN = [
   },
 ] as const;
 
-// Legacy export kept for older components.
-// Note: this only contains sizing/positioning classes, no grid row/column placement.
 export const gridClasses = GRID_PATTERN.map((p) => p.className);
-
-export const INTRO_VISIBLE_COUNT = 9;
 
 const STARTING_CLASSES = [
   'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]',
