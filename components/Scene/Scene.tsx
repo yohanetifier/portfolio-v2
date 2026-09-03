@@ -328,16 +328,6 @@ const Scene = ({ projectsDetails }: Props) => {
       const group = groupRefArray.current[i];
       const isBottom = projectsAtTheBottomRef.current.includes(group!);
 
-      // position={
-      //     selectedIndex === i && workPath
-      //       ? [0.0, 0.0, 0]
-      //       : workPath && i !== selectedIndex
-      //         ? isBottom
-      //           ? [0, -viewport.height, 0]
-      //           : [0, viewport.height, 0]
-      //         : [worldX, worldY, 0]
-      //   }
-
       return (
         <group
           key={i}
