@@ -159,6 +159,7 @@ const Plane = ({ imageUrl, isSelected }: Props) => {
         vertexShader={vertexShader}
         uniforms={uniforms.current}
         ref={materialRef}
+        depthTest={false}
       />
     </mesh>
   );

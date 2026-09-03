@@ -8,7 +8,7 @@ import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
 import { setFlag } from '@/utils/fromWorkList';
-import IntroGridPhantom from '../IntroGridPhantom/IntroGridPhantom';
+import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 

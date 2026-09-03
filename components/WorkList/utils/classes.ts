@@ -25,15 +25,13 @@ const GRID_PATTERN = [
     rowStart: 2,
   },
   {
-    className:
-      'w-[20.208vw] h-[24.219vw] relative top-[7.813vw]',
+    className: 'w-[20.208vw] h-[24.219vw] relative top-[7.813vw]',
     colStart: 7,
     colEnd: 9,
     rowStart: 4,
   },
   {
-    className:
-      'w-[20.208vw] h-[24.219vw] relative bottom-[3.385vw]',
+    className: 'w-[20.208vw] h-[24.219vw] relative bottom-[3.385vw]',
     colStart: 3,
     colEnd: 5,
     rowStart: 5,
@@ -45,8 +43,7 @@ const GRID_PATTERN = [
     rowStart: 7,
   },
   {
-    className:
-      'w-[20.208vw] h-[24.219vw] relative bottom-[5.208vw]',
+    className: 'w-[20.208vw] h-[24.219vw] relative bottom-[5.208vw]',
     colStart: 7,
     colEnd: 9,
     rowStart: 8,
@@ -57,7 +54,7 @@ const GRID_PATTERN = [
 // Note: this only contains sizing/positioning classes, no grid row/column placement.
 export const gridClasses = GRID_PATTERN.map((p) => p.className);
 
-export const INTRO_VISIBLE_COUNT = 5;
+export const INTRO_VISIBLE_COUNT = 9;
 
 const STARTING_CLASSES = [
   'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]',
@@ -90,10 +87,7 @@ export function getGridPlacement(index: number) {
 }
 
 export function getGridMetrics(count: number) {
-  const cycles = Math.max(
-    1,
-    Math.ceil(count / GRID_PATTERN.length),
-  );
+  const cycles = Math.max(1, Math.ceil(count / GRID_PATTERN.length));
 
   return {
     rows: BASE_ROWS + (cycles - 1) * ROW_CYCLE,

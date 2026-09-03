@@ -8,7 +8,7 @@ import {
 } from '../WorkList/utils/classes';
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
 
-export default function IntroGridPhantom({
+export default function IntroPhantomGrid({
   projects,
 }: {
   projects: Pick<Project, 'featuredImage'>[];
@@ -36,30 +36,28 @@ export default function IntroGridPhantom({
 
   return (
     <div
-      className="fixed top-0 left-0 flex justify-center items-center  w-[100vw] h-[100vh] transition-height duration-1000 border-2 border-blue-500"
+      className="fixed top-0 left-0 flex justify-center items-center  w-[100vw] h-[100vh] transition-height duration-1000"
       ref={mainWrapperRef}
     >
       <div
         className="relative w-full h-full rounded-xl flex justify-center items-center opacity-0"
         ref={wrapperImage}
       >
-        {projects
-          .slice(0, INTRO_VISIBLE_COUNT)
-          .map(({ featuredImage }, index) => (
-            <div
-              key={index}
-              className={`${getStartingClass(index)} border-2 border-red-500`}
-              ref={(el) => (imgRefArray.current[index] = el)}
-            >
-              <Image
-                src={featuredImage.src}
-                alt={featuredImage.alt}
-                width={1000}
-                height={1000}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
+        {projects.map(({ featuredImage }, index) => (
+          <div
+            key={index}
+            className={`${getStartingClass(index)}`}
+            ref={(el) => (imgRefArray.current[index] = el)}
+          >
+            <Image
+              src={featuredImage.src}
+              alt={featuredImage.alt}
+              width={1000}
+              height={1000}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
