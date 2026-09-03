@@ -8,6 +8,7 @@ import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
 import { setFlag } from '@/utils/fromWorkList';
+import IntroGridPhantom from '../IntroGridPhantom/IntroGridPhantom';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -28,6 +29,7 @@ export default function WorkList({
     setFromHome,
     isAnimating,
     setIsAnimating,
+    projectsHomeCoords,
   } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
@@ -102,6 +104,7 @@ export default function WorkList({
         height: metrics.height,
       }}
     >
+      <IntroGridPhantom projects={projects} />
       <div
         className={`w-full grid grid-cols-10 gap-[20px] z-[2] `}
         ref={gridRef}
