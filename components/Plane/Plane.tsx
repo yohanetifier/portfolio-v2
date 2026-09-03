@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { useRouter } from 'next/navigation';
 import { useHeaderContext } from '@/contexts/HeaderContext';
+import { unlockScroll } from '@/utils/scroll';
 
 const vertexShader = `
 uniform float uTime;
@@ -90,7 +91,7 @@ interface Props {
 
 const Plane = ({ imageUrl, isSelected }: Props) => {
   const router = useRouter();
-  const { selectedSlug } = useThreeJsContext();
+  const { selectedSlug, returnHome, setIsAnimating } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
@@ -117,8 +118,13 @@ const Plane = ({ imageUrl, isSelected }: Props) => {
           duration: 1,
           ease: 'power2.out',
           onComplete: () => {
-            if (!selectedSlug) return;
+            if (!selectedSlug) {
+              unlockScroll();
+              return;
+            }
             router.push(`/work/${selectedSlug}`);
+            unlockScroll();
+            setIsAnimating(false);
           },
         });
       } else {
@@ -130,6 +136,17 @@ const Plane = ({ imageUrl, isSelected }: Props) => {
         });
       }
     } else {
+      if (returnHome) {
+        if (!amplitude) return;
+        gsap.to(amplitude, {
+          value: 0.4,
+          duration: 1,
+          ease: 'power2.out',
+          onComplete: () => {
+            unlockScroll();
+          },
+        });
+      }
       return;
     }
   }, [isSelected, isReturning]);

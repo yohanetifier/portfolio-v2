@@ -24,11 +24,17 @@ export default function WorkList({
     setProjectSelectedCoords,
     setScrollY,
     scrollY,
+    fromHome,
+    setFromHome,
+    isAnimating,
+    setIsAnimating,
   } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const metrics = getGridMetrics(projects.length);
+  const isAnimatingRef = useRef(false);
+  isAnimatingRef.current = isAnimating;
 
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -44,9 +50,11 @@ export default function WorkList({
     setProjectSelectedCoords(e.currentTarget.getBoundingClientRect());
     setScrollY(window.scrollY);
     setFlag();
+    setIsAnimating(true);
   };
 
   const updateProjects = () => {
+    if (isAnimatingRef.current) return;
     const rects = linkArray.current
       .map((el, i) => {
         return {
@@ -61,12 +69,11 @@ export default function WorkList({
   };
 
   useLayoutEffect(() => {
+    if (fromHome) return;
     updateProjects();
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = 'visible';
-
     const grid = document.getElementById('grid');
     setTimeout(() => {
       while (grid?.firstChild) {
@@ -76,6 +83,7 @@ export default function WorkList({
 
     window.addEventListener('scroll', updateProjects);
     window.addEventListener('resize', updateProjects);
+
     return () => {
       window.removeEventListener('scroll', updateProjects);
       window.removeEventListener('resize', updateProjects);

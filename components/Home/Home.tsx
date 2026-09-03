@@ -17,7 +17,7 @@ import {
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
 import Link from 'next/link';
-import { useThree } from '@react-three/fiber';
+import { lockScroll } from '@/utils/scroll';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -34,7 +34,14 @@ export default function Home({
   const router = useRouter();
   const { setHeaderVisible } = useHeaderContext();
   const imgRefArray = useRef([]);
-  const { setProjects, setFromHome, setProjectsCoords } = useThreeJsContext();
+  const {
+    setProjects,
+    setFromHome,
+    setProjectsCoords,
+    setScrollY,
+    setProjectsHomeCoords,
+    setIsAnimating,
+  } = useThreeJsContext();
   const metrics = getGridMetrics(projects.length);
   const phantomsElements = useRef<HTMLAnchorElement[]>([]);
   // const { size, viewport } = useThree();
@@ -49,6 +56,8 @@ export default function Home({
     //   })
     //   .filter(Boolean);
     setFromHome(true);
+    lockScroll();
+    setIsAnimating(true);
     // linksCoords.forEach((element) => {
     //   const centerX = element.rects.left + element.rects.width / 2;
     //   const centerY = element.rects.top + element.rects.height / 2;
@@ -139,7 +148,7 @@ export default function Home({
   //   { scope: wrapperImage },
   // );
 
-  useEffect(() => {
+  const updateProjects = () => {
     const rects: ProjectItem[] = imgRefArray.current
       .map((element: HTMLElement, index) => {
         return {
@@ -158,6 +167,12 @@ export default function Home({
       })
       .filter(Boolean);
     setProjectsCoords(phantomProjetcsRects);
+    setProjectsHomeCoords(rects);
+  };
+
+  useEffect(() => {
+    setScrollY(0);
+    updateProjects();
   }, []);
 
   return (
@@ -188,7 +203,7 @@ export default function Home({
                 key={index}
                 href={''}
                 prefetch={true}
-                className={`${placement.className} border-2 border-blue-500`}
+                className={`${placement.className}`}
                 // onClick={(e) =>
                 //   handleTransition(e, title, index, featuredImage)
                 // }

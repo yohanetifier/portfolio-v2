@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation';
 import { getProjectPath } from '@/utils/getProjectPath';
 import { clearFlag, getFlag } from '@/utils/fromWorkList';
 import { useRouter } from 'next/navigation';
+import { lockScroll, unlockScroll } from '@/utils/scroll';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -24,10 +25,15 @@ const Scene = ({ projectsDetails }: Props) => {
     setSelectedIndex,
     projectSelectedCoords,
     scrollY,
-    // groupRefArray,
     fromHome,
     projectsCoords,
     setFromHome,
+    setReturnHome,
+    returnHome,
+    projectsHomeCoords,
+    selectedSlug,
+    setSelectedSlug,
+    setIsAnimating,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
@@ -45,9 +51,14 @@ const Scene = ({ projectsDetails }: Props) => {
     const fromWorkList = getFlag();
     if (fromHome) {
       const homeTl = gsap.timeline({
+        onStart: () => {
+          lockScroll();
+        },
         onComplete: () => {
-          router.push(`/work`);
+          router.push(`/work`, { scroll: false });
           setFromHome(false);
+          setIsAnimating(false);
+          unlockScroll();
         },
       });
       projectsCoords?.map(({ rects }, i) => {
@@ -55,11 +66,71 @@ const Scene = ({ projectsDetails }: Props) => {
         const centerY = rects.top + rects.height / 2;
         const worldX = (centerX / size.width - 0.5) * viewport.width;
         const worldY = -(centerY / size.height - 0.5) * viewport.height;
-        homeTl.to(
-          groupRefArray.current[i]?.position,
-          { y: worldY, x: worldX },
-          '<',
-        );
+        const worldW = (rects.width / size.width) * viewport.width;
+        const worldH = (rects.height / size.height) * viewport.height;
+
+        homeTl
+          .to(groupRefArray.current[i]?.position, { y: worldY, x: worldX }, '<')
+          .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<');
+      });
+    }
+
+    if (returnHome) {
+      const returnHomeTl = gsap.timeline({
+        onStart: () => {
+          lockScroll();
+        },
+        onComplete: () => {
+          setSelectedIndex(null);
+          setSettledIndex(null);
+          setSelectedSlug('');
+          setReturnHome(false);
+          router.push(`/`, { scroll: false });
+          setIsAnimating(false);
+          unlockScroll();
+        },
+      });
+      const itemsNotOnTheIntroPage =
+        selectedIndex! > projectsHomeCoords!.length - 1;
+
+      projectsHomeCoords?.map(({ rects }, i) => {
+        const centerX = rects.left + rects.width / 2;
+        const centerY = rects.top + rects.height / 2;
+        const worldX = (centerX / size.width - 0.5) * viewport.width;
+        const worldY = -(centerY / size.height - 0.5) * viewport.height;
+        const worldW = (rects.width / size.width) * viewport.width;
+        const worldH = (rects.height / size.height) * viewport.height;
+        if (itemsNotOnTheIntroPage) {
+          returnHomeTl
+            .to(
+              groupRefArray.current[i]?.position,
+              { y: worldY, x: worldX },
+              '<',
+            )
+            .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<')
+            .to(
+              groupRefArray.current[selectedIndex]?.position,
+              { y: 0, x: 0 },
+              '<',
+            )
+            .to(
+              groupRefArray.current[selectedIndex]?.scale,
+              { x: 0, y: 0 },
+              '<',
+            );
+        } else {
+          returnHomeTl
+            .to(
+              groupRefArray.current[i]?.position,
+              { y: worldY, x: worldX },
+              '<',
+            )
+            .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<');
+        }
+
+        // returnHomeTl
+        //   .to(groupRefArray.current[i]?.position, { y: worldY, x: worldX }, '<')
+        //   .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<');
       });
     }
 
@@ -71,6 +142,9 @@ const Scene = ({ projectsDetails }: Props) => {
     }
     if (selectedIndex === null) return;
     const tl = gsap.timeline({
+      onStart: () => {
+        lockScroll();
+      },
       onComplete: () => {
         setSettledIndex(selectedIndex!);
       },
@@ -80,7 +154,6 @@ const Scene = ({ projectsDetails }: Props) => {
     if (!groupRefArray.current[selectedIndex]) return;
 
     if (!isReturning) {
-      console.log('jriejiroejg');
       if (
         groupRefArray.current[selectedIndex].position.x === 0.0 &&
         groupRefArray.current[selectedIndex].position.y === 0.0 &&
@@ -137,15 +210,18 @@ const Scene = ({ projectsDetails }: Props) => {
         projectsAtTheTop.current[element.uuid] = element.position.y;
       });
 
-      tl.to(groupRefArray.current[selectedIndex]!.scale, {
-        x: viewport.width,
-        y: viewport.height,
-        duration: 1,
-      }).to(
-        groupRefArray.current[selectedIndex]!.position,
-        { x: 0, y: 0, duration: 1 },
-        '<',
-      );
+      if (returnHome) {
+      } else {
+        tl.to(groupRefArray.current[selectedIndex]!.scale, {
+          x: viewport.width,
+          y: viewport.height,
+          duration: 1,
+        }).to(
+          groupRefArray.current[selectedIndex]!.position,
+          { x: 0, y: 0, duration: 1 },
+          '<',
+        );
+      }
 
       projectsAtTheBottomRef.current.forEach((element) => {
         tl.to(element.position, { y: -viewport.height }, '<');
@@ -176,7 +252,7 @@ const Scene = ({ projectsDetails }: Props) => {
           setSelectedIndex(null);
           setSettledIndex(null);
           setIsReturning(false);
-          // sessionStorage.removeItem('fromWorkList');
+          setIsAnimating(false);
           clearFlag();
         },
       });
@@ -200,9 +276,6 @@ const Scene = ({ projectsDetails }: Props) => {
             element.position,
             {
               y: projectsAtTheBottom.current[element.uuid],
-              // onComplete: () => {
-              //   sessionStorage.removeItem('fromWorkList');
-              // },
             },
             '<',
           );
@@ -225,11 +298,6 @@ const Scene = ({ projectsDetails }: Props) => {
               y:
                 initCoords.current[element.uuid] +
                 (scrollY! / size.height) * viewport.height,
-              // onComplete: () => {
-              //   setSelectedIndex(null);
-              //   setSettledIndex(null);
-              //   setIsReturning(false);
-              // },
             },
             '<',
           );
@@ -247,7 +315,7 @@ const Scene = ({ projectsDetails }: Props) => {
         });
       }
     }
-  }, [selectedIndex, isReturning, reset, fromHome]);
+  }, [selectedIndex, isReturning, reset, fromHome, returnHome]);
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
@@ -257,6 +325,18 @@ const Scene = ({ projectsDetails }: Props) => {
       const worldY = -(centerY / size.height - 0.5) * viewport.height;
       const worldW = (rects.width / size.width) * viewport.width;
       const worldH = (rects.height / size.height) * viewport.height;
+      const group = groupRefArray.current[i];
+      const isBottom = projectsAtTheBottomRef.current.includes(group!);
+
+      // position={
+      //     selectedIndex === i && workPath
+      //       ? [0.0, 0.0, 0]
+      //       : workPath && i !== selectedIndex
+      //         ? isBottom
+      //           ? [0, -viewport.height, 0]
+      //           : [0, viewport.height, 0]
+      //         : [worldX, worldY, 0]
+      //   }
 
       return (
         <group
@@ -264,7 +344,11 @@ const Scene = ({ projectsDetails }: Props) => {
           position={
             selectedIndex === i && workPath
               ? [0.0, 0.0, 0]
-              : [worldX, worldY, 0]
+              : workPath && i !== selectedIndex
+                ? isBottom
+                  ? [0, -viewport.height, 0]
+                  : [0, viewport.height, 0]
+                : [worldX, worldY, 0]
           }
           scale={[worldW, worldH, 1]}
           ref={(el) => {
