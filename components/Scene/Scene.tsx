@@ -33,6 +33,7 @@ const Scene = ({ projectsDetails }: Props) => {
     projectsHomeCoords,
     setSelectedSlug,
     setIsAnimating,
+    hoveredIndex,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
@@ -69,8 +70,16 @@ const Scene = ({ projectsDetails }: Props) => {
         const worldH = (rects.height / size.height) * viewport.height;
 
         homeTl
-          .to(groupRefArray.current[i]?.position, { y: worldY, x: worldX }, '<')
-          .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<');
+          .to(
+            groupRefArray.current[i]?.position,
+            { y: worldY, x: worldX, duration: 1 },
+            '<',
+          )
+          .to(
+            groupRefArray.current[i]?.scale,
+            { x: worldW, y: worldH, duration: 1 },
+            '<',
+          );
       });
     }
 
@@ -103,28 +112,36 @@ const Scene = ({ projectsDetails }: Props) => {
           returnHomeTl
             .to(
               groupRefArray.current[i]?.position,
-              { y: worldY, x: worldX },
+              { y: worldY, x: worldX, duration: 1 },
               '<',
             )
-            .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<')
+            .to(
+              groupRefArray.current[i]?.scale,
+              { x: worldW, y: worldH, duration: 1 },
+              '<',
+            )
             .to(
               groupRefArray.current[selectedIndex]?.position,
-              { y: 0, x: 0 },
+              { y: 0, x: 0, duration: 1 },
               '<',
             )
             .to(
               groupRefArray.current[selectedIndex]?.scale,
-              { x: 0, y: 0 },
+              { x: 0, y: 0, duration: 1 },
               '<',
             );
         } else {
           returnHomeTl
             .to(
               groupRefArray.current[i]?.position,
-              { y: worldY, x: worldX },
+              { y: worldY, x: worldX, duration: 1 },
               '<',
             )
-            .to(groupRefArray.current[i]?.scale, { x: worldW, y: worldH }, '<');
+            .to(
+              groupRefArray.current[i]?.scale,
+              { x: worldW, y: worldH, duration: 1 },
+              '<',
+            );
         }
       });
     }
@@ -219,13 +236,14 @@ const Scene = ({ projectsDetails }: Props) => {
       }
 
       projectsAtTheBottomRef.current.forEach((element) => {
-        tl.to(element.position, { y: -viewport.height }, '<');
+        tl.to(element.position, { y: -viewport.height, duration: 1 }, '<');
       });
       projectsAtTheTopRef.current.forEach((element) => {
         tl.to(
           element.position,
           {
             y: viewport.height,
+            duration: 1,
           },
           '<',
         );
@@ -255,12 +273,14 @@ const Scene = ({ projectsDetails }: Props) => {
         .to(groupRefArray.current[selectedIndex]!.position, {
           x: worldX,
           y: worldY,
+          duration: 1,
         })
         .to(
           groupRefArray.current[selectedIndex]!.scale,
           {
             x: worldW,
             y: worldH,
+            duration: 1,
           },
           '<',
         );
@@ -271,6 +291,7 @@ const Scene = ({ projectsDetails }: Props) => {
             element.position,
             {
               y: projectsAtTheBottom.current[element.uuid],
+              duration: 1,
             },
             '<',
           );
@@ -281,6 +302,7 @@ const Scene = ({ projectsDetails }: Props) => {
             element.position,
             {
               y: projectsAtTheTop.current[element.uuid],
+              duration: 1,
             },
             '<',
           );
@@ -293,6 +315,7 @@ const Scene = ({ projectsDetails }: Props) => {
               y:
                 initCoords.current[element.uuid] +
                 (scrollY! / size.height) * viewport.height,
+              duration: 1,
             },
             '<',
           );
@@ -304,6 +327,7 @@ const Scene = ({ projectsDetails }: Props) => {
               y:
                 initCoords.current[element.uuid] +
                 (scrollY! / size.height) * viewport.height,
+              duration: 1,
             },
             '<',
           );
@@ -311,6 +335,10 @@ const Scene = ({ projectsDetails }: Props) => {
       }
     }
   }, [selectedIndex, isReturning, reset, fromHome, returnHome]);
+
+  const handleMove = () => {
+    alert('move');
+  };
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
@@ -340,7 +368,11 @@ const Scene = ({ projectsDetails }: Props) => {
             groupRefArray.current[i] = el;
           }}
         >
-          <Plane imageUrl={imageUrl} isSelected={settledIndex === i} />
+          <Plane
+            imageUrl={imageUrl}
+            isSelected={settledIndex === i}
+            isHovered={hoveredIndex === i}
+          />
         </group>
       );
     });

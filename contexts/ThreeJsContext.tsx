@@ -4,6 +4,11 @@ export interface ProjectItem {
   imageUrl: string;
 }
 
+interface Uv {
+  x: number | null;
+  y: number | null;
+}
+
 interface ThreeJsContextType {
   projectsDetails: ProjectItem[];
   setProjects: (projectsDetails: ProjectItem[]) => void;
@@ -27,6 +32,10 @@ interface ThreeJsContextType {
   setReturnHome: (arg: boolean) => void;
   isAnimating: boolean;
   setIsAnimating: (arg: boolean) => void;
+  hoveredIndex: number | null;
+  setHoveredIndex: (arg: number | null) => void;
+  uv: { x: number | null; y: number | null };
+  setUv: (arg: Uv) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
@@ -39,12 +48,13 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [projectSelectedCoords, setProjectSelectedCoords] =
     useState<DOMRect | null>(null);
   const [scrollY, setScrollY] = useState<number | null>(null);
-  // const groupRefArray = useRef<(THREE.Group | null)[]>([]);
   const [fromHome, setFromHome] = useState(false);
   const [returnHome, setReturnHome] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [projectsCoords, setProjectsCoords] = useState([]);
   const [projectsHomeCoords, setProjectsHomeCoords] = useState([]);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [uv, setUv] = useState<Uv>({ x: null, y: null });
 
   return (
     <ThreeJsContext.Provider
@@ -61,7 +71,6 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setProjectSelectedCoords,
         scrollY,
         setScrollY,
-        // groupRefArray,
         fromHome,
         setFromHome,
         projectsCoords,
@@ -72,6 +81,10 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setReturnHome,
         isAnimating,
         setIsAnimating,
+        hoveredIndex,
+        setHoveredIndex,
+        uv,
+        setUv,
       }}
     >
       {children}

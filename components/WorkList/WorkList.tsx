@@ -28,6 +28,8 @@ export default function WorkList({
     fromHome,
     isAnimating,
     setIsAnimating,
+    setHoveredIndex,
+    setUv,
   } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
@@ -94,6 +96,20 @@ export default function WorkList({
     window.scrollTo(0, scrollY!);
   }, []);
 
+  const handleMouseMove = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    index: number | null,
+  ) => {
+    const rects = e.currentTarget.getBoundingClientRect();
+    const pointXCoords = e.clientX - rects.left;
+    const pointYCoords = e.clientY - rects.top;
+    const pointX = pointXCoords / rects.width;
+    const pointY = 1 - pointYCoords / rects.height;
+    const uv = { x: pointX, y: pointY };
+    setUv(uv);
+    setHoveredIndex(index);
+  };
+
   return (
     <div
       className="flex justify-center items-center relative w-[100vw] transition-height duration-1000 z-[10]"
@@ -120,6 +136,8 @@ export default function WorkList({
               prefetch={true}
               className={`${placement.className}`}
               onClick={(e) => handleTransition(e, title, index, featuredImage)}
+              onMouseMove={(e) => handleMouseMove(e, index)}
+              onMouseLeave={() => setHoveredIndex(null)}
               style={placement.style}
               ref={(el) => {
                 linkArray.current[index] = el!;

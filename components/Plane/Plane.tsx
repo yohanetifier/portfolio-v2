@@ -1,5 +1,5 @@
 'use client';
-import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -10,6 +10,8 @@ import { unlockScroll } from '@/utils/scroll';
 
 const vertexShader = `
 uniform float uTime;
+uniform vec2 uMouseCoords;
+uniform float uIsHovered;
 varying vec2 vUv;
 varying float vWave;
 uniform float uAmplitude;
@@ -64,13 +66,18 @@ float snoise(vec3 v) {
 }
 
 
-
 void main() {
   vec3 pos;
   pos = position;
   vUv = uv;
   vWave = snoise(pos + uTime);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime) * uAmplitude, 1.0);
+  float distX = uMouseCoords.x - uv.x;
+  float distY = uMouseCoords.y - uv.y;
+  float dist = length(vec2(distX, distY));
+  float phase = smoothstep(0.0, 1.0, dist);
+  float factor = 1.0 - phase;
+  float onde = sin(dist + uTime) * factor * uIsHovered;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime) * uAmplitude + onde, 1.0);
 }
 `;
 
@@ -87,11 +94,12 @@ void main() {
 interface Props {
   imageUrl: string;
   isSelected: boolean;
+  isHovered: boolean;
 }
 
-const Plane = ({ imageUrl, isSelected }: Props) => {
+const Plane = ({ imageUrl, isSelected, isHovered }: Props) => {
   const router = useRouter();
-  const { selectedSlug, returnHome, setIsAnimating } = useThreeJsContext();
+  const { selectedSlug, returnHome, setIsAnimating, uv } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
@@ -101,10 +109,15 @@ const Plane = ({ imageUrl, isSelected }: Props) => {
     uTime: { value: 1.0 },
     uTexture: { value: texture },
     uAmplitude: { value: 0.4 },
+    uMouseCoords: { value: new THREE.Vector2(uv.x, uv.y) },
+    uIsHovered: { value: isHovered },
   });
 
   useFrame((_, delta) => {
     materialRef.current!.uniforms.uTime.value += delta;
+    materialRef.current!.uniforms.uMouseCoords.value.x = uv.x;
+    materialRef.current!.uniforms.uMouseCoords.value.y = uv.y;
+    materialRef.current!.uniforms.uIsHovered.value = isHovered ? 1.0 : 0.0;
   });
 
   useEffect(() => {
@@ -116,7 +129,7 @@ const Plane = ({ imageUrl, isSelected }: Props) => {
         gsap.to(amplitude, {
           value: 0,
           duration: 1,
-          ease: 'power2.out',
+          ease: 'power3.out',
           onComplete: () => {
             if (!selectedSlug) {
               unlockScroll();

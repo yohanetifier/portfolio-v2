@@ -18,7 +18,7 @@ const FullscreenCanvas = () => {
         top: '0px',
         left: '0px',
         zIndex: 1,
-        pointerEvents: 'none',
+        // pointerEvents: 'auto',
       }}
       id="fullscreen"
     >
