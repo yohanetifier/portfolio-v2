@@ -3,7 +3,7 @@
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
 import React, { useEffect, useRef, useState } from 'react';
 import Plane from '../Plane/Plane';
-import { useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { getPositions } from '../WorkList/utils/getPositions';
@@ -34,6 +34,7 @@ const Scene = ({ projectsDetails }: Props) => {
     setSelectedSlug,
     setIsAnimating,
     hoveredIndex,
+    mouseCoords,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
@@ -336,9 +337,12 @@ const Scene = ({ projectsDetails }: Props) => {
     }
   }, [selectedIndex, isReturning, reset, fromHome, returnHome]);
 
-  const handleMove = () => {
-    alert('move');
-  };
+  // useFrame(() => {
+  //   const worldX = (mouseCoords.x / size.width - 0.5) * viewport.width;
+  //   const worldY = -(mouseCoords.y / size.height - 0.5) * viewport.height;
+  //   meshRef.current.position.set(worldX, worldY);
+  //   console.log('mouseCoords', mouseCoords);
+  // });
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
@@ -352,28 +356,30 @@ const Scene = ({ projectsDetails }: Props) => {
       const isBottom = projectsAtTheBottomRef.current.includes(group!);
 
       return (
-        <group
-          key={i}
-          position={
-            selectedIndex === i && workPath
-              ? [0.0, 0.0, 0]
-              : workPath && i !== selectedIndex
-                ? isBottom
-                  ? [0, -viewport.height, 0]
-                  : [0, viewport.height, 0]
-                : [worldX, worldY, 0]
-          }
-          scale={[worldW, worldH, 1]}
-          ref={(el) => {
-            groupRefArray.current[i] = el;
-          }}
-        >
-          <Plane
-            imageUrl={imageUrl}
-            isSelected={settledIndex === i}
-            isHovered={hoveredIndex === i}
-          />
-        </group>
+        <>
+          <group
+            key={i}
+            position={
+              selectedIndex === i && workPath
+                ? [0.0, 0.0, 0]
+                : workPath && i !== selectedIndex
+                  ? isBottom
+                    ? [0, -viewport.height, 0]
+                    : [0, viewport.height, 0]
+                  : [worldX, worldY, 0]
+            }
+            scale={[worldW, worldH, 1]}
+            ref={(el) => {
+              groupRefArray.current[i] = el;
+            }}
+          >
+            <Plane
+              imageUrl={imageUrl}
+              isSelected={settledIndex === i}
+              isHovered={hoveredIndex === i}
+            />
+          </group>
+        </>
       );
     });
   }

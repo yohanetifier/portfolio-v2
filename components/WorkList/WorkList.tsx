@@ -9,6 +9,7 @@ import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
 import { setFlag } from '@/utils/fromWorkList';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
+import { useThree } from '@react-three/fiber';
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -30,6 +31,7 @@ export default function WorkList({
     setIsAnimating,
     setHoveredIndex,
     setUv,
+    setMouseCoords,
   } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
@@ -53,6 +55,7 @@ export default function WorkList({
     setScrollY(window.scrollY);
     setFlag();
     setIsAnimating(true);
+    setHoveredIndex(null);
   };
 
   const updateProjects = () => {
@@ -110,13 +113,18 @@ export default function WorkList({
     setHoveredIndex(index);
   };
 
+  const handleMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    setMouseCoords({ x: e.clientX, y: e.clientY });
+  };
+
   return (
     <div
-      className="flex justify-center items-center relative w-[100vw] transition-height duration-1000 z-[10]"
+      className="flex justify-center items-center relative w-[100vw] transition-height duration-1000 z-[10] cursor-none"
       ref={mainWrapperRef}
       style={{
         height: metrics.height,
       }}
+      onPointerMove={handleMove}
     >
       <IntroGridPhantom projects={projects} />
       <div

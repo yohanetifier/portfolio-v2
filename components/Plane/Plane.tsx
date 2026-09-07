@@ -1,5 +1,5 @@
 'use client';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -77,7 +77,7 @@ void main() {
   float phase = smoothstep(0.0, 1.0, dist);
   float factor = 1.0 - phase;
   float onde = sin(dist + uTime) * factor * uIsHovered;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime) * uAmplitude + onde, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos.x, pos.y, snoise(pos + uTime) * uAmplitude + onde , 1.0);
 }
 `;
 

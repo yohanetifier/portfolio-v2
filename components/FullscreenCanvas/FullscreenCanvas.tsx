@@ -4,6 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import Scene from '../Scene/Scene';
 import { usePathname } from 'next/navigation';
+import Cursor from '../Cursor/Cursor';
 
 const FullscreenCanvas = () => {
   const { projectsDetails } = useThreeJsContext();
@@ -23,7 +24,10 @@ const FullscreenCanvas = () => {
       id="fullscreen"
     >
       {pathname.startsWith('/work') || pathname === '/' ? (
-        <Scene projectsDetails={projectsDetails} />
+        <>
+          <Cursor />
+          <Scene projectsDetails={projectsDetails} />
+        </>
       ) : null}
     </Canvas>
   );

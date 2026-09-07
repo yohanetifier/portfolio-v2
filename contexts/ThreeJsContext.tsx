@@ -36,6 +36,8 @@ interface ThreeJsContextType {
   setHoveredIndex: (arg: number | null) => void;
   uv: { x: number | null; y: number | null };
   setUv: (arg: Uv) => void;
+  mouseCoords: Uv;
+  setMouseCoords: (arg: Uv) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
@@ -55,6 +57,7 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [projectsHomeCoords, setProjectsHomeCoords] = useState([]);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [uv, setUv] = useState<Uv>({ x: null, y: null });
+  const [mouseCoords, setMouseCoords] = useState<Uv>({ x: null, y: null });
 
   return (
     <ThreeJsContext.Provider
@@ -85,6 +88,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setHoveredIndex,
         uv,
         setUv,
+        mouseCoords,
+        setMouseCoords,
       }}
     >
       {children}
