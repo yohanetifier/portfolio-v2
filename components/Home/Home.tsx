@@ -53,7 +53,7 @@ export default function Home({
 
   return (
     <div
-      className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000"
+      className="flex justify-center items-center relative w-[100vw] h-[100vh] transition-height duration-1000 cursor-none"
       ref={mainWrapperRef}
     >
       <WorklistPhantomGrid projects={projects} />

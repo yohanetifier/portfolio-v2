@@ -82,6 +82,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/FabrikatMono-Light.otf"
+          as="font"
+          type="font/otf"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={`antialiased`} style={{ backgroundColor: '#ffffff' }}>
         <div
           className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[1] scale-0 absolute top-0 bg-white`}

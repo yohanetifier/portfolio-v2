@@ -1,13 +1,13 @@
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { useFrame, useThree } from '@react-three/fiber';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 const CURSORS = 6;
 
 const Cursor = () => {
   const meshRef = useRef<THREE.Mesh[]>([]);
-  const { mouseCoords } = useThreeJsContext();
+  const { mouseCoords, setMouseCoords } = useThreeJsContext();
   const { viewport, size } = useThree();
   const cursors = Array.from({ length: CURSORS });
   const oldPosition = useRef([]);
@@ -23,7 +23,7 @@ const Cursor = () => {
     meshRef.current[0].position.y =
       meshRef.current[0].position.y +
       (worldY - meshRef.current[0].position.y) * 0.1;
-    meshRef.current[0].scale.set(0.6, 0.6, 0.6);
+    meshRef.current[0].scale.set(0.1, 0.1, 0.1);
     oldPosition.current.push({
       x: meshRef.current[0].position.x,
       y: meshRef.current[0].position.y,
@@ -34,16 +34,27 @@ const Cursor = () => {
 
     if (oldPosition.current.length > 10) {
       for (let i = 1; i < cursors.length; i++) {
+        const scale = i / (cursors.length * 10);
         meshRef.current[i].position.x = oldPosition.current[i * 3].x;
         meshRef.current[i].position.y = oldPosition.current[i * 3].y;
         meshRef.current[i].scale.set(
-          Number(`0.${i}`),
-          Number(`0.${i}`),
-          Number(`0.${i}`),
+          Number(scale),
+          Number(scale),
+          Number(scale),
         );
       }
     }
   });
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      setMouseCoords({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('pointermove', handleMove);
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+    };
+  }, [setMouseCoords]);
 
   return (
     <>
@@ -57,7 +68,7 @@ const Cursor = () => {
             <circleGeometry />
             <meshBasicMaterial
               depthTest={false}
-              color={'red'}
+              color={'#B8C1CC'}
               transparent
               opacity={i === 0 ? 1 : i / cursors.length}
             />

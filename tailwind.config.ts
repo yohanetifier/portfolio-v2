@@ -12,6 +12,7 @@ export default {
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        title: '#f4f3f0',
       },
       keyframes: {
         fadeIn: {
