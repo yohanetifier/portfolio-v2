@@ -59,7 +59,7 @@ const Header = () => {
       setIsAnimating(true);
     }
     e.preventDefault();
-    // router.push(path);
+    router.push(path);
     setReset(true);
   };
 

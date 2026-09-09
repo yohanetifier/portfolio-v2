@@ -1,17 +1,16 @@
 'use client';
 import { Project } from '@/src/models/Project';
 import gsap from 'gsap';
-import { Flip, ScrollTrigger } from 'gsap/all';
+import { Flip, ScrollTrigger, SplitText } from 'gsap/all';
 import Link from 'next/link';
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
 import { setFlag } from '@/utils/fromWorkList';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
-import { useThree } from '@react-three/fiber';
 
-gsap.registerPlugin(Flip, ScrollTrigger);
+gsap.registerPlugin(Flip, ScrollTrigger, SplitText);
 
 export default function WorkList({
   projects,
@@ -31,9 +30,7 @@ export default function WorkList({
     setIsAnimating,
     setHoveredIndex,
     setUv,
-    setMouseCoords,
     hoveredIndex,
-    mouseCoords,
   } = useThreeJsContext();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
@@ -46,7 +43,11 @@ export default function WorkList({
   const currentX = useRef<number | null>(null);
   const currentY = useRef<number | null>(null);
   const hoveredIndexRef = useRef<number | null>(null);
+  const titleWrapperRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLParagraphElement>(null);
+  const [active, setActive] = useState<boolean | null>(false);
+  const tlRef = useRef();
+  const splitRef = useRef(null);
 
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -107,13 +108,40 @@ export default function WorkList({
     window.scrollTo(0, scrollY!);
   }, []);
 
+  useLayoutEffect(() => {
+    const tl = gsap.timeline();
+    const splitTitle = SplitText.create(titleRef.current, {
+      type: 'chars',
+    });
+
+    if (active) {
+      tl.fromTo(
+        splitTitle.chars,
+        { yPercent: 110 },
+        { yPercent: 0, stagger: 0.03, ease: 'expo.out' },
+      );
+    } else {
+      tl.fromTo(
+        splitTitle.chars,
+        { yPercent: 0 },
+        {
+          yPercent: 110,
+          stagger: 0.03,
+          duration: 0.6,
+          ease: 'expo.out',
+          onComplete: () => {
+            hoveredIndexRef.current = null;
+          },
+        },
+      );
+    }
+  }, [active]);
+
   const handleMouseMove = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     index: number | null,
   ) => {
     if (index === null) return;
-    hoveredIndexRef.current = index;
-    titleRef.current.style.opacity = 1;
     const rects = e.currentTarget.getBoundingClientRect();
     const pointXCoords = e.clientX - rects.left;
     const pointYCoords = e.clientY - rects.top;
@@ -122,11 +150,13 @@ export default function WorkList({
     const uv = { x: pointX, y: pointY };
     setUv(uv);
     setHoveredIndex(index);
+    hoveredIndexRef.current = index;
+    setActive(true);
   };
 
   const handleMouseLeave = () => {
+    setActive(false);
     setHoveredIndex(null);
-    titleRef.current.style.opacity = 0;
   };
 
   useEffect(() => {
@@ -142,14 +172,13 @@ export default function WorkList({
           currentX.current + (targetX.current - currentX.current) * 0.1;
         currentY.current =
           currentY.current + (targetY.current - currentY.current) * 0.1;
-        titleRef.current.style.left = currentX.current + 'px';
-        titleRef.current.style.top = currentY.current + 'px';
+        titleWrapperRef.current.style.left = currentX.current + 'px';
+        titleWrapperRef.current.style.top = currentY.current + 'px';
         requestAnimationFrame(tick);
       }
     };
     const id = requestAnimationFrame(tick);
     const handleMove = (e: MouseEvent) => {
-      if (hoveredIndexRef.current === null) return;
       targetX.current = e.clientX + 50;
       targetY.current = e.clientY - 10;
       if (currentX.current === null) {
@@ -158,8 +187,6 @@ export default function WorkList({
       if (currentY.current === null) {
         currentY.current = targetY.current;
       }
-      // titleRef.current.style.top = currentY.current + 'px';
-      // titleRef.current.style.left = currentX.current + 'px';
     };
     window.addEventListener('mousemove', handleMove);
     return () => {
@@ -195,7 +222,7 @@ export default function WorkList({
               className={`${placement.className}`}
               onClick={(e) => handleTransition(e, title, index, featuredImage)}
               onMouseMove={(e) => handleMouseMove(e, index)}
-              onMouseLeave={() => handleMouseLeave()}
+              onMouseLeave={handleMouseLeave}
               style={placement.style}
               ref={(el) => {
                 linkArray.current[index] = el!;
@@ -203,17 +230,27 @@ export default function WorkList({
             ></Link>
           );
         })}
-        <p
-          className="fixed opacity-0 text-red-500 mix-blend-difference text-[20px] pointer-events-none"
-          style={{
-            transition: 'opacity 900ms',
-          }}
-          ref={titleRef}
+        <div
+          className="fixed overflow-hidden pointer-events-none"
+          ref={titleWrapperRef}
         >
-          {hoveredIndexRef.current !== null
-            ? projects[hoveredIndexRef.current].title.toUpperCase()
-            : null}
-        </p>
+          <p
+            className=" font-fabrikatMono font-bold"
+            style={{
+              color: '#f4f3f0',
+              fontSize: 'clamp(36px, 4vw, 60px)',
+              letterSpacing: '-0.01em',
+              textShadow:
+                '0 2px 34px rgba(10,12,14,0.55), 0 0 2px rgba(10,12,14,0.4)',
+              // transform: 'translateY(100px)',
+            }}
+            ref={titleRef}
+          >
+            {hoveredIndexRef.current === null
+              ? null
+              : projects[hoveredIndexRef.current].title}
+          </p>
+        </div>
       </div>
     </div>
   );
