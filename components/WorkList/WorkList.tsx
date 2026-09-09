@@ -46,8 +46,6 @@ export default function WorkList({
   const titleWrapperRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLParagraphElement>(null);
   const [active, setActive] = useState<boolean | null>(false);
-  const tlRef = useRef();
-  const splitRef = useRef(null);
 
   const handleTransition = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -55,6 +53,7 @@ export default function WorkList({
     index: number,
     featuredImage: { src: string; alt: string },
   ) => {
+    setActive(false);
     e.preventDefault();
     const formatedTitle = slugify(title);
     setSelectedIndex(index);
@@ -235,9 +234,9 @@ export default function WorkList({
           ref={titleWrapperRef}
         >
           <p
-            className=" font-fabrikatMono font-bold"
+            className=" font-fabrikatMono "
             style={{
-              color: '#f4f3f0',
+              color: 'black',
               fontSize: 'clamp(36px, 4vw, 60px)',
               letterSpacing: '-0.01em',
               textShadow:

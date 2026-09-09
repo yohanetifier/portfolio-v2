@@ -86,6 +86,17 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   useLayoutEffect(() => {
     updateProjects();
     setProjectImageSelected(data.featuredImage.src);
+    const handleScroll = () => {
+      const offset = window.innerHeight / 2;
+      const offScreen = window.scrollY > offset;
+      const progress = offScreen ? 0 : Math.abs(window.scrollY / offset - 1);
+      titleRef.current.style.opacity = progress;
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
@@ -99,7 +110,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
         }}
       >
         <div
-          className={`w-full grid grid-cols-10 gap-[20px] z-[2]`}
+          className={`w-full grid grid-cols-10 gap-[20px] z-[2] `}
           ref={gridRef}
           style={{
             height: metrics.height,
@@ -126,9 +137,9 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
           })}
         </div>
       </div>
-      <div className="w-screen h-screen relative flex justify-center items-center p-4">
+      <div className="w-screen h-screen relative flex justify-center items-center  font-fabrikatMono">
         <h1
-          className="relative z-1 text-[5vw] text-white"
+          className="fixed z-1 text-[5vw] text-white"
           ref={titleRef}
           onPointerEnter={() => animateText(titleRef.current!)}
         >
@@ -141,7 +152,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
           return (
             <div
               key={index}
-              className="md:w-full md:h-full overflow-hidden p-4"
+              className="md:w-full md:h-full overflow-hidden block"
             >
               <video
                 key={index}
@@ -151,6 +162,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
                 playsInline
                 width={'100%'}
                 height={'100%'}
+                className="block w-full h-full object-cover"
               >
                 <source src={element} type="video/mp4" />
               </video>
@@ -164,7 +176,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
               alt={`Image du projet ${project}`}
               width={1000}
               height={1000}
-              className="md:w-full md:h-full relative z-20 p-4 object-cover"
+              className="md:w-full md:h-full relative z-20 object-cover block"
             />
           );
         }

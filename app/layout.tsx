@@ -91,7 +91,10 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className={`antialiased`} style={{ backgroundColor: '#ffffff' }}>
+      <body
+        className={`antialiased cursor-none`}
+        style={{ backgroundColor: '#ffffff' }}
+      >
         <div
           className={`w-full grid grid-rows-10 grid-cols-10 gap-[20px] h-[300vh] z-[1] scale-0 absolute top-0 bg-white`}
           id={'grid'}

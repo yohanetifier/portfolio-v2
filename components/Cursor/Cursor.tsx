@@ -23,7 +23,7 @@ const Cursor = () => {
     meshRef.current[0].position.y =
       meshRef.current[0].position.y +
       (worldY - meshRef.current[0].position.y) * 0.1;
-    meshRef.current[0].scale.set(0.1, 0.1, 0.1);
+    meshRef.current[0].scale.set(0.05, 0.05, 0.05);
     oldPosition.current.push({
       x: meshRef.current[0].position.x,
       y: meshRef.current[0].position.y,
@@ -34,7 +34,7 @@ const Cursor = () => {
 
     if (oldPosition.current.length > 10) {
       for (let i = 1; i < cursors.length; i++) {
-        const scale = i / (cursors.length * 10);
+        const scale = i / (cursors.length * 20);
         meshRef.current[i].position.x = oldPosition.current[i * 3].x;
         meshRef.current[i].position.y = oldPosition.current[i * 3].y;
         meshRef.current[i].scale.set(
@@ -68,7 +68,7 @@ const Cursor = () => {
             <circleGeometry />
             <meshBasicMaterial
               depthTest={false}
-              color={'#B8C1CC'}
+              color={'black'}
               transparent
               opacity={i === 0 ? 1 : i / cursors.length}
             />
