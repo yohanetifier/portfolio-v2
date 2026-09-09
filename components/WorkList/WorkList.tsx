@@ -218,7 +218,7 @@ export default function WorkList({
               key={index}
               href={`/work/${slugify(title)}`}
               prefetch={true}
-              className={`${placement.className}`}
+              className={`${placement.className} cursor-none`}
               onClick={(e) => handleTransition(e, title, index, featuredImage)}
               onMouseMove={(e) => handleMouseMove(e, index)}
               onMouseLeave={handleMouseLeave}
