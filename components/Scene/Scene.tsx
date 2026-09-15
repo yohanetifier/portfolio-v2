@@ -35,11 +35,19 @@ const Scene = ({ projectsDetails }: Props) => {
     setIsAnimating,
     hoveredIndex,
     mouseCoords,
+    fromWorkPage,
+    setFromWorkPage,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
   const workPath = getProjectPath(usePathname());
+  const activeIndex =
+    selectedIndex !== null
+      ? selectedIndex
+      : fromWorkPage >= 0
+        ? fromWorkPage
+        : null;
   const initCoords = useRef<Record<string, number>>({});
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
   const projectsAtTheBottom = useRef<Record<string, number>>({});
@@ -93,14 +101,17 @@ const Scene = ({ projectsDetails }: Props) => {
           setSelectedIndex(null);
           setSettledIndex(null);
           setSelectedSlug('');
+          setFromWorkPage(-1);
           setReturnHome(false);
           router.push(`/`, { scroll: false });
           setIsAnimating(false);
           unlockScroll();
         },
       });
+      const returningIndex = activeIndex;
       const itemsNotOnTheIntroPage =
-        selectedIndex! > projectsHomeCoords!.length - 1;
+        returningIndex !== null &&
+        returningIndex > projectsHomeCoords!.length - 1;
 
       projectsHomeCoords?.map(({ rects }, i) => {
         const centerX = rects.left + rects.width / 2;
@@ -109,7 +120,7 @@ const Scene = ({ projectsDetails }: Props) => {
         const worldY = -(centerY / size.height - 0.5) * viewport.height;
         const worldW = (rects.width / size.width) * viewport.width;
         const worldH = (rects.height / size.height) * viewport.height;
-        if (itemsNotOnTheIntroPage) {
+        if (itemsNotOnTheIntroPage && returningIndex !== null) {
           returnHomeTl
             .to(
               groupRefArray.current[i]?.position,
@@ -122,12 +133,12 @@ const Scene = ({ projectsDetails }: Props) => {
               '<',
             )
             .to(
-              groupRefArray.current[selectedIndex]?.position,
+              groupRefArray.current[returningIndex]?.position,
               { y: 0, x: 0, duration: 1 },
               '<',
             )
             .to(
-              groupRefArray.current[selectedIndex]?.scale,
+              groupRefArray.current[returningIndex]?.scale,
               { x: 0, y: 0, duration: 1 },
               '<',
             );
@@ -145,6 +156,7 @@ const Scene = ({ projectsDetails }: Props) => {
             );
         }
       });
+      return;
     }
 
     if (reset) {
@@ -206,6 +218,7 @@ const Scene = ({ projectsDetails }: Props) => {
         projectsAtTheTopRef.current.forEach((element) => {
           projectsAtTheTop.current[element.uuid] = element.position.y;
         });
+        console.log('selectedIndex', selectedIndex);
       } else {
         const { childAtTheBottom, childAtTheTop } = getPositions(
           groupRefArray.current,
@@ -335,7 +348,7 @@ const Scene = ({ projectsDetails }: Props) => {
         });
       }
     }
-  }, [selectedIndex, isReturning, reset, fromHome, returnHome]);
+  }, [selectedIndex, isReturning, reset, fromHome, returnHome, fromWorkPage]);
 
   // useFrame(() => {
   //   const worldX = (mouseCoords.x / size.width - 0.5) * viewport.width;
@@ -360,9 +373,9 @@ const Scene = ({ projectsDetails }: Props) => {
           <group
             key={i}
             position={
-              selectedIndex === i && workPath
+              activeIndex === i && workPath
                 ? [0.0, 0.0, 0]
-                : workPath && i !== selectedIndex
+                : workPath && i !== activeIndex
                   ? isBottom
                     ? [0, -viewport.height, 0]
                     : [0, viewport.height, 0]

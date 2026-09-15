@@ -8,6 +8,7 @@ import { useHeaderContext } from '@/contexts/HeaderContext';
 import Burger from '../Burger/Burger';
 import { getProjectPath } from '@/utils/getProjectPath';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { clearFlag } from '@/utils/fromWorkList';
 
 const Header = () => {
   const workRef = useRef<HTMLAnchorElement | null>(null);
@@ -20,7 +21,8 @@ const Header = () => {
   const { isOpen, setIsOpen } = useContext(ThemeContext);
   const { isHeaderVisible, setIsReturning, setReset } = useHeaderContext();
   const isIntro = !pathname || pathname === '/';
-  const { selectedIndex, setReturnHome, setIsAnimating } = useThreeJsContext();
+  const { selectedIndex, setReturnHome, setIsAnimating, setFromWorkPage } =
+    useThreeJsContext();
   const projectPath = getProjectPath(pathname);
 
   const handleClick = () => {
@@ -54,11 +56,17 @@ const Header = () => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     path: string,
   ) => {
+    e.preventDefault();
     if (path === '/') {
+      clearFlag();
+      if (selectedIndex !== null) {
+        setFromWorkPage(selectedIndex);
+      }
       setReturnHome(true);
       setIsAnimating(true);
+      // Pas de setReset / push ici : Scene returnHome clear + push('/') en onComplete
+      return;
     }
-    e.preventDefault();
     router.push(path);
     setReset(true);
   };

@@ -28,6 +28,8 @@ interface ThreeJsContextType {
   setProjectsHomeCoords: (projectsDetails: ProjectItem[]) => void;
   fromHome: boolean;
   setFromHome: (arg: boolean) => void;
+  fromWorkPage: number;
+  setFromWorkPage: (arg: number) => void;
   returnHome: boolean;
   setReturnHome: (arg: boolean) => void;
   isAnimating: boolean;
@@ -51,6 +53,7 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
     useState<DOMRect | null>(null);
   const [scrollY, setScrollY] = useState<number | null>(null);
   const [fromHome, setFromHome] = useState(false);
+  const [fromWorkPage, setFromWorkPage] = useState(-1);
   const [returnHome, setReturnHome] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [projectsCoords, setProjectsCoords] = useState([]);
@@ -90,6 +93,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setUv,
         mouseCoords,
         setMouseCoords,
+        fromWorkPage,
+        setFromWorkPage,
       }}
     >
       {children}

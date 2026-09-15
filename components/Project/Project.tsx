@@ -11,6 +11,7 @@ import { Project as ProjectModel } from '@/src/models/Project';
 import Link from 'next/link';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { slugify } from '@/utils/slugify';
+import { clearFlag, getFlag } from '@/utils/fromWorkList';
 
 interface Props {
   data: ProjectType;
