@@ -83,10 +83,24 @@ export function getGridPlacement(index: number) {
 }
 
 export function getGridMetrics(count: number) {
-  const cycles = Math.max(1, Math.ceil(count / GRID_PATTERN.length));
+  if (count <= 0) {
+    return {
+      rows: BASE_ROWS,
+      height: `${BASE_HEIGHT_VH}vh`,
+    };
+  }
+
+  let maxRow = 0;
+  for (let i = 0; i < count; i++) {
+    maxRow = Math.max(maxRow, getGridPlacement(i).style.gridRowStart);
+  }
+
+  // Marge pour les offsets relative (top/bottom) et la hauteur des cards (~24vw)
+  const rows = maxRow + 3;
+  const vhPerRow = BASE_HEIGHT_VH / BASE_ROWS;
 
   return {
-    rows: BASE_ROWS + (cycles - 1) * ROW_CYCLE,
-    height: `${BASE_HEIGHT_VH * cycles}vh`,
+    rows,
+    height: `${rows * vhPerRow}vh`,
   };
 }

@@ -11,17 +11,20 @@ type Props = {
 const WorklistPhantomGrid = ({ projects }: Props) => {
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const metrics = getGridMetrics(projects.length);
-  const phantomsElements = useRef<HTMLAnchorElement[]>([]);
+  const phantomsElements = useRef<(HTMLDivElement | null)[]>([]);
   const { setProjectsCoords } = useThreeJsContext();
 
   const updateProjects = () => {
     const phantomProjetcsRects = phantomsElements.current
-      .map((element: HTMLElement) => {
+      .map((element) => {
+        if (!element) return null;
         return {
           rects: element.getBoundingClientRect(),
         };
       })
-      .filter(Boolean);
+      .filter(
+        (item): item is { rects: DOMRect } => item !== null,
+      );
     setProjectsCoords(phantomProjetcsRects);
   };
 
@@ -52,7 +55,7 @@ const WorklistPhantomGrid = ({ projects }: Props) => {
               className={`${placement.className}`}
               style={placement.style}
               ref={(el) => {
-                phantomsElements.current[index] = el!;
+                phantomsElements.current[index] = el;
               }}
             ></div>
           );

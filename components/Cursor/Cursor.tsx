@@ -7,14 +7,22 @@ const CURSORS = 6;
 
 const Cursor = () => {
   const meshRef = useRef<THREE.Mesh[]>([]);
-  const { mouseCoords, setMouseCoords } = useThreeJsContext();
+  const { mouseCoords, setMouseCoords, cursorHover } = useThreeJsContext();
   const { viewport, size } = useThree();
   const cursors = Array.from({ length: CURSORS });
-  const oldPosition = useRef([]);
+  const oldPosition = useRef<{ x: number; y: number }[]>([]);
 
   useFrame(() => {
     if (mouseCoords.x === null || mouseCoords.y === null || !meshRef.current)
       return;
+
+    const visible = !cursorHover;
+    for (let i = 0; i < cursors.length; i++) {
+      const mesh = meshRef.current[i];
+      if (mesh) mesh.visible = visible;
+    }
+    if (!visible) return;
+
     const worldX = (mouseCoords.x / size.width - 0.5) * viewport.width;
     const worldY = -(mouseCoords.y / size.height - 0.5) * viewport.height;
     meshRef.current[0].position.x =
@@ -35,8 +43,10 @@ const Cursor = () => {
     if (oldPosition.current.length > 10) {
       for (let i = 1; i < cursors.length; i++) {
         const scale = i / (cursors.length * 20);
-        meshRef.current[i].position.x = oldPosition.current[i * 3].x;
-        meshRef.current[i].position.y = oldPosition.current[i * 3].y;
+        const sample = oldPosition.current[i * 3];
+        if (!sample || !meshRef.current[i]) continue;
+        meshRef.current[i].position.x = sample.x;
+        meshRef.current[i].position.y = sample.y;
         meshRef.current[i].scale.set(
           Number(scale),
           Number(scale),
@@ -62,7 +72,9 @@ const Cursor = () => {
         return (
           <mesh
             key={i}
-            ref={(el) => (meshRef.current[i] = el)}
+            ref={(el) => {
+              if (el) meshRef.current[i] = el;
+            }}
             scale={[0.2, 0.2, 0.2]}
           >
             <circleGeometry />

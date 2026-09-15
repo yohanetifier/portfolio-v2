@@ -4,6 +4,10 @@ export interface ProjectItem {
   imageUrl: string;
 }
 
+export type ProjectCoordsItem = {
+  rects: DOMRect;
+};
+
 interface Uv {
   x: number | null;
   y: number | null;
@@ -22,8 +26,8 @@ interface ThreeJsContextType {
   setProjectSelectedCoords: (arg: DOMRect) => void;
   scrollY: number | null;
   setScrollY: (arg: number) => void;
-  projectsCoords: DOMRect[] | null;
-  setProjectsCoords: (arg: DOMRect[] | null) => void;
+  projectsCoords: ProjectCoordsItem[] | null;
+  setProjectsCoords: (arg: ProjectCoordsItem[] | null) => void;
   projectsHomeCoords: ProjectItem[] | null;
   setProjectsHomeCoords: (projectsDetails: ProjectItem[]) => void;
   fromHome: boolean;
@@ -40,6 +44,8 @@ interface ThreeJsContextType {
   setUv: (arg: Uv) => void;
   mouseCoords: Uv;
   setMouseCoords: (arg: Uv) => void;
+  cursorHover: boolean;
+  setCursorHover: (arg: boolean) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
@@ -56,11 +62,16 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [fromWorkPage, setFromWorkPage] = useState(-1);
   const [returnHome, setReturnHome] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [projectsCoords, setProjectsCoords] = useState([]);
-  const [projectsHomeCoords, setProjectsHomeCoords] = useState([]);
-  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [projectsCoords, setProjectsCoords] = useState<ProjectCoordsItem[] | null>(
+    null,
+  );
+  const [projectsHomeCoords, setProjectsHomeCoords] = useState<ProjectItem[]>(
+    [],
+  );
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [uv, setUv] = useState<Uv>({ x: null, y: null });
   const [mouseCoords, setMouseCoords] = useState<Uv>({ x: null, y: null });
+  const [cursorHover, setCursorHover] = useState(false);
 
   return (
     <ThreeJsContext.Provider
@@ -95,6 +106,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setMouseCoords,
         fromWorkPage,
         setFromWorkPage,
+        cursorHover,
+        setCursorHover,
       }}
     >
       {children}

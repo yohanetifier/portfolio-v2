@@ -1,5 +1,5 @@
 'use client';
-import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -95,11 +95,19 @@ interface Props {
   imageUrl: string;
   isSelected: boolean;
   isHovered: boolean;
+  /** Plane plein écran sur /work/[project] — pas de ripple */
+  isProjectView?: boolean;
 }
 
-const Plane = ({ imageUrl, isSelected, isHovered }: Props) => {
+const Plane = ({
+  imageUrl,
+  isSelected,
+  isHovered,
+  isProjectView = false,
+}: Props) => {
   const router = useRouter();
-  const { selectedSlug, returnHome, setIsAnimating, uv } = useThreeJsContext();
+  const { selectedSlug, returnHome, setIsAnimating, uv, setHoveredIndex } =
+    useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
@@ -109,48 +117,79 @@ const Plane = ({ imageUrl, isSelected, isHovered }: Props) => {
     uTime: { value: 1.0 },
     uTexture: { value: texture },
     uAmplitude: { value: 0.4 },
-    uMouseCoords: { value: new THREE.Vector2(uv.x, uv.y) },
-    uIsHovered: { value: isHovered },
+    uMouseCoords: { value: new THREE.Vector2(uv.x ?? 0, uv.y ?? 0) },
+    uIsHovered: { value: 0.0 },
   });
 
   useFrame((_, delta) => {
-    materialRef.current!.uniforms.uTime.value += delta;
-    materialRef.current!.uniforms.uMouseCoords.value.x = uv.x;
-    materialRef.current!.uniforms.uMouseCoords.value.y = uv.y;
-    materialRef.current!.uniforms.uIsHovered.value = isHovered ? 1.0 : 0.0;
+    const mat = materialRef.current;
+    if (!mat) return;
+
+    mat.uniforms.uTime.value += delta;
+    mat.uniforms.uMouseCoords.value.x = uv.x ?? 0;
+    mat.uniforms.uMouseCoords.value.y = uv.y ?? 0;
+
+    // Hover lissé seulement hors page projet / sélection
+    if (!isSelected && !isProjectView) {
+      const target = isHovered ? 1.0 : 0.0;
+      mat.uniforms.uIsHovered.value +=
+        (target - mat.uniforms.uIsHovered.value) * 0.12;
+    }
   });
 
   useEffect(() => {
-    // if (!isSelected) return;
-    const amplitude = materialRef.current?.uniforms.uAmplitude;
-    if (isSelected) {
-      if (!isReturning) {
-        if (!amplitude) return;
+    if (isProjectView) {
+      setHoveredIndex(null);
+    }
+  }, [isProjectView, setHoveredIndex]);
+
+  useEffect(() => {
+    const mat = materialRef.current;
+    if (!mat) return;
+
+    const amplitude = mat.uniforms.uAmplitude;
+    const hover = mat.uniforms.uIsHovered;
+    const tweens: gsap.core.Tween[] = [];
+
+    if (isReturning && isSelected) {
+      tweens.push(
+        gsap.to(amplitude, {
+          value: 0.4,
+          duration: 1,
+          ease: 'power2.out',
+        }),
+      );
+      return () => tweens.forEach((t) => t.kill());
+    }
+
+    if (isSelected || isProjectView) {
+      tweens.push(
+        gsap.to(hover, {
+          value: 0,
+          duration: 0.55,
+          ease: 'power2.out',
+        }),
+      );
+      tweens.push(
         gsap.to(amplitude, {
           value: 0,
           duration: 1,
           ease: 'power3.out',
           onComplete: () => {
-            if (!selectedSlug) {
-              unlockScroll();
-              return;
+            // Navigation uniquement à la fin de la sélection (pas au mount page projet)
+            if (isSelected && !isProjectView && selectedSlug) {
+              router.push(`/work/${selectedSlug}`);
+              setIsAnimating(false);
             }
-            router.push(`/work/${selectedSlug}`);
             unlockScroll();
-            setIsAnimating(false);
           },
-        });
-      } else {
-        if (!amplitude) return;
-        gsap.to(amplitude, {
-          value: 0.4,
-          duration: 1,
-          ease: 'power2.out',
-        });
-      }
-    } else {
-      if (returnHome) {
-        if (!amplitude) return;
+        }),
+      );
+      return () => tweens.forEach((t) => t.kill());
+    }
+
+    if (returnHome) {
+      tweens.push(
         gsap.to(amplitude, {
           value: 0.4,
           duration: 1,
@@ -158,11 +197,19 @@ const Plane = ({ imageUrl, isSelected, isHovered }: Props) => {
           onComplete: () => {
             unlockScroll();
           },
-        });
-      }
-      return;
+        }),
+      );
+      return () => tweens.forEach((t) => t.kill());
     }
-  }, [isSelected, isReturning]);
+  }, [
+    isSelected,
+    isReturning,
+    isProjectView,
+    returnHome,
+    router,
+    selectedSlug,
+    setIsAnimating,
+  ]);
 
   return (
     <mesh scale={[1, 1, 1]} position={[0.0, 0.0, 0.0]}>

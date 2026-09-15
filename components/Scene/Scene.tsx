@@ -71,6 +71,8 @@ const Scene = ({ projectsDetails }: Props) => {
         },
       });
       projectsCoords?.map(({ rects }, i) => {
+        const group = groupRefArray.current[i];
+        if (!group) return;
         const centerX = rects.left + rects.width / 2;
         const centerY = rects.top + rects.height / 2;
         const worldX = (centerX / size.width - 0.5) * viewport.width;
@@ -79,16 +81,8 @@ const Scene = ({ projectsDetails }: Props) => {
         const worldH = (rects.height / size.height) * viewport.height;
 
         homeTl
-          .to(
-            groupRefArray.current[i]?.position,
-            { y: worldY, x: worldX, duration: 1 },
-            '<',
-          )
-          .to(
-            groupRefArray.current[i]?.scale,
-            { x: worldW, y: worldH, duration: 1 },
-            '<',
-          );
+          .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
+          .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
       });
     }
 
@@ -114,6 +108,8 @@ const Scene = ({ projectsDetails }: Props) => {
         returningIndex > projectsHomeCoords!.length - 1;
 
       projectsHomeCoords?.map(({ rects }, i) => {
+        const group = groupRefArray.current[i];
+        if (!group) return;
         const centerX = rects.left + rects.width / 2;
         const centerY = rects.top + rects.height / 2;
         const worldX = (centerX / size.width - 0.5) * viewport.width;
@@ -121,39 +117,19 @@ const Scene = ({ projectsDetails }: Props) => {
         const worldW = (rects.width / size.width) * viewport.width;
         const worldH = (rects.height / size.height) * viewport.height;
         if (itemsNotOnTheIntroPage && returningIndex !== null) {
+          const selectedGroup = groupRefArray.current[returningIndex];
           returnHomeTl
-            .to(
-              groupRefArray.current[i]?.position,
-              { y: worldY, x: worldX, duration: 1 },
-              '<',
-            )
-            .to(
-              groupRefArray.current[i]?.scale,
-              { x: worldW, y: worldH, duration: 1 },
-              '<',
-            )
-            .to(
-              groupRefArray.current[returningIndex]?.position,
-              { y: 0, x: 0, duration: 1 },
-              '<',
-            )
-            .to(
-              groupRefArray.current[returningIndex]?.scale,
-              { x: 0, y: 0, duration: 1 },
-              '<',
-            );
+            .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
+            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
+          if (selectedGroup) {
+            returnHomeTl
+              .to(selectedGroup.position, { y: 0, x: 0, duration: 1 }, '<')
+              .to(selectedGroup.scale, { x: 0, y: 0, duration: 1 }, '<');
+          }
         } else {
           returnHomeTl
-            .to(
-              groupRefArray.current[i]?.position,
-              { y: worldY, x: worldX, duration: 1 },
-              '<',
-            )
-            .to(
-              groupRefArray.current[i]?.scale,
-              { x: worldW, y: worldH, duration: 1 },
-              '<',
-            );
+            .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
+            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
         }
       });
       return;
@@ -196,13 +172,13 @@ const Scene = ({ projectsDetails }: Props) => {
 
         baseLocationItemSelected.position.x = worldX;
         baseLocationItemSelected.position.y = worldY;
-        const groupRefArrayFilter = groupRefArray.current.filter(
-          (_, i) => i !== selectedIndex,
-        );
+        const groupRefArrayFilter = groupRefArray.current
+          .map((el, i) => (i !== selectedIndex ? el : null))
+          .filter((el): el is THREE.Group => el !== null);
 
         if (!fromWorkList) {
           groupRefArrayFilter.forEach((element) => {
-            initCoords.current[element.uuid] = element?.position.y;
+            initCoords.current[element.uuid] = element.position.y;
           });
         }
 
@@ -218,11 +194,15 @@ const Scene = ({ projectsDetails }: Props) => {
         projectsAtTheTopRef.current.forEach((element) => {
           projectsAtTheTop.current[element.uuid] = element.position.y;
         });
-        console.log('selectedIndex', selectedIndex);
       } else {
+        const groups = groupRefArray.current.filter(
+          (el): el is THREE.Group => el !== null,
+        );
+        const selectedGroup = groupRefArray.current[selectedIndex];
+        if (!selectedGroup) return;
         const { childAtTheBottom, childAtTheTop } = getPositions(
-          groupRefArray.current,
-          groupRefArray.current[selectedIndex],
+          groups,
+          selectedGroup,
         );
         projectsAtTheBottomRef.current = childAtTheBottom;
         projectsAtTheTopRef.current = childAtTheTop;
@@ -390,6 +370,7 @@ const Scene = ({ projectsDetails }: Props) => {
               imageUrl={imageUrl}
               isSelected={settledIndex === i}
               isHovered={hoveredIndex === i}
+              isProjectView={activeIndex === i && Boolean(workPath)}
             />
           </group>
         </>

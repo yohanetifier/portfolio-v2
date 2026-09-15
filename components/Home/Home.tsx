@@ -6,6 +6,7 @@ import React, { useEffect, useRef } from 'react';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { lockScroll } from '@/utils/scroll';
+import gsap from 'gsap';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 
@@ -16,6 +17,7 @@ export default function Home({
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const welcomeRef = useRef<HTMLButtonElement>(null);
+  const titlesRef = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const { setHeaderVisible } = useHeaderContext();
   const {
@@ -30,6 +32,14 @@ export default function Home({
     setFromHome(true);
     lockScroll();
     setIsAnimating(true);
+    if (titlesRef.current) {
+      gsap.to(titlesRef.current, {
+        opacity: 0,
+        duration: 1,
+        ease: 'power2.inOut',
+        overwrite: 'auto',
+      });
+    }
   };
 
   useEffect(() => {
@@ -47,6 +57,8 @@ export default function Home({
   };
 
   useEffect(() => {
+    // document.documentElement.style.overflow = 'hidden';
+    lockScroll();
     setScrollY(0);
     updateProjects();
   }, [projectsHomeCoords]);
@@ -58,7 +70,10 @@ export default function Home({
     >
       <WorklistPhantomGrid projects={projects} />
       <IntroGridPhantom projects={projects} />
-      <div className="absolute w-full h-[100px] md:w-[80%]  2xl:w-[60%] z-20 flex items-center justify-between">
+      <div
+        ref={titlesRef}
+        className="absolute w-full h-[100px] md:w-[80%]  2xl:w-[60%] z-20 flex items-center justify-between"
+      >
         <Button
           onClick={handleClick}
           onMouseEnter={() => animateText(welcomeRef.current!)}

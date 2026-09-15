@@ -12,18 +12,19 @@ export default function IntroPhantomGrid({
 }) {
   const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
-  const imgRefArray = useRef([]);
+  const imgRefArray = useRef<(HTMLDivElement | null)[]>([]);
   const { setProjectsHomeCoords } = useThreeJsContext();
 
   const updateProjects = () => {
     const rects: ProjectItem[] = imgRefArray.current
-      .map((element: HTMLElement, index) => {
+      .map((element, index) => {
+        if (!element) return null;
         return {
           rects: element.getBoundingClientRect(),
           imageUrl: projects[index].featuredImage.src,
         };
       })
-      .filter(Boolean);
+      .filter((item): item is ProjectItem => item !== null);
     setProjectsHomeCoords(rects);
   };
 
@@ -44,7 +45,9 @@ export default function IntroPhantomGrid({
           <div
             key={index}
             className={`${getStartingClass(index)}`}
-            ref={(el) => (imgRefArray.current[index] = el)}
+            ref={(el) => {
+              imgRefArray.current[index] = el;
+            }}
           >
             <Image
               src={featuredImage.src}

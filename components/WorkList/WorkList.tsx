@@ -166,13 +166,15 @@ export default function WorkList({
         hoveredIndexRef.current === null
       ) {
         requestAnimationFrame(tick);
-      } else {
+      } else if (titleWrapperRef.current) {
         currentX.current =
           currentX.current + (targetX.current - currentX.current) * 0.1;
         currentY.current =
           currentY.current + (targetY.current - currentY.current) * 0.1;
         titleWrapperRef.current.style.left = currentX.current + 'px';
         titleWrapperRef.current.style.top = currentY.current + 'px';
+        requestAnimationFrame(tick);
+      } else {
         requestAnimationFrame(tick);
       }
     };

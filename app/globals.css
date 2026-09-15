@@ -32,6 +32,53 @@ body {
   font-family: 'Fabrikat Mono', monospace;
 }
 
-/* * {
-  will-change: auto;
-} */
+/* Masquer la scrollbar native (Lenis + barre custom) */
+html.lenis,
+html.lenis body {
+  scrollbar-width: none; /* Firefox */
+}
+
+html.lenis::-webkit-scrollbar,
+html.lenis body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+/* Custom scroll progress (Lenis) */
+.progress {
+  position: fixed;
+  right: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  width: 1px;
+  height: 22vh;
+  background: rgba(244, 243, 240, 0.32);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.progress__thumb {
+  width: 100%;
+  height: 18%;
+  background: #f4f3f0;
+  transform-origin: top;
+  will-change: transform;
+}
+
+/* Cursor follow — état lien (taille native = hover, pas d’upscale) */
+.cursor-follow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 120;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #000 3px, transparent 3.1px),
+    #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  will-change: transform;
+}

@@ -91,7 +91,9 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
       const offset = window.innerHeight / 2;
       const offScreen = window.scrollY > offset;
       const progress = offScreen ? 0 : Math.abs(window.scrollY / offset - 1);
-      titleRef.current.style.opacity = progress;
+      if (titleRef.current) {
+        titleRef.current.style.opacity = String(progress);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
