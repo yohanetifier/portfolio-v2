@@ -1,6 +1,7 @@
 'use client';
 import React, { useLayoutEffect, useRef } from 'react';
 import Image from 'next/image';
+import gsap from 'gsap';
 import { Project as ProjectType } from '@/src/models/Project';
 import { animateText } from '@/common/utils/animateText';
 import { useParams, usePathname } from 'next/navigation';
@@ -12,6 +13,7 @@ import Link from 'next/link';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { slugify } from '@/utils/slugify';
 import { clearFlag, getFlag } from '@/utils/fromWorkList';
+import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 
 interface Props {
   data: ProjectType;
@@ -33,8 +35,10 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     setScrollY,
     scrollY,
     setProjectSelectedCoords,
+    goToContact,
   } = useThreeJsContext();
   const workPath = usePathname().split('/')[2];
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const updateProjects = () => {
     const checkIfProjectsAlreadySet =
@@ -102,8 +106,15 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     };
   }, []);
 
+  // Masque le HTML projet avant le paint → le canvas 3D prend le relais sans flash
+  useLayoutEffect(() => {
+    if (!goToContact || !overlayRef.current) return;
+    gsap.set(overlayRef.current, { opacity: 0, pointerEvents: 'none' });
+  }, [goToContact]);
+
   return (
     <div className="w-screen h-screen relative z-[3]">
+      <ContactPhantomGrid projects={projects} />
       <div
         className="flex justify-center items-center absolute w-[100vw] transition-height duration-1000 z-[1] pointer-events-none"
         ref={mainWrapperRef}
@@ -128,9 +139,6 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
                 href={`/work/${title.replace(/\s+/g, '-')}`}
                 prefetch={true}
                 className={`${placement.className} `}
-                // onClick={(e) =>
-                //   handleTransition(e, title, index, featuredImage)
-                // }
                 style={placement.style}
                 ref={(el) => {
                   linkArray.current[index] = el!;
@@ -140,50 +148,53 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
           })}
         </div>
       </div>
-      <div className="w-screen h-screen relative flex justify-center items-center  font-fabrikatMono">
-        <h1
-          className="fixed z-1 text-[5vw] text-white"
-          ref={titleRef}
-          onPointerEnter={() => animateText(titleRef.current!)}
-        >
-          {data.title}
-        </h1>
-      </div>
 
-      {mediaUrls.map((element, index) => {
-        if (element.endsWith('mp4')) {
-          return (
-            <div
-              key={index}
-              className="md:w-full md:h-full overflow-hidden block"
-            >
-              <video
+      <div ref={overlayRef} className="relative z-[20]">
+        <div className="w-screen h-screen relative flex justify-center items-center  font-fabrikatMono">
+          <h1
+            className="fixed z-1 text-[5vw] text-white"
+            ref={titleRef}
+            onPointerEnter={() => animateText(titleRef.current!)}
+          >
+            {data.title}
+          </h1>
+        </div>
+
+        {mediaUrls.map((element, index) => {
+          if (element.endsWith('mp4')) {
+            return (
+              <div
                 key={index}
-                loop
-                autoPlay
-                muted
-                playsInline
-                width={'100%'}
-                height={'100%'}
-                className="block w-full h-full object-cover"
+                className="md:w-full md:h-full overflow-hidden block"
               >
-                <source src={element} type="video/mp4" />
-              </video>
-            </div>
-          );
-        } else {
-          return (
-            <Image
-              key={index}
-              src={getFullSizeImage(element)}
-              alt={`Image du projet ${project}`}
-              width={1000}
-              height={1000}
-              className="md:w-full md:h-full relative z-20 object-cover block"
-            />
-          );
-        }
-      })}
+                <video
+                  key={index}
+                  loop
+                  autoPlay
+                  muted
+                  playsInline
+                  width={'100%'}
+                  height={'100%'}
+                  className="block w-full h-full object-cover"
+                >
+                  <source src={element} type="video/mp4" />
+                </video>
+              </div>
+            );
+          } else {
+            return (
+              <Image
+                key={index}
+                src={getFullSizeImage(element)}
+                alt={`Image du projet ${project}`}
+                width={1000}
+                height={1000}
+                className="md:w-full md:h-full relative z-20 object-cover block"
+              />
+            );
+          }
+        })}
+      </div>
     </div>
   );
 };

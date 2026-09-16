@@ -21,9 +21,18 @@ const Header = () => {
   const { isOpen, setIsOpen } = useContext(ThemeContext);
   const { isHeaderVisible, setIsReturning, setReset } = useHeaderContext();
   const isIntro = !pathname || pathname === '/';
-  const { selectedIndex, setReturnHome, setIsAnimating, setFromWorkPage } =
-    useThreeJsContext();
+  const {
+    selectedIndex,
+    setReturnHome,
+    setIsAnimating,
+    setFromWorkPage,
+    setGoToContact,
+    setGoToWork,
+    setFromProjectSlug,
+    setFromProjectIndex,
+  } = useThreeJsContext();
   const projectPath = getProjectPath(pathname);
+  const showBack = Boolean(projectPath);
 
   const returnToWorkList = () => {
     if (selectedIndex === null) return;
@@ -47,6 +56,12 @@ const Header = () => {
     if (projectPath) {
       e.preventDefault();
       returnToWorkList();
+    } else if (pathname === '/contact') {
+      e.preventDefault();
+      setFromProjectSlug(null);
+      setFromProjectIndex(-1);
+      setGoToWork(true);
+      setIsAnimating(true);
     } else {
       setReset(true);
     }
@@ -62,9 +77,28 @@ const Header = () => {
       if (selectedIndex !== null) {
         setFromWorkPage(selectedIndex);
       }
+      setFromProjectSlug(null);
+      setFromProjectIndex(-1);
       setReturnHome(true);
       setIsAnimating(true);
-      // Pas de setReset / push ici : Scene returnHome clear + push('/') en onComplete
+      return;
+    }
+    if (path === '/contact') {
+      if (pathname === '/work') {
+        setGoToContact(true);
+        setIsAnimating(true);
+        return;
+      }
+      if (projectPath) {
+        if (selectedIndex === null) return;
+        setFromProjectSlug(String(projectPath));
+        setFromProjectIndex(selectedIndex);
+        setGoToContact(true);
+        setIsAnimating(true);
+        return;
+      }
+      router.push(path);
+      setReset(true);
       return;
     }
     router.push(path);
@@ -77,7 +111,7 @@ const Header = () => {
         <header
           className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out ${project || isOpen ? 'text-white' : 'text-black'} ${isHeaderVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
-          {projectPath && (
+          {showBack && (
             <button
               type="button"
               onClick={handleBack}
@@ -85,7 +119,7 @@ const Header = () => {
               aria-label="Retour"
             >
               <Image
-                src="/images/Fleche.png"
+                src={projectPath ? '/images/Fleche.png' : '/images/Black_Fleche.png'}
                 alt=""
                 width={16}
                 height={16}
@@ -102,13 +136,6 @@ const Header = () => {
           >
             Yeti
           </Link>
-            {/* <p
-              className="text-right justify-self-end cursor-pointer"
-              ref={jobRef}
-              onMouseEnter={() => animateText(jobRef.current!)}
-            >
-              Art director
-            </p> */}
           </div>
           <Link
             ref={workRef}

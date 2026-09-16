@@ -109,8 +109,16 @@ const Plane = ({
   isProjectView = false,
 }: Props) => {
   const router = useRouter();
-  const { selectedSlug, returnHome, setIsAnimating, uv, setHoveredIndex } =
-    useThreeJsContext();
+  const {
+    selectedSlug,
+    returnHome,
+    goToContact,
+    goToWork,
+    goToProject,
+    setIsAnimating,
+    uv,
+    setHoveredIndex,
+  } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
   const materialRef = useRef<THREE.ShaderMaterial>();
@@ -165,6 +173,18 @@ const Plane = ({
       return () => tweens.forEach((t) => t.kill());
     }
 
+    // Projet → contact : remettre l’amplitude pendant le shrink (sinon reste à 0)
+    if (goToContact) {
+      tweens.push(
+        gsap.to(amplitude, {
+          value: PLANE_AMPLITUDE,
+          duration: 1,
+          ease: 'power2.out',
+        }),
+      );
+      return () => tweens.forEach((t) => t.kill());
+    }
+
     if (isSelected || isProjectView) {
       tweens.push(
         gsap.to(hover, {
@@ -179,6 +199,10 @@ const Plane = ({
           duration: 1,
           ease: 'power3.out',
           onComplete: () => {
+            // Ne pas naviguer si une autre transition (contact / works / retour) est en cours
+            if (goToContact || goToWork || goToProject || returnHome) {
+              return;
+            }
             // Navigation uniquement à la fin de la sélection (pas au mount page projet)
             if (isSelected && !isProjectView && selectedSlug) {
               router.push(`/work/${selectedSlug}`);
@@ -209,6 +233,9 @@ const Plane = ({
     isReturning,
     isProjectView,
     returnHome,
+    goToContact,
+    goToWork,
+    goToProject,
     router,
     selectedSlug,
     setIsAnimating,

@@ -1,4 +1,5 @@
 import Contact from '@/components/Contact/Contact';
+import { portfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPage() {
-  return <Contact />;
+export default async function ContactPage() {
+  const projects = await portfolioViewModel();
+  return <Contact projects={projects ?? []} />;
 }

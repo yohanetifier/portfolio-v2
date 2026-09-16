@@ -11,7 +11,8 @@ const FullscreenCanvas = () => {
   const { projectsDetails } = useThreeJsContext();
   const pathname = usePathname();
   const finePointer = useFinePointer();
-  const showScene = pathname.startsWith('/work') || pathname === '/';
+  const showScene =
+    pathname.startsWith('/work') || pathname === '/' || pathname === '/contact';
 
   return (
     <Canvas

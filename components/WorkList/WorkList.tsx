@@ -9,6 +9,7 @@ import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
 import { setFlag } from '@/utils/fromWorkList';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
+import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { useFinePointer } from '@/utils/useFinePointer';
 
 gsap.registerPlugin(Flip, ScrollTrigger, SplitText);
@@ -211,6 +212,7 @@ export default function WorkList({
       }}
     >
       <IntroGridPhantom projects={projects} />
+      <ContactPhantomGrid projects={projects} />
       <div
         className={`w-full grid grid-cols-10 gap-[20px] z-[2] `}
         ref={gridRef}

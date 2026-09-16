@@ -30,12 +30,24 @@ interface ThreeJsContextType {
   setProjectsCoords: (arg: ProjectCoordsItem[] | null) => void;
   projectsHomeCoords: ProjectItem[] | null;
   setProjectsHomeCoords: (projectsDetails: ProjectItem[]) => void;
+  projectsContactCoords: ProjectItem[] | null;
+  setProjectsContactCoords: (arg: ProjectItem[] | null) => void;
   fromHome: boolean;
   setFromHome: (arg: boolean) => void;
   fromWorkPage: number;
   setFromWorkPage: (arg: number) => void;
   returnHome: boolean;
   setReturnHome: (arg: boolean) => void;
+  goToContact: boolean;
+  setGoToContact: (arg: boolean) => void;
+  goToWork: boolean;
+  setGoToWork: (arg: boolean) => void;
+  goToProject: boolean;
+  setGoToProject: (arg: boolean) => void;
+  fromProjectSlug: string | null;
+  setFromProjectSlug: (arg: string | null) => void;
+  fromProjectIndex: number;
+  setFromProjectIndex: (arg: number) => void;
   isAnimating: boolean;
   setIsAnimating: (arg: boolean) => void;
   hoveredIndex: number | null;
@@ -61,6 +73,11 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [fromHome, setFromHome] = useState(false);
   const [fromWorkPage, setFromWorkPage] = useState(-1);
   const [returnHome, setReturnHome] = useState(false);
+  const [goToContact, setGoToContact] = useState(false);
+  const [goToWork, setGoToWork] = useState(false);
+  const [goToProject, setGoToProject] = useState(false);
+  const [fromProjectSlug, setFromProjectSlug] = useState<string | null>(null);
+  const [fromProjectIndex, setFromProjectIndex] = useState(-1);
   const [isAnimating, setIsAnimating] = useState(false);
   const [projectsCoords, setProjectsCoords] = useState<ProjectCoordsItem[] | null>(
     null,
@@ -68,6 +85,9 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [projectsHomeCoords, setProjectsHomeCoords] = useState<ProjectItem[]>(
     [],
   );
+  const [projectsContactCoords, setProjectsContactCoords] = useState<
+    ProjectItem[] | null
+  >(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [uv, setUv] = useState<Uv>({ x: null, y: null });
   const [mouseCoords, setMouseCoords] = useState<Uv>({ x: null, y: null });
@@ -94,8 +114,20 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setProjectsCoords,
         projectsHomeCoords,
         setProjectsHomeCoords,
+        projectsContactCoords,
+        setProjectsContactCoords,
         returnHome,
         setReturnHome,
+        goToContact,
+        setGoToContact,
+        goToWork,
+        setGoToWork,
+        goToProject,
+        setGoToProject,
+        fromProjectSlug,
+        setFromProjectSlug,
+        fromProjectIndex,
+        setFromProjectIndex,
         isAnimating,
         setIsAnimating,
         hoveredIndex,
