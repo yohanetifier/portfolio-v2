@@ -1,26 +1,39 @@
 'use client';
 
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { useFinePointer } from '@/utils/useFinePointer';
 import gsap from 'gsap';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 const SELECTOR = 'a, button, [data-cursor]';
 
+/** Pages où le trail 3D remplace le curseur idle */
+function hasThreeCursor(pathname: string | null) {
+  return pathname === '/' || (pathname?.startsWith('/work') ?? false);
+}
+
 export default function CursorFollow() {
   const rootRef = useRef<HTMLDivElement>(null);
   const { setCursorHover } = useThreeJsContext();
+  const pathname = usePathname();
+  const finePointer = useFinePointer();
+  const useIdleDot = !hasThreeCursor(pathname);
   const xTo = useRef<ReturnType<typeof gsap.quickTo> | null>(null);
   const yTo = useRef<ReturnType<typeof gsap.quickTo> | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    if (!root || !finePointer) {
+      setCursorHover(false);
+      return;
+    }
 
     gsap.set(root, {
       xPercent: -50,
       yPercent: -50,
       scale: 1 / 2,
-      opacity: 0,
+      opacity: useIdleDot ? 1 : 0,
     });
 
     xTo.current = gsap.quickTo(root, 'x', {
@@ -36,7 +49,7 @@ export default function CursorFollow() {
       setCursorHover(on);
       gsap.to(root, {
         scale: on ? 1 : 1 / 2,
-        opacity: on ? 1 : 0,
+        opacity: on || useIdleDot ? 1 : 0,
         duration: 0.35,
         ease: 'power3.out',
         overwrite: 'auto',
@@ -70,7 +83,9 @@ export default function CursorFollow() {
       document.removeEventListener('pointerout', onPointerOut);
       setCursorHover(false);
     };
-  }, [setCursorHover]);
+  }, [setCursorHover, useIdleDot, finePointer]);
+
+  if (!finePointer) return null;
 
   return <div ref={rootRef} className="cursor-follow" aria-hidden />;
 }

@@ -12,7 +12,7 @@ export default function ScrollProgress() {
   const rootRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const visible = pathname !== '/';
+  const visible = pathname !== '/' && pathname !== '/contact';
 
   useEffect(() => {
     const el = rootRef.current;

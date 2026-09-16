@@ -57,10 +57,10 @@ const Menu = () => {
         className={`h-[2px] w-[60%] bg-gray-500 mt-[20px] transition-opacity duration-500 ${isOpen ? 'opacity-1 delay-300' : 'opacity-0 '}`}
       ></span>
       <a
-        href="mailto:yohan@yohanetifier.com"
+        href="mailto:contact@yohanetifier.com"
         className={`transition-opacity duration-500 ${isOpen ? 'opacity-1 delay-300' : 'opacity-0'}`}
       >
-        yohan@yohanetifier.com
+        contact@yohanetifier.com
       </a>
     </div>
   );

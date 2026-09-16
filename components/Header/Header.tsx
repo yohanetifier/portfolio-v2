@@ -25,28 +25,28 @@ const Header = () => {
     useThreeJsContext();
   const projectPath = getProjectPath(pathname);
 
-  const handleClick = () => {
+  const returnToWorkList = () => {
+    if (selectedIndex === null) return;
     setIsReturning(true);
     setIsAnimating(true);
+    router.push('/work', { scroll: false });
+  };
+
+  const handleBack = () => {
     if (isOpen) {
       setIsOpen(false);
-    } else {
-      if (pathname) {
-        router.back();
-      }
+      return;
     }
+    returnToWorkList();
   };
 
   const handleWorkPath = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     href: string,
   ) => {
-    // e.preventDefault();
     if (projectPath) {
-      if (selectedIndex === null) return;
-      setIsReturning(true);
-      setIsAnimating(true);
-      // router.push(href, { scroll: false });
+      e.preventDefault();
+      returnToWorkList();
     } else {
       setReset(true);
     }
@@ -80,7 +80,7 @@ const Header = () => {
           {projectPath && (
             <button
               type="button"
-              onClick={handleClick}
+              onClick={handleBack}
               className="absolute bottom-0 w-[16px] h-[16px] cursor-pointer p-0 border-0 bg-transparent"
               aria-label="Retour"
             >

@@ -8,6 +8,9 @@ import { useRouter } from 'next/navigation';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { unlockScroll } from '@/utils/scroll';
 
+/** Amplitude du déform (réduite pour limiter le motion sickness) */
+const PLANE_AMPLITUDE = 0.18;
+
 const vertexShader = `
 uniform float uTime;
 uniform vec2 uMouseCoords;
@@ -116,7 +119,7 @@ const Plane = ({
   const uniforms = useRef({
     uTime: { value: 1.0 },
     uTexture: { value: texture },
-    uAmplitude: { value: 0.4 },
+    uAmplitude: { value: PLANE_AMPLITUDE },
     uMouseCoords: { value: new THREE.Vector2(uv.x ?? 0, uv.y ?? 0) },
     uIsHovered: { value: 0.0 },
   });
@@ -154,7 +157,7 @@ const Plane = ({
     if (isReturning && isSelected) {
       tweens.push(
         gsap.to(amplitude, {
-          value: 0.4,
+          value: PLANE_AMPLITUDE,
           duration: 1,
           ease: 'power2.out',
         }),
@@ -191,7 +194,7 @@ const Plane = ({
     if (returnHome) {
       tweens.push(
         gsap.to(amplitude, {
-          value: 0.4,
+          value: PLANE_AMPLITUDE,
           duration: 1,
           ease: 'power2.out',
           onComplete: () => {

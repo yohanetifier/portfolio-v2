@@ -92,7 +92,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`antialiased cursor-none`}
+        className={`antialiased`}
         style={{ backgroundColor: '#ffffff' }}
       >
         <div

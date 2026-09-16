@@ -9,6 +9,7 @@ import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
 import { setFlag } from '@/utils/fromWorkList';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
+import { useFinePointer } from '@/utils/useFinePointer';
 
 gsap.registerPlugin(Flip, ScrollTrigger, SplitText);
 
@@ -32,6 +33,7 @@ export default function WorkList({
     setUv,
     hoveredIndex,
   } = useThreeJsContext();
+  const finePointer = useFinePointer();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -108,6 +110,7 @@ export default function WorkList({
   }, []);
 
   useLayoutEffect(() => {
+    if (!finePointer || !titleRef.current) return;
     const tl = gsap.timeline();
     const splitTitle = SplitText.create(titleRef.current, {
       type: 'chars',
@@ -134,13 +137,13 @@ export default function WorkList({
         },
       );
     }
-  }, [active]);
+  }, [active, finePointer]);
 
   const handleMouseMove = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     index: number | null,
   ) => {
-    if (index === null) return;
+    if (!finePointer || index === null) return;
     const rects = e.currentTarget.getBoundingClientRect();
     const pointXCoords = e.clientX - rects.left;
     const pointYCoords = e.clientY - rects.top;
@@ -154,11 +157,14 @@ export default function WorkList({
   };
 
   const handleMouseLeave = () => {
+    if (!finePointer) return;
     setActive(false);
     setHoveredIndex(null);
   };
 
   useEffect(() => {
+    if (!finePointer) return;
+
     const tick = () => {
       if (
         currentX.current === null ||
@@ -194,7 +200,7 @@ export default function WorkList({
       window.removeEventListener('mousemove', handleMove);
       cancelAnimationFrame(id);
     };
-  }, []);
+  }, [finePointer]);
 
   return (
     <div
@@ -220,10 +226,12 @@ export default function WorkList({
               key={index}
               href={`/work/${slugify(title)}`}
               prefetch={true}
-              className={`${placement.className} cursor-none`}
+              className={`${placement.className} ${finePointer ? 'cursor-none' : ''}`}
               onClick={(e) => handleTransition(e, title, index, featuredImage)}
-              onMouseMove={(e) => handleMouseMove(e, index)}
-              onMouseLeave={handleMouseLeave}
+              onMouseMove={
+                finePointer ? (e) => handleMouseMove(e, index) : undefined
+              }
+              onMouseLeave={finePointer ? handleMouseLeave : undefined}
               style={placement.style}
               ref={(el) => {
                 linkArray.current[index] = el!;
@@ -231,27 +239,28 @@ export default function WorkList({
             ></Link>
           );
         })}
-        <div
-          className="fixed overflow-hidden pointer-events-none"
-          ref={titleWrapperRef}
-        >
-          <p
-            className=" font-fabrikatMono "
-            style={{
-              color: 'black',
-              fontSize: 'clamp(36px, 4vw, 60px)',
-              letterSpacing: '-0.01em',
-              textShadow:
-                '0 2px 34px rgba(10,12,14,0.55), 0 0 2px rgba(10,12,14,0.4)',
-              // transform: 'translateY(100px)',
-            }}
-            ref={titleRef}
+        {finePointer ? (
+          <div
+            className="fixed overflow-hidden pointer-events-none"
+            ref={titleWrapperRef}
           >
-            {hoveredIndexRef.current === null
-              ? null
-              : projects[hoveredIndexRef.current].title}
-          </p>
-        </div>
+            <p
+              className=" font-fabrikatMono "
+              style={{
+                color: 'black',
+                fontSize: 'clamp(36px, 4vw, 60px)',
+                letterSpacing: '-0.01em',
+                textShadow:
+                  '0 2px 34px rgba(10,12,14,0.55), 0 0 2px rgba(10,12,14,0.4)',
+              }}
+              ref={titleRef}
+            >
+              {hoveredIndexRef.current === null
+                ? null
+                : projects[hoveredIndexRef.current].title}
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

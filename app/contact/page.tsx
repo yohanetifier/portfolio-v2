@@ -1,5 +1,5 @@
+import Contact from '@/components/Contact/Contact';
 import { Metadata } from 'next';
-import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -24,13 +24,6 @@ export const metadata: Metadata = {
   },
 };
 
-const page = () => {
-  return (
-    <div className="w-screen h-screen flex justify-center items-center relative flex-col">
-      <h2 className="uppercase">Send me an email:</h2>
-      <a href="mailto:yohan@yohanetifier.com">yohan@yohanetifier.com</a>
-    </div>
-  );
-};
-
-export default page;
+export default function ContactPage() {
+  return <Contact />;
+}

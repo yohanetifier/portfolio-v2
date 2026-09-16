@@ -14,12 +14,6 @@
   } */
 /* } */
 
-body {
-  color: var(--foreground);
-  background-color: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @font-face {
   font-family: 'Fabrikat Mono';
   font-style: normal;
@@ -29,7 +23,22 @@ body {
 }
 
 body {
+  color: var(--foreground);
+  background-color: var(--background);
   font-family: 'Fabrikat Mono', monospace;
+}
+
+/* Curseur custom uniquement desktop */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-follow {
+    display: none !important;
+  }
 }
 
 /* Masquer la scrollbar native (Lenis + barre custom) */
