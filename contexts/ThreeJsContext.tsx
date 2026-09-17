@@ -48,6 +48,8 @@ interface ThreeJsContextType {
   setFromProjectSlug: (arg: string | null) => void;
   fromProjectIndex: number;
   setFromProjectIndex: (arg: number) => void;
+  isLostPage: boolean;
+  setIsLostPage: (arg: boolean) => void;
   isAnimating: boolean;
   setIsAnimating: (arg: boolean) => void;
   hoveredIndex: number | null;
@@ -78,6 +80,7 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [goToProject, setGoToProject] = useState(false);
   const [fromProjectSlug, setFromProjectSlug] = useState<string | null>(null);
   const [fromProjectIndex, setFromProjectIndex] = useState(-1);
+  const [isLostPage, setIsLostPage] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [projectsCoords, setProjectsCoords] = useState<ProjectCoordsItem[] | null>(
     null,
@@ -128,6 +131,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setFromProjectSlug,
         fromProjectIndex,
         setFromProjectIndex,
+        isLostPage,
+        setIsLostPage,
         isAnimating,
         setIsAnimating,
         hoveredIndex,

@@ -4,9 +4,13 @@ import { Project } from '@/src/models/Project';
 import Link from 'next/link';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { SplitText } from 'gsap/all';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { useFinePointer } from '@/utils/useFinePointer';
 import ContactPhantomGrid from './ContactPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
+
+gsap.registerPlugin(SplitText);
 
 const SOCIAL_LINKS = [
   { label: 'GITHUB', href: 'https://github.com/yohanetifier' },
@@ -22,7 +26,9 @@ export default function Contact({ projects }: Props) {
   const init = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   const [now, setNow] = useState(init);
   const contentRef = useRef<HTMLDivElement>(null);
-  const { setProjects, setHoveredIndex, setUv, setScrollY, projectsContactCoords, goToWork, returnHome, goToProject } =
+  const mailRef = useRef<HTMLAnchorElement>(null);
+  const finePointer = useFinePointer();
+  const { setProjects, setHoveredIndex, setUv, setScrollY, setIsLostPage, projectsContactCoords, goToWork, returnHome, goToProject } =
     useThreeJsContext();
 
   useEffect(() => {
@@ -39,6 +45,10 @@ export default function Contact({ projects }: Props) {
   useEffect(() => {
     setScrollY(0);
   }, [setScrollY]);
+
+  useLayoutEffect(() => {
+    setIsLostPage(false);
+  }, [setIsLostPage]);
 
   useEffect(() => {
     if (!projectsContactCoords?.length) return;
@@ -65,6 +75,38 @@ export default function Contact({ projects }: Props) {
       tween.kill();
     };
   }, []);
+
+  // Vague sur le mail (desktop / fine pointer)
+  useEffect(() => {
+    const el = mailRef.current;
+    if (!el || !finePointer) return;
+
+    const split = SplitText.create(el, { type: 'chars' });
+    const wave = gsap.to(split.chars, {
+      yPercent: -22,
+      duration: 0.5,
+      ease: 'sine.inOut',
+      stagger: { each: 0.055, from: 'start', repeat: -1, yoyo: true },
+      paused: true,
+    });
+
+    const onEnter = () => {
+      wave.play();
+    };
+    const onLeave = () => {
+      wave.pause().progress(0);
+    };
+
+    el.addEventListener('mouseenter', onEnter);
+    el.addEventListener('mouseleave', onLeave);
+
+    return () => {
+      el.removeEventListener('mouseenter', onEnter);
+      el.removeEventListener('mouseleave', onLeave);
+      wave.kill();
+      split.revert();
+    };
+  }, [finePointer]);
 
   // Sortie Contact → Works / Yeti / Projet : fade texte
   useEffect(() => {
@@ -96,7 +138,7 @@ export default function Contact({ projects }: Props) {
         <WorklistPhantomGrid projects={projects} />
       </div>
 
-      <main className="relative z-[2] min-h-screen flex items-center text-black px-[8vw] md:px-[10vw] overflow-hidden">
+      <main className="relative z-[2] min-h-screen flex items-center text-black px-[8vw] md:px-[10vw] overflow-x-hidden">
         <div
           ref={contentRef}
           className="relative w-full max-w-[52%] pointer-events-none [&_a]:pointer-events-auto [&_[data-reveal]]:opacity-0"
@@ -109,9 +151,10 @@ export default function Contact({ projects }: Props) {
           </p>
 
           <a
+            ref={mailRef}
             data-reveal
             href="mailto:contact@yohanetifier.com"
-            className="block font-sans font-bold text-[clamp(2rem,6.5vw,4.5rem)] leading-[0.95] tracking-[-0.02em] mb-10 md:mb-14 cursor-none"
+            className="block font-sans font-bold text-[clamp(1.6rem,5.5vw,4.5rem)] leading-[0.95] tracking-[-0.02em] mb-10 md:mb-14 cursor-none overflow-visible whitespace-nowrap"
             data-cursor
           >
             contact@yohanetifier.com

@@ -33,6 +33,7 @@ export default function WorkList({
     setHoveredIndex,
     setUv,
     hoveredIndex,
+    setIsLostPage,
   } = useThreeJsContext();
   const finePointer = useFinePointer();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
@@ -85,9 +86,15 @@ export default function WorkList({
   };
 
   useLayoutEffect(() => {
+    setIsLostPage(false);
+  }, [setIsLostPage]);
+
+  // Mesure la grille dès que l’intro→work est finie (fromHome passe à false).
+  // Avant : if (fromHome) return au mount → coords intro restaient collées sur /work.
+  useLayoutEffect(() => {
     if (fromHome) return;
     updateProjects();
-  }, []);
+  }, [fromHome]);
 
   useEffect(() => {
     const grid = document.getElementById('grid');

@@ -25,6 +25,7 @@ export default function Home({
     setFromHome,
     setScrollY,
     setIsAnimating,
+    setIsLostPage,
     projectsHomeCoords,
   } = useThreeJsContext();
 
@@ -41,6 +42,10 @@ export default function Home({
       });
     }
   };
+
+  useEffect(() => {
+    setIsLostPage(false);
+  }, [setIsLostPage]);
 
   useEffect(() => {
     setHeaderVisible(false);

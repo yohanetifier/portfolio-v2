@@ -30,9 +30,16 @@ const Header = () => {
     setGoToWork,
     setFromProjectSlug,
     setFromProjectIndex,
+    isLostPage,
   } = useThreeJsContext();
   const projectPath = getProjectPath(pathname);
   const showBack = Boolean(projectPath);
+  const isLostRoute =
+    isLostPage ||
+    (!isIntro &&
+      pathname !== '/contact' &&
+      !pathname.startsWith('/work') &&
+      !pathname.startsWith('/blogs'));
 
   const returnToWorkList = () => {
     if (selectedIndex === null) return;
@@ -56,7 +63,7 @@ const Header = () => {
     if (projectPath) {
       e.preventDefault();
       returnToWorkList();
-    } else if (pathname === '/contact') {
+    } else if (pathname === '/contact' || isLostRoute) {
       e.preventDefault();
       setFromProjectSlug(null);
       setFromProjectIndex(-1);
@@ -84,7 +91,9 @@ const Header = () => {
       return;
     }
     if (path === '/contact') {
-      if (pathname === '/work') {
+      if (pathname === '/work' || isLostRoute) {
+        setFromProjectSlug(null);
+        setFromProjectIndex(-1);
         setGoToContact(true);
         setIsAnimating(true);
         return;

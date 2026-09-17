@@ -4,6 +4,7 @@ import { useLenis } from 'lenis/react';
 import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { useEffect, useRef } from 'react';
+import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 const THUMB_TRAVEL = ((100 - 18) / 18) * 100;
 const FADE = { duration: 0.35, ease: 'power3.out' } as const;
@@ -12,7 +13,15 @@ export default function ScrollProgress() {
   const rootRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const visible = pathname !== '/' && pathname !== '/contact';
+  const { isLostPage } = useThreeJsContext();
+  const isLostRoute =
+    isLostPage ||
+    (pathname !== '/' &&
+      pathname !== '/contact' &&
+      !pathname.startsWith('/work') &&
+      !pathname.startsWith('/blogs'));
+  const visible =
+    pathname !== '/' && pathname !== '/contact' && !isLostRoute;
 
   useEffect(() => {
     const el = rootRef.current;

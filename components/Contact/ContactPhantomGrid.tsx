@@ -2,15 +2,16 @@
 
 import { Project } from '@/src/models/Project';
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { CONTACT_SQUARE_SIZE } from './contactVignettes';
 
 type Props = {
-  projects: Pick<Project, 'featuredImage'>[];
+  projects: Pick<Project, 'featuredImage' | 'title'>[];
   /** Si true, les phantoms captent le hover (page contact) */
   interactive?: boolean;
   onHover?: (index: number, uv: { x: number; y: number }) => void;
   onLeave?: () => void;
+  onSelect?: (index: number) => void;
 };
 
 /**
@@ -22,11 +23,12 @@ export default function ContactPhantomGrid({
   interactive = false,
   onHover,
   onLeave,
+  onSelect,
 }: Props) {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const { setProjectsContactCoords } = useThreeJsContext();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const update = () => {
       const rects: ProjectItem[] = [];
       for (let index = 0; index < projects.length; index++) {
@@ -40,9 +42,8 @@ export default function ContactPhantomGrid({
       if (rects.length) setProjectsContactCoords(rects);
     };
 
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(update);
-    });
+    update();
+    const raf = requestAnimationFrame(update);
     window.addEventListener('resize', update);
     return () => {
       cancelAnimationFrame(raf);
@@ -66,6 +67,7 @@ export default function ContactPhantomGrid({
             style={{
               width: CONTACT_SQUARE_SIZE,
               height: CONTACT_SQUARE_SIZE,
+              cursor: interactive && onSelect ? 'none' : undefined,
             }}
             ref={(el) => {
               refs.current[index] = el;
@@ -81,6 +83,11 @@ export default function ContactPhantomGrid({
                 : undefined
             }
             onMouseLeave={interactive ? onLeave : undefined}
+            onClick={
+              interactive && onSelect
+                ? () => onSelect(index)
+                : undefined
+            }
           />
         ))}
       </div>

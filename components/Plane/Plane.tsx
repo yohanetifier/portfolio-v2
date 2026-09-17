@@ -185,6 +185,21 @@ const Plane = ({
       return () => tweens.forEach((t) => t.kill());
     }
 
+    // Projet → home : idem
+    if (returnHome) {
+      tweens.push(
+        gsap.to(amplitude, {
+          value: PLANE_AMPLITUDE,
+          duration: 1,
+          ease: 'power2.out',
+          onComplete: () => {
+            unlockScroll();
+          },
+        }),
+      );
+      return () => tweens.forEach((t) => t.kill());
+    }
+
     if (isSelected || isProjectView) {
       tweens.push(
         gsap.to(hover, {
@@ -208,20 +223,6 @@ const Plane = ({
               router.push(`/work/${selectedSlug}`);
               setIsAnimating(false);
             }
-            unlockScroll();
-          },
-        }),
-      );
-      return () => tweens.forEach((t) => t.kill());
-    }
-
-    if (returnHome) {
-      tweens.push(
-        gsap.to(amplitude, {
-          value: PLANE_AMPLITUDE,
-          duration: 1,
-          ease: 'power2.out',
-          onComplete: () => {
             unlockScroll();
           },
         }),

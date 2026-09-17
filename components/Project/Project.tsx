@@ -14,6 +14,7 @@ import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage
 import { slugify } from '@/utils/slugify';
 import { clearFlag, getFlag } from '@/utils/fromWorkList';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
+import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 
 interface Props {
   data: ProjectType;
@@ -36,6 +37,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     scrollY,
     setProjectSelectedCoords,
     goToContact,
+    returnHome,
   } = useThreeJsContext();
   const workPath = usePathname().split('/')[2];
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -108,12 +110,14 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
 
   // Masque le HTML projet avant le paint → le canvas 3D prend le relais sans flash
   useLayoutEffect(() => {
-    if (!goToContact || !overlayRef.current) return;
+    if ((!goToContact && !returnHome) || !overlayRef.current) return;
     gsap.set(overlayRef.current, { opacity: 0, pointerEvents: 'none' });
-  }, [goToContact]);
+  }, [goToContact, returnHome]);
 
   return (
     <div className="w-screen h-screen relative z-[3]">
+      {/* Cibles Yeti — grille intro réelle (pas dans un wrapper overflow qui fausse les rects) */}
+      <IntroGridPhantom projects={projects} />
       <ContactPhantomGrid projects={projects} />
       <div
         className="flex justify-center items-center absolute w-[100vw] transition-height duration-1000 z-[1] pointer-events-none"

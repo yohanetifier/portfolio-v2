@@ -53,16 +53,25 @@ const Scene = ({ projectsDetails }: Props) => {
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
-  const workPath = getProjectPath(usePathname());
+  const pathname = usePathname();
+  const workPath = getProjectPath(pathname);
   const activeIndex =
     selectedIndex !== null
       ? selectedIndex
       : fromWorkPage >= 0
         ? fromWorkPage
         : null;
-  /** Laisse GSAP piloter sans reset React (projet ↔ contact) */
+  /**
+   * GSAP owns pose ONLY quand React poserait le mauvais départ
+   * (page projet = fullscreen, projectsDetails = petite grille).
+   *
+   * 404 / worklist / intro / contact : React garde projectsDetails = bonnes origines
+   * (même modèle que worklist→contact). isLostPage ne doit PAS activer ça.
+   */
   const gsapOwnsPose = Boolean(
-    goToProject || (goToContact && workPath),
+    goToProject ||
+      (returnHome && Boolean(workPath)) ||
+      (goToContact && Boolean(workPath)),
   );
   const initCoords = useRef<Record<string, number>>({});
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
@@ -80,9 +89,17 @@ const Scene = ({ projectsDetails }: Props) => {
           lockScroll();
         },
         onComplete: () => {
-          router.push(`/work`, { scroll: false });
+          if (projectsCoords?.length) {
+            setProjects(
+              projectsCoords.map((item, i) => ({
+                rects: item.rects,
+                imageUrl: projectsDetails[i]?.imageUrl ?? '',
+              })),
+            );
+          }
           setFromHome(false);
           setIsAnimating(false);
+          router.push(`/work`, { scroll: false });
           unlockScroll();
         },
       });
@@ -103,11 +120,21 @@ const Scene = ({ projectsDetails }: Props) => {
     }
 
     if (returnHome) {
+      // Attendre les cibles intro
+      if (!projectsHomeCoords?.length) {
+        return;
+      }
+
+      let cancelled = false;
       const returnHomeTl = gsap.timeline({
         onStart: () => {
           lockScroll();
         },
         onComplete: () => {
+          if (cancelled) return;
+          if (projectsHomeCoords?.length) {
+            setProjects(projectsHomeCoords);
+          }
           setSelectedIndex(null);
           setSettledIndex(null);
           setSelectedSlug('');
@@ -116,8 +143,11 @@ const Scene = ({ projectsDetails }: Props) => {
           setFromProjectIndex(-1);
           setReturnHome(false);
           router.push(`/`, { scroll: false });
-          setIsAnimating(false);
-          unlockScroll();
+          requestAnimationFrame(() => {
+            if (cancelled) return;
+            setIsAnimating(false);
+            unlockScroll();
+          });
         },
       });
 
@@ -128,6 +158,44 @@ const Scene = ({ projectsDetails }: Props) => {
       );
 
       const returningIndex = activeIndex;
+      const leavingProject = Boolean(workPath) && returningIndex !== null;
+
+      // Uniquement projet → home (React sinon = petite grille au centre)
+      if (leavingProject) {
+        projectsAtTheBottomRef.current = [];
+        projectsAtTheTopRef.current = [];
+        const selectedGroup = groupRefArray.current[returningIndex!];
+        if (selectedGroup) {
+          const others = groupRefArray.current
+            .map((el, i) => (i !== returningIndex ? el : null))
+            .filter((el): el is THREE.Group => el !== null);
+          const { childAtTheBottom, childAtTheTop } = getPositions(
+            others,
+            selectedGroup,
+          );
+          projectsAtTheBottomRef.current = childAtTheBottom;
+          projectsAtTheTopRef.current = childAtTheTop;
+        }
+
+        groupRefArray.current.forEach((group, i) => {
+          if (!group) return;
+          if (i === returningIndex) {
+            gsap.set(group.position, { x: 0, y: 0 });
+            gsap.set(group.scale, {
+              x: viewport.width,
+              y: viewport.height,
+            });
+          } else {
+            const isBottom = projectsAtTheBottomRef.current.includes(group);
+            gsap.set(group.position, {
+              x: 0,
+              y: isBottom ? -viewport.height : viewport.height,
+            });
+          }
+        });
+      }
+      // 404 / worklist → home : React garde projectsDetails (épaves / grille)
+
       const itemsNotOnTheIntroPage =
         returningIndex !== null &&
         returningIndex > (projectsHomeCoords?.length ?? 0) - 1;
@@ -157,31 +225,39 @@ const Scene = ({ projectsDetails }: Props) => {
             .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
         }
       });
-      return;
+
+      return () => {
+        cancelled = true;
+        returnHomeTl.kill();
+      };
     }
 
     if (goToContact) {
       if (!projectsContactCoords?.length) {
-        setGoToContact(false);
-        setIsAnimating(false);
-        router.push('/contact', { scroll: false });
         return;
       }
 
+      let cancelled = false;
       const contactTl = gsap.timeline({
         onStart: () => {
           lockScroll();
         },
         onComplete: () => {
+          if (cancelled) return;
           if (projectsContactCoords?.length) {
             setProjects(projectsContactCoords);
           }
+          router.replace('/contact', { scroll: false });
           setGoToContact(false);
           setSelectedIndex(null);
           setSettledIndex(null);
-          setIsAnimating(false);
-          router.push('/contact', { scroll: false });
-          unlockScroll();
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (cancelled) return;
+              setIsAnimating(false);
+              unlockScroll();
+            });
+          });
         },
       });
 
@@ -191,21 +267,16 @@ const Scene = ({ projectsDetails }: Props) => {
         0,
       );
 
-      // Depuis une page projet : repartir du fullscreen + hors champ haut/bas
-      // (même logique que le retour projet → worklist)
-      const leavingProject = Boolean(workPath) || fromProjectIndex >= 0;
+      // Depuis une page projet uniquement
+      const leavingProject = Boolean(workPath);
       const selected =
         fromProjectIndex >= 0 ? fromProjectIndex : selectedIndex;
 
       if (leavingProject && selected !== null) {
         const selectedGroup = groupRefArray.current[selected];
-
-        // Recalcule haut/bas si les refs ont été perdues
-        if (
-          selectedGroup &&
-          projectsAtTheBottomRef.current.length === 0 &&
-          projectsAtTheTopRef.current.length === 0
-        ) {
+        projectsAtTheBottomRef.current = [];
+        projectsAtTheTopRef.current = [];
+        if (selectedGroup) {
           const others = groupRefArray.current
             .map((el, i) => (i !== selected ? el : null))
             .filter((el): el is THREE.Group => el !== null);
@@ -233,6 +304,7 @@ const Scene = ({ projectsDetails }: Props) => {
           }
         });
       }
+      // 404 / worklist → contact : React garde projectsDetails
 
       projectsContactCoords.forEach(({ rects }, i) => {
         const group = groupRefArray.current[i];
@@ -245,10 +317,22 @@ const Scene = ({ projectsDetails }: Props) => {
         const worldH = (rects.height / size.height) * viewport.height;
 
         contactTl
-          .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
-          .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
+          .to(
+            group.position,
+            { y: worldY, x: worldX, duration: 1, ease: 'power2.inOut' },
+            '<',
+          )
+          .to(
+            group.scale,
+            { x: worldW, y: worldH, duration: 1, ease: 'power2.inOut' },
+            '<',
+          );
       });
-      return;
+
+      return () => {
+        cancelled = true;
+        contactTl.kill();
+      };
     }
 
     if (goToProject) {
@@ -282,7 +366,35 @@ const Scene = ({ projectsDetails }: Props) => {
         0,
       );
 
+      // gsapOwnsPose droppe les props → re-ancrer depuis projectsDetails (404 / grille)
+      projectsDetails.forEach(({ rects }, i) => {
+        const group = groupRefArray.current[i];
+        if (!group || !rects) return;
+        const centerX = rects.left + rects.width / 2;
+        const centerY = rects.top + rects.height / 2;
+        const worldX = (centerX / size.width - 0.5) * viewport.width;
+        const worldY = -(centerY / size.height - 0.5) * viewport.height;
+        const worldW = (rects.width / size.width) * viewport.width;
+        const worldH = (rects.height / size.height) * viewport.height;
+        gsap.set(group.position, { x: worldX, y: worldY });
+        gsap.set(group.scale, { x: worldW, y: worldH });
+      });
+
       const selectedGroup = groupRefArray.current[projectIndex];
+      projectsAtTheBottomRef.current = [];
+      projectsAtTheTopRef.current = [];
+      if (selectedGroup) {
+        const others = groupRefArray.current
+          .map((el, i) => (i !== projectIndex ? el : null))
+          .filter((el): el is THREE.Group => el !== null);
+        const { childAtTheBottom, childAtTheTop } = getPositions(
+          others,
+          selectedGroup,
+        );
+        projectsAtTheBottomRef.current = childAtTheBottom;
+        projectsAtTheTopRef.current = childAtTheTop;
+      }
+
       groupRefArray.current.forEach((group, i) => {
         if (!group) return;
         if (i === projectIndex) {
@@ -294,12 +406,11 @@ const Scene = ({ projectsDetails }: Props) => {
               '<',
             );
         } else {
-          const goUp =
-            selectedGroup != null && group.position.y >= selectedGroup.position.y;
+          const isBottom = projectsAtTheBottomRef.current.includes(group);
           projectTl.to(
             group.position,
             {
-              y: goUp ? viewport.height : -viewport.height,
+              y: isBottom ? -viewport.height : viewport.height,
               duration: 1,
             },
             '<',
@@ -311,18 +422,16 @@ const Scene = ({ projectsDetails }: Props) => {
 
     if (goToWork) {
       if (!projectsCoords?.length) {
-        setGoToWork(false);
-        setIsAnimating(false);
-        router.push('/work', { scroll: false });
         return;
       }
 
+      let cancelled = false;
       const workTl = gsap.timeline({
         onStart: () => {
           lockScroll();
         },
         onComplete: () => {
-          // Aligne projectsDetails sur la worklist avant le push
+          if (cancelled) return;
           if (projectsCoords?.length) {
             setProjects(
               projectsCoords.map((item, i) => ({
@@ -337,9 +446,12 @@ const Scene = ({ projectsDetails }: Props) => {
           setGoToWork(false);
           setFromProjectSlug(null);
           setFromProjectIndex(-1);
-          setIsAnimating(false);
           router.push('/work', { scroll: false });
-          unlockScroll();
+          requestAnimationFrame(() => {
+            if (cancelled) return;
+            setIsAnimating(false);
+            unlockScroll();
+          });
         },
       });
 
@@ -363,7 +475,11 @@ const Scene = ({ projectsDetails }: Props) => {
           .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
           .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
       });
-      return;
+
+      return () => {
+        cancelled = true;
+        workTl.kill();
+      };
     }
 
     if (reset) {
@@ -559,7 +675,7 @@ const Scene = ({ projectsDetails }: Props) => {
         });
       }
     }
-  }, [selectedIndex, isReturning, reset, fromHome, returnHome, goToContact, goToWork, goToProject, fromWorkPage]);
+  }, [selectedIndex, isReturning, reset, fromHome, returnHome, goToContact, goToWork, goToProject, fromWorkPage, projectsContactCoords?.length, projectsHomeCoords?.length, projectsCoords?.length]);
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
@@ -587,7 +703,10 @@ const Scene = ({ projectsDetails }: Props) => {
                       ? [0, -viewport.height, 0]
                       : [0, viewport.height, 0]
                     : [worldX, worldY, 0]) as [number, number, number],
-                scale: [worldW, worldH, 1] as [number, number, number],
+                // Sur page projet : fullscreen (sinon petit au centre sous le HTML → flash au retour)
+                scale: (activeIndex === i && workPath
+                  ? [viewport.width, viewport.height, 1]
+                  : [worldW, worldH, 1]) as [number, number, number],
               })}
           ref={(el) => {
             groupRefArray.current[i] = el;

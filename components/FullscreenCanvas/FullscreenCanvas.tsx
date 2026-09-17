@@ -8,11 +8,23 @@ import Cursor from '../Cursor/Cursor';
 import { useFinePointer } from '@/utils/useFinePointer';
 
 const FullscreenCanvas = () => {
-  const { projectsDetails } = useThreeJsContext();
+  const { projectsDetails, isLostPage, isAnimating } = useThreeJsContext();
   const pathname = usePathname();
   const finePointer = useFinePointer();
+  // Catch-all /xxx = vraie page 404 (pas not-found.tsx) → garder le canvas
+  const isLostRoute =
+    isLostPage ||
+    (pathname !== '/' &&
+      pathname !== '/contact' &&
+      !pathname.startsWith('/work') &&
+      !pathname.startsWith('/blogs'));
+
   const showScene =
-    pathname.startsWith('/work') || pathname === '/' || pathname === '/contact';
+    pathname.startsWith('/work') ||
+    pathname === '/' ||
+    pathname === '/contact' ||
+    isLostRoute ||
+    isAnimating;
 
   return (
     <Canvas
