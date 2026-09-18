@@ -6,12 +6,13 @@ import { Providers } from './providers';
 import FullscreenCanvas from '@/components/FullscreenCanvas/FullscreenCanvas';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://yohanetifier.com'),
   title: {
     template: '%s | Portfolio Yohan Etifier',
     default: 'Yohan Etifier | Portfolio Yohan Etifier',
   },
   description:
-    'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+    "I'm a Paris-based creative developer building motion-driven, interactive websites — where code meets design, and way too many hours get spent tweaking easing curves. Currently available for new projects.",
   keywords: [
     'portfolio',
     'developer',
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     siteName: 'Portfolio Yohan Etifier',
     title: 'Yohan Etifier | Portfolio',
     description:
-      'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+      "I'm a Paris-based creative developer building motion-driven, interactive websites — where code meets design, and way too many hours get spent tweaking easing curves. Currently available for new projects.",
     images: [
       {
         url: '/og-image.jpg',
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Yohan Etifier | Portfolio',
     description:
-      'Portfolio of Yohan Etifier - Creative developer and designer showcasing innovative projects and creative solutions.',
+      "I'm a Paris-based creative developer building motion-driven, interactive websites — where code meets design, and way too many hours get spent tweaking easing curves. Currently available for new projects.",
     images: ['/og-image.jpg'],
     creator: '@yohanetifier',
   },

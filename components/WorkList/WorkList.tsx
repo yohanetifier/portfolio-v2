@@ -8,6 +8,7 @@ import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
 import { setFlag } from '@/utils/fromWorkList';
+import { unlockScroll } from '@/utils/scroll';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { useFinePointer } from '@/utils/useFinePointer';
@@ -87,6 +88,7 @@ export default function WorkList({
 
   useLayoutEffect(() => {
     setIsLostPage(false);
+    unlockScroll();
   }, [setIsLostPage]);
 
   // Mesure la grille dès que l’intro→work est finie (fromHome passe à false).

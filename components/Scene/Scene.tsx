@@ -135,6 +135,8 @@ const Scene = ({ projectsDetails }: Props) => {
           if (projectsHomeCoords?.length) {
             setProjects(projectsHomeCoords);
           }
+          // Unlock avant setState : le cleanup (cancelled=true) tourne juste après
+          unlockScroll();
           setSelectedIndex(null);
           setSettledIndex(null);
           setSelectedSlug('');
@@ -144,9 +146,7 @@ const Scene = ({ projectsDetails }: Props) => {
           setReturnHome(false);
           router.push(`/`, { scroll: false });
           requestAnimationFrame(() => {
-            if (cancelled) return;
             setIsAnimating(false);
-            unlockScroll();
           });
         },
       });
@@ -247,15 +247,14 @@ const Scene = ({ projectsDetails }: Props) => {
           if (projectsContactCoords?.length) {
             setProjects(projectsContactCoords);
           }
+          unlockScroll();
           router.replace('/contact', { scroll: false });
           setGoToContact(false);
           setSelectedIndex(null);
           setSettledIndex(null);
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              if (cancelled) return;
               setIsAnimating(false);
-              unlockScroll();
             });
           });
         },
@@ -443,14 +442,15 @@ const Scene = ({ projectsDetails }: Props) => {
               })),
             );
           }
+          // Unlock avant setGoToWork(false) : sinon le cleanup met cancelled=true
+          // et le rAF saute unlockScroll → scroll bloqué sur /work
+          unlockScroll();
           setGoToWork(false);
           setFromProjectSlug(null);
           setFromProjectIndex(-1);
           router.push('/work', { scroll: false });
           requestAnimationFrame(() => {
-            if (cancelled) return;
             setIsAnimating(false);
-            unlockScroll();
           });
         },
       });
