@@ -50,6 +50,9 @@ interface ThreeJsContextType {
   setFromProjectIndex: (arg: number) => void;
   isLostPage: boolean;
   setIsLostPage: (arg: boolean) => void;
+  /** Ouverture projet depuis la 404 — Works doit aller à la grille, pas reverse vers les épaves */
+  fromLostPage: boolean;
+  setFromLostPage: (arg: boolean) => void;
   isAnimating: boolean;
   setIsAnimating: (arg: boolean) => void;
   hoveredIndex: number | null;
@@ -81,6 +84,7 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [fromProjectSlug, setFromProjectSlug] = useState<string | null>(null);
   const [fromProjectIndex, setFromProjectIndex] = useState(-1);
   const [isLostPage, setIsLostPage] = useState(false);
+  const [fromLostPage, setFromLostPage] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [projectsCoords, setProjectsCoords] = useState<ProjectCoordsItem[] | null>(
     null,
@@ -133,6 +137,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setFromProjectIndex,
         isLostPage,
         setIsLostPage,
+        fromLostPage,
+        setFromLostPage,
         isAnimating,
         setIsAnimating,
         hoveredIndex,

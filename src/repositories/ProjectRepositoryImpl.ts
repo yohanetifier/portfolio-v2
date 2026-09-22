@@ -17,18 +17,21 @@ export class ProjectRepositoryImpl implements ProjectRepository {
     }));
   }
 
-  async getProjectsByTitle(title: string): Promise<Project> {
+  async getProjectsByTitle(title: string): Promise<Project | null> {
     const decodedTitle = decodeURIComponent(title);
     const { data } = await fetchData(GET_PROJECT_BY_TITLE, {
       title: decodedTitle,
     });
 
+    const node = data?.works?.nodes?.[0];
+    if (!node) return null;
+
     return {
-      title: data.works.nodes[0].title,
-      content: data.works.nodes[0].content,
+      title: node.title,
+      content: node.content,
       featuredImage: {
-        src: data.works.nodes[0].featuredImage.node.sourceUrl,
-        alt: data.works.nodes[0].featuredImage.node.altText,
+        src: node.featuredImage.node.sourceUrl,
+        alt: node.featuredImage.node.altText,
       },
     };
   }

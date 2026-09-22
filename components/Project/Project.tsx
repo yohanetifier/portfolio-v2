@@ -12,7 +12,8 @@ import { Project as ProjectModel } from '@/src/models/Project';
 import Link from 'next/link';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { slugify } from '@/utils/slugify';
-import { clearFlag, getFlag } from '@/utils/fromWorkList';
+import { getFlag } from '@/utils/fromWorkList';
+import { getLenis, unlockScroll } from '@/utils/scroll';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 
@@ -32,12 +33,14 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   const {
     setProjectImageSelected,
     setProjects,
+    projectsDetails,
     setSelectedIndex,
     setScrollY,
     scrollY,
     setProjectSelectedCoords,
     goToContact,
     returnHome,
+    goToProject,
   } = useThreeJsContext();
   const workPath = usePathname().split('/')[2];
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -54,17 +57,30 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
       })
       .filter(Boolean);
 
-    if (checkIfProjectsAlreadySet === null) {
-      setProjects(rects);
-    } else {
-      setProjects(checkIfProjectsAlreadySet.rects);
+    // Refresh / entrée directe : toujours peupler si le canvas est vide
+    // (sinon getFlag() en sessionStorage skipait setProjects → pas de hero).
+    // Soft-nav works/404→projet : garder les poses déjà en place.
+    if (projectsDetails.length === 0) {
+      setProjects(
+        rects.length > 0
+          ? rects
+          : (checkIfProjectsAlreadySet?.rects ?? []),
+      );
+    } else if (!getFlag()) {
+      if (checkIfProjectsAlreadySet === null) {
+        setProjects(rects);
+      } else {
+        setProjects(checkIfProjectsAlreadySet.rects);
+      }
     }
     const itemIndex = projects.findIndex((project) => {
       return slugify(project.title) === workPath;
     });
     setSelectedIndex(itemIndex);
     const itemCoords = rects[itemIndex];
-    if (scrollY === null) {
+    // Deep-link / refresh seulement — pas depuis 404 (scrollY déjà 0 + projectsCoords).
+    // Sinon on réécrit scrollY avec la grille fantôme → même flash qu’au changement d’URL.
+    if (itemCoords && scrollY === null) {
       const isInFirstScreen =
         itemCoords.rects.top + itemCoords.rects.height < window.innerHeight;
 
@@ -91,6 +107,13 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   };
 
   useLayoutEffect(() => {
+    // Haut de page avant unlock si on vient de works/404 (évite le scroll Works visible).
+    // Pas via isAnimating — sinon ça re-scroll quand on part vers Yeti/Contact.
+    if (getFlag()) {
+      window.scrollTo(0, 0);
+      getLenis()?.scrollTo(0, { immediate: true });
+    }
+    unlockScroll();
     updateProjects();
     setProjectImageSelected(data.featuredImage.src);
     const handleScroll = () => {
@@ -101,6 +124,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
         titleRef.current.style.opacity = String(progress);
       }
     };
+    handleScroll();
 
     window.addEventListener('scroll', handleScroll);
     return () => {
@@ -110,9 +134,10 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
 
   // Masque le HTML projet avant le paint → le canvas 3D prend le relais sans flash
   useLayoutEffect(() => {
-    if ((!goToContact && !returnHome) || !overlayRef.current) return;
+    if ((!goToContact && !returnHome && !goToProject) || !overlayRef.current)
+      return;
     gsap.set(overlayRef.current, { opacity: 0, pointerEvents: 'none' });
-  }, [goToContact, returnHome]);
+  }, [goToContact, returnHome, goToProject]);
 
   return (
     <div className="w-screen h-screen relative z-[3]">

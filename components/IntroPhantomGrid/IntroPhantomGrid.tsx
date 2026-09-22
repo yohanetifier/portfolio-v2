@@ -2,7 +2,7 @@
 import { Project } from '@/src/models/Project';
 import Image from 'next/image';
 import React, { useLayoutEffect, useRef } from 'react';
-import { getStartingClass } from '../WorkList/utils/classes';
+import { getStartingClass, INTRO_VISIBLE_COUNT } from '../WorkList/utils/classes';
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 export default function IntroPhantomGrid({
@@ -21,9 +21,18 @@ export default function IntroPhantomGrid({
   useLayoutEffect(() => {
     if (!writeCoords) return;
 
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
     const rects: ProjectItem[] = imgRefArray.current
       .map((element, index) => {
         if (!element || !projects[index]) return null;
+        // Hors intro visible : 0×0 au centre (Three scale 0, pas une 2ᵉ pile)
+        if (index >= INTRO_VISIBLE_COUNT) {
+          return {
+            rects: new DOMRect(vw / 2, vh / 2, 0, 0),
+            imageUrl: projects[index].featuredImage.src,
+          };
+        }
         return {
           rects: element.getBoundingClientRect(),
           imageUrl: projects[index].featuredImage.src,

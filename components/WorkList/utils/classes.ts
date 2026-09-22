@@ -60,10 +60,13 @@ const STARTING_CLASSES = [
   'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
 ] as const;
 
+/** Planes visibles sur l’intro — le reste scale 0 (évite la pile au centre au retour Yeti) */
+export const INTRO_VISIBLE_COUNT = STARTING_CLASSES.length;
+
 export function getStartingClass(index: number) {
   return (
     STARTING_CLASSES[index] ??
-    'opacity-0 w-[16.641vw] h-[19.943vw] absolute pointer-events-none'
+    'opacity-0 w-0 h-0 absolute pointer-events-none overflow-hidden'
   );
 }
 

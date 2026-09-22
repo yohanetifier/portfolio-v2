@@ -116,6 +116,7 @@ const Plane = ({
     goToWork,
     goToProject,
     setIsAnimating,
+    isAnimating,
     uv,
     setHoveredIndex,
   } = useThreeJsContext();
@@ -173,28 +174,40 @@ const Plane = ({
       return () => tweens.forEach((t) => t.kill());
     }
 
-    // Projet → contact : remettre l’amplitude pendant le shrink (sinon reste à 0)
-    if (goToContact) {
-      tweens.push(
-        gsap.to(amplitude, {
-          value: PLANE_AMPLITUDE,
-          duration: 1,
-          ease: 'power2.out',
-        }),
-      );
-      return () => tweens.forEach((t) => t.kill());
-    }
-
-    // Projet → home : idem
-    if (returnHome) {
+    // Projet → contact / home : remettre l’amplitude pendant le tween
+    if (goToContact || returnHome || goToWork) {
       tweens.push(
         gsap.to(amplitude, {
           value: PLANE_AMPLITUDE,
           duration: 1,
           ease: 'power2.out',
           onComplete: () => {
-            unlockScroll();
+            if (returnHome) unlockScroll();
           },
+        }),
+      );
+      return () => tweens.forEach((t) => t.kill());
+    }
+
+    // 404 → projet utilise le même flux que works (selectedIndex), pas goToProject
+    if (goToProject) {
+      tweens.push(
+        gsap.to(amplitude, {
+          value: PLANE_AMPLITUDE,
+          duration: 0.35,
+          ease: 'power2.out',
+        }),
+      );
+      return () => tweens.forEach((t) => t.kill());
+    }
+
+    // Pendant expand works/404 : garder la vague (comme worklist→projet)
+    if (isAnimating && !isSelected && !isProjectView) {
+      tweens.push(
+        gsap.to(amplitude, {
+          value: PLANE_AMPLITUDE,
+          duration: 0.35,
+          ease: 'power2.out',
         }),
       );
       return () => tweens.forEach((t) => t.kill());
@@ -214,13 +227,12 @@ const Plane = ({
           duration: 1,
           ease: 'power3.out',
           onComplete: () => {
-            // Ne pas naviguer si une autre transition (contact / works / retour) est en cours
             if (goToContact || goToWork || goToProject || returnHome) {
               return;
             }
-            // Navigation uniquement à la fin de la sélection (pas au mount page projet)
+            // Même flux works & 404 : nav après flatten amplitude
             if (isSelected && !isProjectView && selectedSlug) {
-              router.push(`/work/${selectedSlug}`);
+              router.push(`/work/${selectedSlug}`, { scroll: false });
               setIsAnimating(false);
             }
             unlockScroll();
@@ -233,6 +245,7 @@ const Plane = ({
     isSelected,
     isReturning,
     isProjectView,
+    isAnimating,
     returnHome,
     goToContact,
     goToWork,

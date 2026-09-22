@@ -29,6 +29,11 @@ const Header = () => {
     setGoToWork,
     setFromProjectSlug,
     setFromProjectIndex,
+    setScrollY,
+    setProjectSelectedCoords,
+    projectsCoords,
+    fromLostPage,
+    setFromLostPage,
     isLostPage,
   } = useThreeJsContext();
   const projectPath = getProjectPath(pathname);
@@ -42,6 +47,35 @@ const Header = () => {
 
   const returnToWorkList = () => {
     if (selectedIndex === null) return;
+
+    // 404 → projet → works : même reverse que works (haut/bas + scrollY), cibles grille
+    if (fromLostPage) {
+      const item = projectsCoords?.[selectedIndex];
+      if (item?.rects) {
+        const r = item.rects;
+        const isInFirstScreen =
+          r.top + r.height < window.innerHeight;
+        setScrollY(isInFirstScreen ? 0 : r.top);
+        setProjectSelectedCoords({
+          x: r.x,
+          y: isInFirstScreen ? r.y : 0,
+          width: r.width,
+          height: r.height,
+          top: isInFirstScreen ? r.top : 0,
+          left: r.left,
+          bottom: isInFirstScreen ? r.bottom : r.height,
+          right: r.right,
+          toJSON() {
+            return {};
+          },
+        } as DOMRect);
+      }
+      setIsReturning(true);
+      setIsAnimating(true);
+      router.push('/work', { scroll: false });
+      return;
+    }
+
     setIsReturning(true);
     setIsAnimating(true);
     router.push('/work', { scroll: false });
@@ -80,6 +114,7 @@ const Header = () => {
     e.preventDefault();
     if (path === '/') {
       clearFlag();
+      setFromLostPage(false);
       if (selectedIndex !== null) {
         setFromWorkPage(selectedIndex);
       }
@@ -117,13 +152,13 @@ const Header = () => {
     <>
       {isIntro ? null : (
         <header
-          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out mix-blend-difference text-white ${isHeaderVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out mix-blend-difference text-white pointer-events-none ${isHeaderVisible ? 'opacity-100' : 'opacity-0'}`}
         >
           {showBack && (
             <button
               type="button"
               onClick={handleBack}
-              className="absolute bottom-0 w-[16px] h-[16px] cursor-pointer p-0 border-0 bg-transparent"
+              className={`absolute bottom-0 w-[16px] h-[16px] cursor-pointer p-0 border-0 bg-transparent ${isHeaderVisible ? 'pointer-events-auto' : ''}`}
               aria-label="Retour"
             >
               <Image
@@ -139,7 +174,7 @@ const Header = () => {
           <Link
             ref={personalRef}
             href={'/'}
-            className="text-[16px]"
+            className={`text-[16px] ${isHeaderVisible ? 'pointer-events-auto' : ''}`}
             onClick={(e) => handleNav(e, '/')}
           >
             Yeti
@@ -147,7 +182,7 @@ const Header = () => {
           </div>
           <Link
             ref={workRef}
-            className="col-start-3 col-end-5 row-start-1 justify-self-end relative right-[20px] cursor-none md:right-[-30px] hidden md:block"
+            className={`col-start-3 col-end-5 row-start-1 justify-self-end relative right-[20px] cursor-none md:right-[-30px] hidden md:block ${isHeaderVisible ? 'pointer-events-auto' : ''}`}
             href={'/work'}
             onClick={(e) => handleWorkPath(e, `/work`)}
           >
@@ -161,14 +196,16 @@ const Header = () => {
             About
           </p>
           <Link
-            className="absolute right-[0px] top-[50px] cursor-none hidden md:block"
+            className={`absolute right-[0px] top-[50px] cursor-none hidden md:block ${isHeaderVisible ? 'pointer-events-auto' : ''}`}
             ref={contactRef}
             href={'/contact'}
             onClick={(e) => handleNav(e, '/contact')}
           >
             Contact
           </Link>
-          <Burger />
+          <div className={isHeaderVisible ? 'pointer-events-auto contents' : 'contents'}>
+            <Burger />
+          </div>
         </header>
       )}
     </>

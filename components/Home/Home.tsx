@@ -5,7 +5,7 @@ import { Project } from '@/src/models/Project';
 import React, { useEffect, useRef } from 'react';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
-import { lockScroll } from '@/utils/scroll';
+import { getLenis, lockScroll } from '@/utils/scroll';
 import gsap from 'gsap';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
@@ -26,6 +26,7 @@ export default function Home({
     setScrollY,
     setIsAnimating,
     setIsLostPage,
+    setFromLostPage,
     projectsHomeCoords,
   } = useThreeJsContext();
 
@@ -45,7 +46,8 @@ export default function Home({
 
   useEffect(() => {
     setIsLostPage(false);
-  }, [setIsLostPage]);
+    setFromLostPage(false);
+  }, [setIsLostPage, setFromLostPage]);
 
   useEffect(() => {
     setHeaderVisible(false);
@@ -62,7 +64,9 @@ export default function Home({
   };
 
   useEffect(() => {
-    // document.documentElement.style.overflow = 'hidden';
+    // router.push({ scroll: false }) garde le scroll Works → reset fenêtre
+    window.scrollTo(0, 0);
+    getLenis()?.scrollTo(0, { immediate: true });
     lockScroll();
     setScrollY(0);
     updateProjects();

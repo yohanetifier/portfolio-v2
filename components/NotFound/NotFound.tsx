@@ -10,6 +10,7 @@ import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import NotFoundPhantomGrid from './NotFoundPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { slugify } from '@/utils/slugify';
+import { setFlag, clearFlag } from '@/utils/fromWorkList';
 
 type Props = {
   projects: Pick<Project, 'title' | 'featuredImage'>[];
@@ -26,14 +27,19 @@ export default function NotFoundView({ projects }: Props) {
     setUv,
     setScrollY,
     setIsLostPage,
+    setFromLostPage,
     setIsAnimating,
     setReturnHome,
     setGoToContact,
-    setGoToProject,
+    setGoToWork,
     setFromProjectSlug,
     setFromProjectIndex,
     setSelectedIndex,
+    setSelectedSlug,
     setProjectImageSelected,
+    setProjectSelectedCoords,
+    selectedIndex,
+    isAnimating,
     goToContact,
     goToWork,
     returnHome,
@@ -41,13 +47,37 @@ export default function NotFoundView({ projects }: Props) {
   } = useThreeJsContext();
 
   useLayoutEffect(() => {
+    // Reset complet à chaque entrée 404 (2ᵉ visite sinon settled/isAnimating bloquent le clic)
     setIsLostPage(true);
+    setFromLostPage(false);
+    setSelectedIndex(null);
+    setSelectedSlug('');
+    setIsAnimating(false);
+    setHoveredIndex(null);
+    setGoToContact(false);
+    setGoToWork(false);
+    setReturnHome(false);
+    clearFlag();
     setScrollY(0);
+    if (contentRef.current) {
+      gsap.set(contentRef.current, { opacity: 1 });
+    }
     document.body.style.backgroundColor = '#f4f3f0';
     return () => {
       setIsLostPage(false);
     };
-  }, [setIsLostPage, setScrollY]);
+  }, [
+    setIsLostPage,
+    setFromLostPage,
+    setSelectedIndex,
+    setSelectedSlug,
+    setIsAnimating,
+    setHoveredIndex,
+    setGoToContact,
+    setGoToWork,
+    setReturnHome,
+    setScrollY,
+  ]);
 
   // Vague 404 — mêmes amplitudes / déphasage que le HTML, en GSAP (comme le mail)
   useEffect(() => {
@@ -85,17 +115,23 @@ export default function NotFoundView({ projects }: Props) {
       if (e.key !== 'Escape') return;
       e.preventDefault();
       setHoveredIndex(null);
+      setFromLostPage(false);
       setReturnHome(true);
       setIsAnimating(true);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [setReturnHome, setIsAnimating]);
+  }, [setReturnHome, setIsAnimating, setHoveredIndex, setFromLostPage]);
 
   // Sortie 404 → Contact / Works / Yeti / Projet : fade du texte
+  const leavingToProject = selectedIndex !== null && isAnimating;
   useEffect(() => {
     if (
-      (!goToContact && !goToWork && !returnHome && !goToProject) ||
+      (!goToContact &&
+        !goToWork &&
+        !returnHome &&
+        !goToProject &&
+        !leavingToProject) ||
       !contentRef.current
     )
       return;
@@ -106,11 +142,18 @@ export default function NotFoundView({ projects }: Props) {
       ease: 'power2.inOut',
       overwrite: 'auto',
     });
-  }, [goToContact, goToWork, returnHome, goToProject]);
+  }, [
+    goToContact,
+    goToWork,
+    returnHome,
+    goToProject,
+    leavingToProject,
+  ]);
 
   const goHome = (e: MouseEvent) => {
     e.preventDefault();
     setHoveredIndex(null);
+    setFromLostPage(false);
     setReturnHome(true);
     setIsAnimating(true);
   };
@@ -125,16 +168,20 @@ export default function NotFoundView({ projects }: Props) {
     setIsAnimating(true);
   };
 
-  const openProject = (index: number) => {
+  const openProject = (index: number, rect: DOMRect) => {
     const project = projects[index];
     if (!project) return;
+    // Identique à WorkList.handleTransition — Scene expand + Plane navigate
     const slug = slugify(project.title);
     setHoveredIndex(null);
+    setIsLostPage(false);
+    setFromLostPage(true);
     setSelectedIndex(index);
-    setFromProjectIndex(index);
-    setFromProjectSlug(slug);
+    setSelectedSlug(slug);
     setProjectImageSelected(project.featuredImage.src);
-    setGoToProject(true);
+    setProjectSelectedCoords(rect);
+    setScrollY(0);
+    setFlag();
     setIsAnimating(true);
   };
 
@@ -149,7 +196,7 @@ export default function NotFoundView({ projects }: Props) {
       <section
         ref={contentRef}
         data-nf
-        className="fixed inset-0 z-[2] overflow-hidden text-[#12120f]"
+        className="pointer-events-none fixed inset-0 z-[2] overflow-hidden text-[#12120f]"
       >
         <div
           className="pointer-events-none absolute inset-0"
@@ -159,9 +206,7 @@ export default function NotFoundView({ projects }: Props) {
           }}
         />
 
-        <div
-          className="pane relative flex h-full max-w-[min(760px,62vw)] flex-col items-start justify-start gap-[clamp(16px,3vh,36px)] overflow-y-auto px-[6vw] pb-[92px] pt-[100px] font-fabrikatMono font-normal pointer-events-none [&_a]:pointer-events-auto"
-        >
+        <div className="pane relative flex h-full max-w-[min(760px,62vw)] flex-col items-start justify-start gap-[clamp(16px,3vh,36px)] overflow-y-auto px-[6vw] pb-[92px] pt-[100px] font-fabrikatMono font-normal">
           <span className="text-[11px] uppercase tracking-[0.3em] text-[#12120f]">
             [ error 404 — lost at sea ]
           </span>
@@ -183,7 +228,7 @@ export default function NotFoundView({ projects }: Props) {
           </div>
 
           <p className="m-0 max-w-[46ch] text-[13px] leading-[1.7] text-[#12120f] text-pretty">
-            This page sank. The six projects are drifting around you — move the
+            This page sank. The projects are drifting around you — move the
             mouse to stir the current, click a wreck to surface.
           </p>
 
@@ -210,6 +255,7 @@ export default function NotFoundView({ projects }: Props) {
         </div>
       </section>
 
+      {/* Hit-targets des projets — au-dessus du fade, sous le texte cliquable */}
       <NotFoundPhantomGrid
         projects={projects}
         onHover={(index, uv) => {

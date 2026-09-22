@@ -7,7 +7,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { slugify } from '@/utils/slugify';
-import { setFlag } from '@/utils/fromWorkList';
+import { setFlag, getFlag } from '@/utils/fromWorkList';
 import { unlockScroll } from '@/utils/scroll';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
@@ -72,7 +72,7 @@ export default function WorkList({
   };
 
   const updateProjects = () => {
-    if (isAnimatingRef.current) return;
+    if (isAnimatingRef.current || getFlag()) return;
     const rects = linkArray.current
       .map((el, i) => {
         return {
@@ -91,12 +91,14 @@ export default function WorkList({
     unlockScroll();
   }, [setIsLostPage]);
 
-  // Mesure la grille dès que l’intro→work est finie (fromHome passe à false).
-  // Avant : if (fromHome) return au mount → coords intro restaient collées sur /work.
+  // Mesure la grille après intro→work, ou après retour projet→works.
+  // Ne PAS remesurer quand isAnimating passe à false avant le push projet
+  // (sinon setProjects écrase le fullscreen → flash à l’URL).
   useLayoutEffect(() => {
-    if (fromHome) return;
+    if (fromHome || isAnimating) return;
+    if (getFlag()) return;
     updateProjects();
-  }, [fromHome]);
+  }, [fromHome, isAnimating]);
 
   useEffect(() => {
     const grid = document.getElementById('grid');

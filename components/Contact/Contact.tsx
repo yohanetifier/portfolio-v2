@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { SplitText } from 'gsap/all';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { useFinePointer } from '@/utils/useFinePointer';
+import { getLenis } from '@/utils/scroll';
 import ContactPhantomGrid from './ContactPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 
@@ -41,9 +42,11 @@ export default function Contact({ projects }: Props) {
     return () => window.clearInterval(id);
   }, []);
 
-  // Remet le scroll en haut pour le retour Works / projet
+  // Remet le scroll en haut (context + fenêtre — push/replace scroll:false)
   useEffect(() => {
     setScrollY(0);
+    window.scrollTo(0, 0);
+    getLenis()?.scrollTo(0, { immediate: true });
   }, [setScrollY]);
 
   useLayoutEffect(() => {
