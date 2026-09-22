@@ -87,10 +87,27 @@ void main() {
 const fragmentShader = `
 uniform float uTime;
 uniform sampler2D uTexture;
+uniform vec2 uPlaneScale;
+uniform vec2 uTextureSize;
 varying vec2 vUv;
 varying float vWave;
+
+/** object-cover : remplit le plane sans étirer la texture */
+vec2 coverUv(vec2 uv, float planeAspect, float textureAspect) {
+  vec2 scale = vec2(1.0);
+  if (planeAspect > textureAspect) {
+    scale.y = textureAspect / max(planeAspect, 0.0001);
+  } else {
+    scale.x = planeAspect / max(textureAspect, 0.0001);
+  }
+  return (uv - 0.5) * scale + 0.5;
+}
+
 void main() {
-  gl_FragColor = texture2D(uTexture, vUv);
+  float planeAspect = uPlaneScale.x / max(uPlaneScale.y, 0.0001);
+  float textureAspect = uTextureSize.x / max(uTextureSize.y, 0.0001);
+  vec2 uv = coverUv(vUv, planeAspect, textureAspect);
+  gl_FragColor = texture2D(uTexture, uv);
 }
 `;
 
@@ -121,7 +138,8 @@ const Plane = ({
   } = useThreeJsContext();
   const proxiedUrl = `/api/image?url=${encodeURIComponent(imageUrl!)}`;
   const texture = useLoader(THREE.TextureLoader, proxiedUrl);
-  const materialRef = useRef<THREE.ShaderMaterial>();
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
   const { isReturning } = useHeaderContext();
 
   const uniforms = useRef({
@@ -130,7 +148,30 @@ const Plane = ({
     uAmplitude: { value: PLANE_AMPLITUDE },
     uMouseCoords: { value: new THREE.Vector2(uv.x ?? 0, uv.y ?? 0) },
     uIsHovered: { value: 0.0 },
+    uPlaneScale: { value: new THREE.Vector2(1, 1) },
+    uTextureSize: {
+      value: new THREE.Vector2(
+        texture.image?.width || 1,
+        texture.image?.height || 1,
+      ),
+    },
   });
+
+  useEffect(() => {
+    const img = texture.image as
+      | HTMLImageElement
+      | ImageBitmap
+      | { width: number; height: number }
+      | undefined;
+    if (!img?.width || !img?.height) return;
+    uniforms.current.uTextureSize.value.set(img.width, img.height);
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTextureSize.value.set(
+        img.width,
+        img.height,
+      );
+    }
+  }, [texture]);
 
   useFrame((_, delta) => {
     const mat = materialRef.current;
@@ -139,6 +180,15 @@ const Plane = ({
     mat.uniforms.uTime.value += delta;
     mat.uniforms.uMouseCoords.value.x = uv.x ?? 0;
     mat.uniforms.uMouseCoords.value.y = uv.y ?? 0;
+
+    // Scale du group parent = taille monde du plane (ratio DOM)
+    const parent = meshRef.current?.parent;
+    if (parent) {
+      mat.uniforms.uPlaneScale.value.set(
+        Math.abs(parent.scale.x) || 1,
+        Math.abs(parent.scale.y) || 1,
+      );
+    }
 
     // Hover lissé seulement hors page projet / sélection
     if (!isSelected && !isProjectView) {
@@ -243,7 +293,7 @@ const Plane = ({
   ]);
 
   return (
-    <mesh scale={[1, 1, 1]} position={[0.0, 0.0, 0.0]}>
+    <mesh ref={meshRef} scale={[1, 1, 1]} position={[0.0, 0.0, 0.0]}>
       <planeGeometry args={[1, 1, 16, 16]} />
       <shaderMaterial
         fragmentShader={fragmentShader}

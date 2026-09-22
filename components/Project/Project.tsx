@@ -115,20 +115,24 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   }, [goToContact, returnHome]);
 
   return (
-    <div className="w-screen h-screen relative z-[3]">
+    <div className="w-screen min-h-screen relative z-[3]">
       {/* Cibles Yeti — grille intro réelle (pas dans un wrapper overflow qui fausse les rects) */}
       <IntroGridPhantom projects={projects} />
       <ContactPhantomGrid projects={projects} />
+      {/*
+        fixed (pas absolute) : sinon metrics.height (~300vh) allonge le document
+        et au scroll mobile on tombe sur le hero WebGL vide en bas.
+      */}
       <div
-        className="flex justify-center items-center absolute w-[100vw] transition-height duration-1000 z-[1] pointer-events-none"
+        className="flex justify-center items-center fixed top-0 left-0 w-[100vw] transition-height duration-1000 z-[1] pointer-events-none opacity-0"
         ref={mainWrapperRef}
+        aria-hidden
         style={{
           height: metrics.height,
-          opacity: 0,
         }}
       >
         <div
-          className={`w-full grid grid-cols-10 gap-[20px] z-[2] `}
+          className={`w-full grid grid-cols-10 gap-[20px] z-[2]`}
           ref={gridRef}
           style={{
             height: metrics.height,
@@ -154,7 +158,8 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
       </div>
 
       <div ref={overlayRef} className="relative z-[20]">
-        <div className="w-screen h-screen relative flex justify-center items-center  font-fabrikatMono">
+        {/* Transparent : laisse voir le plane WebGL en hero */}
+        <div className="w-screen h-screen relative flex justify-center items-center font-fabrikatMono">
           <h1
             className="fixed z-1 text-[5vw] text-white"
             ref={titleRef}
@@ -164,40 +169,42 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
           </h1>
         </div>
 
-        {mediaUrls.map((element, index) => {
-          if (element.endsWith('mp4')) {
-            return (
-              <div
-                key={index}
-                className="md:w-full md:h-full overflow-hidden block"
-              >
-                <video
+        <div className="relative z-[20] bg-white">
+          {mediaUrls.map((element, index) => {
+            if (element.endsWith('mp4')) {
+              return (
+                <div
                   key={index}
-                  loop
-                  autoPlay
-                  muted
-                  playsInline
-                  width={'100%'}
-                  height={'100%'}
-                  className="block w-full h-full object-cover"
+                  className="w-full overflow-hidden block aspect-video bg-white"
                 >
-                  <source src={element} type="video/mp4" />
-                </video>
-              </div>
-            );
-          } else {
-            return (
-              <Image
-                key={index}
-                src={getFullSizeImage(element)}
-                alt={`Image du projet ${project}`}
-                width={1000}
-                height={1000}
-                className="md:w-full md:h-full relative z-20 object-cover block"
-              />
-            );
-          }
-        })}
+                  <video
+                    key={index}
+                    loop
+                    autoPlay
+                    muted
+                    playsInline
+                    className="block w-full h-full object-cover"
+                  >
+                    <source src={element} type="video/mp4" />
+                  </video>
+                </div>
+              );
+            } else {
+              return (
+                <Image
+                  key={index}
+                  src={getFullSizeImage(element)}
+                  alt={`Image du projet ${project}`}
+                  width={1600}
+                  height={1000}
+                  sizes="100vw"
+                  className="w-full h-auto relative z-20 block bg-white"
+                  style={{ width: '100%', height: 'auto' }}
+                />
+              );
+            }
+          })}
+        </div>
       </div>
     </div>
   );

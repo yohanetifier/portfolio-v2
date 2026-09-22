@@ -123,7 +123,7 @@ const Header = () => {
             <button
               type="button"
               onClick={handleBack}
-              className="absolute bottom-0 w-[16px] h-[16px] cursor-pointer p-0 border-0 bg-transparent"
+              className="absolute bottom-0 w-[12px] h-[12px] md:w-[16px] md:h-[16px] cursor-pointer p-0 border-0 bg-transparent"
               aria-label="Retour"
             >
               <Image
