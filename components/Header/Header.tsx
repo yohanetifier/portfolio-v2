@@ -127,7 +127,7 @@ const Header = () => {
             <button
               type="button"
               onClick={handleBack}
-              className="absolute bottom-0 w-[12px] h-[12px] md:w-[16px] md:h-[16px] cursor-pointer p-0 border-0 bg-transparent"
+              className="absolute bottom-0 left-0 z-[5] flex h-[44px] w-[44px] cursor-pointer items-start justify-start border-0 bg-transparent p-0 md:h-[16px] md:w-[16px]"
               aria-label="Retour"
             >
               <Image
@@ -135,7 +135,7 @@ const Header = () => {
                 alt=""
                 width={16}
                 height={16}
-                className="w-full h-full object-contain"
+                className="mt-[2px] h-[14px] w-[14px] object-contain md:mt-0 md:h-full md:w-full"
               />
             </button>
           )}
