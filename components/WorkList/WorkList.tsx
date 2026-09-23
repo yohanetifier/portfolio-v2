@@ -91,12 +91,12 @@ export default function WorkList({
     unlockScroll();
   }, [setIsLostPage]);
 
-  // Mesure la grille dès que l’intro→work est finie (fromHome passe à false).
-  // Avant : if (fromHome) return au mount → coords intro restaient collées sur /work.
+  // Mesure la grille dès que l’intro→work est finie, ou dès la fin d’une transition
+  // (ex. contact→work : sinon isAnimating bloquait le 1er update → positions contact jusqu’au scroll).
   useLayoutEffect(() => {
-    if (fromHome) return;
+    if (fromHome || isAnimating) return;
     updateProjects();
-  }, [fromHome]);
+  }, [fromHome, isAnimating]);
 
   useEffect(() => {
     const grid = document.getElementById('grid');

@@ -29,7 +29,7 @@ export default function Contact({ projects }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const mailRef = useRef<HTMLAnchorElement>(null);
   const finePointer = useFinePointer();
-  const { setProjects, setHoveredIndex, setUv, setScrollY, setIsLostPage, projectsContactCoords, goToContact, goToWork, returnHome, goToProject } =
+  const { setProjects, setHoveredIndex, setUv, setScrollY, setIsLostPage, projectsContactCoords, goToContact, goToWork, returnHome, goToProject, isAnimating } =
     useThreeJsContext();
 
   useEffect(() => {
@@ -51,9 +51,12 @@ export default function Contact({ projects }: Props) {
     setIsLostPage(false);
   }, [setIsLostPage]);
 
-  // Accès direct / refresh sur Contact — ne pas écraser pendant une transition Works→Contact
+  // Sync planes ↔ vignettes contact.
+  // Ne pas réécrire quand on PART (goToWork false + isAnimating) :
+  // sinon les coords contact écrasent les positions works déjà posées par Scene.
   useEffect(() => {
-    if (goToContact || goToWork || returnHome || goToProject) return;
+    if (goToContact || goToWork || returnHome || goToProject || isAnimating)
+      return;
     if (!projectsContactCoords?.length) return;
     setProjects(projectsContactCoords);
   }, [
@@ -63,6 +66,7 @@ export default function Contact({ projects }: Props) {
     goToWork,
     returnHome,
     goToProject,
+    isAnimating,
   ]);
 
   // Arrivée en cascade — hidden en CSS puis anim avant paint (évite flash visible→caché→visible)
