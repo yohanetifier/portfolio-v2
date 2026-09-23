@@ -9,6 +9,7 @@ import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { useFinePointer } from '@/utils/useFinePointer';
 import ContactPhantomGrid from './ContactPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
+import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 
 gsap.registerPlugin(SplitText);
 
@@ -28,7 +29,7 @@ export default function Contact({ projects }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const mailRef = useRef<HTMLAnchorElement>(null);
   const finePointer = useFinePointer();
-  const { setProjects, setHoveredIndex, setUv, setScrollY, setIsLostPage, projectsContactCoords, goToWork, returnHome, goToProject } =
+  const { setProjects, setHoveredIndex, setUv, setScrollY, setIsLostPage, projectsContactCoords, goToContact, goToWork, returnHome, goToProject } =
     useThreeJsContext();
 
   useEffect(() => {
@@ -50,10 +51,19 @@ export default function Contact({ projects }: Props) {
     setIsLostPage(false);
   }, [setIsLostPage]);
 
+  // Accès direct / refresh sur Contact — ne pas écraser pendant une transition Works→Contact
   useEffect(() => {
+    if (goToContact || goToWork || returnHome || goToProject) return;
     if (!projectsContactCoords?.length) return;
     setProjects(projectsContactCoords);
-  }, [projectsContactCoords, setProjects]);
+  }, [
+    projectsContactCoords,
+    setProjects,
+    goToContact,
+    goToWork,
+    returnHome,
+    goToProject,
+  ]);
 
   // Arrivée en cascade — hidden en CSS puis anim avant paint (évite flash visible→caché→visible)
   useLayoutEffect(() => {
@@ -136,16 +146,17 @@ export default function Contact({ projects }: Props) {
         aria-hidden
       >
         <WorklistPhantomGrid projects={projects} />
+        <IntroGridPhantom projects={projects} />
       </div>
 
-      <main className="relative z-[2] min-h-screen flex items-center text-black px-[8vw] md:px-[10vw] overflow-x-hidden">
+      <main className="relative z-[2] min-h-screen flex flex-col text-black px-[8vw] md:px-[10vw] md:justify-center md:pt-0 md:pb-0 overflow-x-hidden">
         <div
           ref={contentRef}
-          className="relative w-full max-w-[52%] pointer-events-none [&_a]:pointer-events-auto [&_[data-reveal]]:opacity-0"
+          className="relative z-[2] w-full max-w-none md:max-w-[52%] flex-1 flex flex-col justify-center pt-[72px] pb-8 pointer-events-none md:flex-none md:block md:pt-0 md:pb-0 [&_a]:pointer-events-auto [&_[data-reveal]]:opacity-0"
         >
           <p
             data-reveal
-            className="text-[10px] md:text-[11px] uppercase tracking-[0.12em] mb-6 md:mb-8"
+            className="text-[10px] md:text-[11px] uppercase tracking-[0.12em] mb-5 md:mb-8"
           >
             [ UN PROJET ? ]
           </p>
@@ -154,7 +165,7 @@ export default function Contact({ projects }: Props) {
             ref={mailRef}
             data-reveal
             href="mailto:contact@yohanetifier.com"
-            className="block font-sans font-bold text-[clamp(1.6rem,5.5vw,4.5rem)] leading-[0.95] tracking-[-0.02em] mb-10 md:mb-14 cursor-none overflow-visible whitespace-nowrap"
+            className="block font-sans font-bold text-[clamp(1.35rem,6.8vw,4.5rem)] md:text-[clamp(1.6rem,5.5vw,4.5rem)] leading-[1.05] md:leading-[0.95] tracking-[-0.02em] mb-6 md:mb-14 cursor-none overflow-visible whitespace-normal md:whitespace-nowrap [overflow-wrap:anywhere]"
             data-cursor
           >
             contact@yohanetifier.com
@@ -162,7 +173,7 @@ export default function Contact({ projects }: Props) {
 
           <nav
             data-reveal
-            className="flex flex-wrap gap-x-10 md:gap-x-16 gap-y-3 mb-10 md:mb-12"
+            className="flex flex-wrap gap-x-8 md:gap-x-16 gap-y-3 mb-6 md:mb-12"
           >
             {SOCIAL_LINKS.map(({ label, href }) => (
               <Link
@@ -182,29 +193,31 @@ export default function Contact({ projects }: Props) {
 
           <div
             data-reveal
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-[10px] md:text-[11px] uppercase tracking-[0.12em]"
+            className="flex flex-col gap-2.5 text-[10px] md:text-[11px] uppercase tracking-[0.12em] md:flex-row md:items-center md:justify-between md:gap-3"
           >
             <p className="flex items-center gap-2">
-              <span aria-hidden className="text-[8px] leading-none">
+              <span aria-hidden className="text-[8px] leading-none shrink-0">
                 ●
               </span>
               Disponible pour de nouveaux projets
             </p>
-            <p className="sm:text-right">
+            <p className="md:text-right">
               Paris — <span>{now}</span>
             </p>
           </div>
         </div>
 
-        <ContactPhantomGrid
-          projects={projects}
-          interactive
-          onHover={(index, uv) => {
-            setUv(uv);
-            setHoveredIndex(index);
-          }}
-          onLeave={() => setHoveredIndex(null)}
-        />
+        <div className="relative z-[1] w-full shrink-0 pt-8 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:contents">
+          <ContactPhantomGrid
+            projects={projects}
+            interactive
+            onHover={(index, uv) => {
+              setUv(uv);
+              setHoveredIndex(index);
+            }}
+            onLeave={() => setHoveredIndex(null)}
+          />
+        </div>
       </main>
     </>
   );

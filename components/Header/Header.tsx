@@ -117,9 +117,13 @@ const Header = () => {
     <>
       {isIntro ? null : (
         <header
-          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] absolute top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out mix-blend-difference text-white ${isHeaderVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          className={`text-[8px] md:text-[16px] grid grid-cols-10 row-start-1 col-start-1 col-end-10 pt-[50px] top-0 z-[100] h-[150px] w-[85%] md:w-[90%] left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-white ${
+            isOpen ? 'fixed' : 'absolute'
+          } ${
+            isOpen ? '' : 'mix-blend-difference'
+          } ${isHeaderVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
-          {showBack && (
+          {showBack && !isOpen && (
             <button
               type="button"
               onClick={handleBack}
@@ -135,7 +139,11 @@ const Header = () => {
               />
             </button>
           )}
-          <div className="col-start-1 col-end-3 flex justify-between ">
+          <div
+            className={`col-start-1 col-end-3 flex justify-between ${
+              isOpen ? 'max-md:opacity-0 max-md:pointer-events-none' : ''
+            }`}
+          >
           <Link
             ref={personalRef}
             href={'/'}
