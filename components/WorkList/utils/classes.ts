@@ -53,11 +53,12 @@ const GRID_PATTERN = [
 export const gridClasses = GRID_PATTERN.map((p) => p.className);
 
 const STARTING_CLASSES = [
-  'w-[16.641vw] h-[19.943vw] absolute right-[50%] rotate-[-14deg] z-[7]',
+  'w-[16.641vw] h-[19.943vw] absolute right-[50%] top-[42%] lg:top-auto rotate-[-14deg] z-[7]',
   'w-[16.641vw] h-[19.943vw] absolute top-[48%] lg:top-[40%] z-[6]',
-  'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[42%] lg:top-[30%] z-[5]',
+  'w-[24.573vw] h-[15.526vw] rotate-[8deg] absolute top-[44%] lg:top-[30%] z-[5]',
   'w-[16.641vw] h-[19.943vw] absolute top-[40%] lg:top-[25%] z-10 rotate-[1deg] z-[4]',
-  'w-[16.641vw] h-[19.943vw] absolute top-[25%] z-10 rotate-[1deg] z-[4]',
+  // Mobile : moins haut pour coller au cluster (évite le trou sous la vignette du haut)
+  'w-[16.641vw] h-[19.943vw] absolute top-[36%] lg:top-[25%] z-10 rotate-[1deg] z-[4]',
 ] as const;
 
 export function getStartingClass(index: number) {
