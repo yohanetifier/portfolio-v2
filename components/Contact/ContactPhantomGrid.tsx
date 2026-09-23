@@ -15,8 +15,8 @@ type Props = {
 
 /**
  * Grille de petits carrés — tous les projets.
- * Desktop : toujours fixed à droite (comme avant) — ne pas casser les transitions.
- * Mobile page contact : dans le flux. Mobile autres pages : fixed en bas.
+ * Même layout partout (work phantom + page contact) pour des transitions stables.
+ * Desktop : fixed à droite. Mobile : fixed un peu remontée.
  */
 export default function ContactPhantomGrid({
   projects,
@@ -51,24 +51,13 @@ export default function ContactPhantomGrid({
     };
   }, [projects, setProjectsContactCoords]);
 
-  /**
-   * `fixed` en base = desktop/transitions OK.
-   * Overrides mobile via max-md: seulement (évite le flash relative → top).
-   */
-  const shellClass = interactive
-    ? [
-        'fixed inset-y-0 right-0 z-[1] flex items-center justify-end pr-[6vw] md:pr-[8vw]',
-        // Mobile contact : dans le flux sous le texte
-        'max-md:relative max-md:inset-auto max-md:right-auto max-md:w-full max-md:justify-center max-md:pr-0',
-      ].join(' ')
-    : [
-        'pointer-events-none fixed inset-y-0 right-0 z-[1] flex items-center justify-end pr-[6vw] md:pr-[8vw]',
-        // Mobile phantom : bas d’écran pour les transitions
-        'max-md:inset-auto max-md:bottom-[max(1.25rem,env(safe-area-inset-bottom))] max-md:left-0 max-md:right-0 max-md:items-end max-md:justify-center max-md:px-[8vw] max-md:pr-[8vw] max-md:pb-2',
-      ].join(' ');
-
   return (
-    <div className={shellClass} aria-hidden>
+    <div
+      className={`fixed z-[1] flex justify-center ${
+        interactive ? '' : 'pointer-events-none'
+      } inset-y-0 right-0 items-center pr-[6vw] md:pr-[8vw] max-md:inset-auto max-md:bottom-[max(4.5rem,14vh)] max-md:left-0 max-md:right-0 max-md:items-end max-md:justify-center max-md:px-[8vw] max-md:pr-[8vw]`}
+      aria-hidden
+    >
       <div
         className="grid grid-cols-3 gap-2 max-md:[--sq:min(17vw,_70px)] md:gap-4 md:[--sq:min(9vw,_110px)] [--sq:min(9vw,_110px)]"
         style={{ width: 'calc(var(--sq) * 3 + 1rem)' }}

@@ -153,10 +153,10 @@ export default function Contact({ projects }: Props) {
         <IntroGridPhantom projects={projects} />
       </div>
 
-      <main className="relative z-[2] min-h-screen flex flex-col text-black px-[8vw] md:px-[10vw] md:justify-center md:pt-0 md:pb-0 overflow-x-hidden">
+      <main className="relative z-[2] min-h-screen flex flex-col justify-center text-black px-[8vw] md:px-[10vw] pt-[88px] pb-[calc(3*min(17vw,70px)+6.5rem)] md:pt-0 md:pb-0 overflow-x-hidden">
         <div
           ref={contentRef}
-          className="relative z-[2] w-full max-w-none md:max-w-[52%] flex-1 flex flex-col justify-center pt-[72px] pb-8 pointer-events-none md:flex-none md:block md:pt-0 md:pb-0 [&_a]:pointer-events-auto [&_[data-reveal]]:opacity-0"
+          className="relative z-[2] w-full max-w-none md:max-w-[52%] pointer-events-none [&_a]:pointer-events-auto [&_[data-reveal]]:opacity-0"
         >
           <p
             data-reveal
@@ -211,17 +211,15 @@ export default function Contact({ projects }: Props) {
           </div>
         </div>
 
-        <div className="relative z-[1] w-full shrink-0 pt-8 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:contents">
-          <ContactPhantomGrid
-            projects={projects}
-            interactive
-            onHover={(index, uv) => {
-              setUv(uv);
-              setHoveredIndex(index);
-            }}
-            onLeave={() => setHoveredIndex(null)}
-          />
-        </div>
+        <ContactPhantomGrid
+          projects={projects}
+          interactive
+          onHover={(index, uv) => {
+            setUv(uv);
+            setHoveredIndex(index);
+          }}
+          onLeave={() => setHoveredIndex(null)}
+        />
       </main>
     </>
   );

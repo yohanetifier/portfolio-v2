@@ -35,6 +35,10 @@ export default function WorkList({
     setUv,
     hoveredIndex,
     setIsLostPage,
+    goToContact,
+    goToWork,
+    returnHome,
+    goToProject,
   } = useThreeJsContext();
   const finePointer = useFinePointer();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
@@ -43,6 +47,10 @@ export default function WorkList({
   const metrics = getGridMetrics(projects.length);
   const isAnimatingRef = useRef(false);
   isAnimatingRef.current = isAnimating;
+  const leavingRef = useRef(false);
+  leavingRef.current = Boolean(
+    goToContact || goToWork || returnHome || goToProject,
+  );
   const targetX = useRef<number>(0);
   const targetY = useRef<number>(0);
   const currentX = useRef<number | null>(null);
@@ -72,7 +80,8 @@ export default function WorkList({
   };
 
   const updateProjects = () => {
-    if (isAnimatingRef.current) return;
+    // Pendant / juste après une transition : ne pas écraser les cibles GSAP
+    if (isAnimatingRef.current || leavingRef.current) return;
     const rects = linkArray.current
       .map((el, i) => {
         return {
@@ -91,12 +100,12 @@ export default function WorkList({
     unlockScroll();
   }, [setIsLostPage]);
 
-  // Mesure la grille dès que l’intro→work est finie, ou dès la fin d’une transition
-  // (ex. contact→work : sinon isAnimating bloquait le 1er update → positions contact jusqu’au scroll).
+  // Mesure quand on est bien installé sur /work (pas en train de partir vers contact/home)
   useLayoutEffect(() => {
-    if (fromHome || isAnimating) return;
+    if (fromHome || isAnimating || goToContact || goToWork || returnHome || goToProject)
+      return;
     updateProjects();
-  }, [fromHome, isAnimating]);
+  }, [fromHome, isAnimating, goToContact, goToWork, returnHome, goToProject]);
 
   useEffect(() => {
     const grid = document.getElementById('grid');
