@@ -18,26 +18,29 @@ const SOCIAL_LINKS = [
 const NAV_LINK_CLASS =
   'block w-full border-0 bg-transparent p-0 text-left font-sans text-[clamp(2.75rem,12vw,4.5rem)] font-bold leading-[1.15] tracking-[-0.03em]';
 
-/** Laisse le menu se fermer avant de lancer GSAP (sinon anim derrière le fond crème) */
-const MENU_CLOSE_MS = 420;
-
 const Menu = () => {
   const { setIsOpen, isOpen } = useContext(ThemeContext);
-  const { setIsReturning } = useHeaderContext();
+  const { setIsReturning, setReset } = useHeaderContext();
   const pathname = usePathname();
   const router = useRouter();
   const projectPath = getProjectPath(pathname);
-  const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
     selectedIndex,
+    setSelectedIndex,
     setReturnHome,
     setIsAnimating,
     setFromWorkPage,
+    fromWorkPage,
     setGoToContact,
     setGoToWork,
+    goToWork,
     setFromProjectSlug,
     setFromProjectIndex,
     isLostPage,
+    isAnimating,
+    goToContact,
+    returnHome,
+    goToProject,
   } = useThreeJsContext();
 
   const isLostRoute =
@@ -47,6 +50,12 @@ const Menu = () => {
       !pathname.startsWith('/work') &&
       !pathname.startsWith('/blogs'));
 
+  // Ne pas unlockScroll au close si une transition GSAP vient de partir
+  const keepScrollLockedRef = useRef(false);
+  keepScrollLockedRef.current = Boolean(
+    isAnimating || goToWork || goToContact || returnHome || goToProject,
+  );
+
   useEffect(() => {
     if (!isOpen) return;
     lockScroll();
@@ -55,90 +64,116 @@ const Menu = () => {
     };
     document.addEventListener('touchmove', blockTouch, { passive: false });
     return () => {
-      unlockScroll();
       document.removeEventListener('touchmove', blockTouch);
+      if (!keepScrollLockedRef.current) {
+        unlockScroll();
+      }
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    return () => {
-      if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
-    };
-  }, []);
-
   const close = () => setIsOpen(false);
 
-  /** Ferme le menu puis exécute la nav — l’anim WebGL est visible */
-  const afterClose = (action: () => void) => {
-    if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
-    setIsOpen(false);
-    navTimeoutRef.current = setTimeout(action, MENU_CLOSE_MS);
+  const resolveIndex = () => {
+    if (selectedIndex !== null && selectedIndex >= 0) return selectedIndex;
+    if (fromWorkPage >= 0) return fromWorkPage;
+    return null;
   };
 
+  /** Identique Header.handleNav('/') */
   const goHome = () => {
     if (pathname === '/') {
       close();
       return;
     }
-    afterClose(() => {
-      clearFlag();
-      if (selectedIndex !== null) {
-        setFromWorkPage(selectedIndex);
-      }
-      setFromProjectSlug(null);
-      setFromProjectIndex(-1);
-      setReturnHome(true);
-      setIsAnimating(true);
-    });
+    clearFlag();
+    if (selectedIndex !== null) {
+      setFromWorkPage(selectedIndex);
+    }
+    setFromProjectSlug(null);
+    setFromProjectIndex(-1);
+    setReturnHome(true);
+    setIsAnimating(true);
+    close();
   };
 
+  /** Identique Header.handleWorkPath / returnToWorkList — flags tout de suite */
   const goToProjets = () => {
     if (pathname === '/work' && !projectPath) {
       close();
       return;
     }
-    afterClose(() => {
-      if (projectPath) {
-        if (selectedIndex === null) return;
-        setIsReturning(true);
-        setIsAnimating(true);
-        router.push('/work', { scroll: false });
+
+    if (projectPath) {
+      const index = resolveIndex();
+      if (index === null) {
+        close();
         return;
       }
-      if (pathname === '/contact' || isLostRoute) {
-        setFromProjectSlug(null);
-        setFromProjectIndex(-1);
+      setSelectedIndex(index);
+      setIsReturning(true);
+      setIsAnimating(true);
+      router.push('/work', { scroll: false });
+      close();
+      return;
+    }
+
+    if (pathname === '/contact' || isLostRoute) {
+      setFromProjectSlug(null);
+      setFromProjectIndex(-1);
+      // Si un goToWork précédent est resté coincé (pas de coords), forcer un re-trigger
+      if (goToWork) {
+        setGoToWork(false);
+        requestAnimationFrame(() => {
+          setGoToWork(true);
+          setIsAnimating(true);
+        });
+      } else {
         setGoToWork(true);
         setIsAnimating(true);
-        return;
       }
-      router.push('/work');
-    });
+      close();
+      return;
+    }
+
+    router.push('/work', { scroll: false });
+    setReset(true);
+    close();
   };
 
+  /** Identique Header.handleNav('/contact') */
   const goToContactPage = () => {
     if (pathname === '/contact') {
       close();
       return;
     }
-    afterClose(() => {
-      if (pathname === '/work' || isLostRoute) {
-        setFromProjectSlug(null);
-        setFromProjectIndex(-1);
-        setGoToContact(true);
-        setIsAnimating(true);
+
+    if (pathname === '/work' || isLostRoute) {
+      setFromProjectSlug(null);
+      setFromProjectIndex(-1);
+      setGoToContact(true);
+      setIsAnimating(true);
+      close();
+      return;
+    }
+
+    if (projectPath) {
+      const index = resolveIndex();
+      if (index === null) {
+        close();
         return;
       }
-      if (projectPath) {
-        if (selectedIndex === null) return;
-        setFromProjectSlug(String(projectPath));
-        setFromProjectIndex(selectedIndex);
-        setGoToContact(true);
-        setIsAnimating(true);
-        return;
-      }
-      router.push('/contact');
-    });
+      setSelectedIndex(index);
+      setFromProjectSlug(String(projectPath));
+      setFromProjectIndex(index);
+      setGoToContact(true);
+      setIsAnimating(true);
+      close();
+      return;
+    }
+
+    router.push('/contact', { scroll: false });
+    setReset(true);
+    close();
   };
 
   return (

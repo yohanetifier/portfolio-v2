@@ -145,13 +145,9 @@ export default function Contact({ projects }: Props) {
 
   return (
     <>
-      <div
-        className="pointer-events-none opacity-0 fixed inset-0 overflow-hidden"
-        aria-hidden
-      >
-        <WorklistPhantomGrid projects={projects} />
-        <IntroGridPhantom projects={projects} />
-      </div>
+      {/* Même structure que Home — pas de wrapper opacity/overflow qui fausse les mesures */}
+      <WorklistPhantomGrid projects={projects} />
+      <IntroGridPhantom projects={projects} />
 
       <main className="relative z-[2] min-h-screen flex flex-col justify-center text-black px-[8vw] md:px-[10vw] pt-[88px] pb-[calc(3*min(17vw,70px)+6.5rem)] md:pt-0 md:pb-0 overflow-x-hidden">
         <div

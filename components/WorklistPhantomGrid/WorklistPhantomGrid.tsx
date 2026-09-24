@@ -21,7 +21,7 @@ const WorklistPhantomGrid = ({
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const metrics = getGridMetrics(projects.length);
   const phantomsElements = useRef<(HTMLDivElement | null)[]>([]);
-  const { setProjectsCoords } = useThreeJsContext();
+  const { setProjectsCoords, goToWork } = useThreeJsContext();
 
   useLayoutEffect(() => {
     if (!writeCoords) return;
@@ -38,10 +38,12 @@ const WorklistPhantomGrid = ({
     };
 
     update();
-    // Refs parfois pas prêts au tout premier layout
-    const raf = requestAnimationFrame(update);
+    const raf = requestAnimationFrame(() => {
+      update();
+      requestAnimationFrame(update);
+    });
     return () => cancelAnimationFrame(raf);
-  }, [projects, setProjectsCoords, writeCoords]);
+  }, [projects, setProjectsCoords, writeCoords, goToWork]);
 
   return (
     <div

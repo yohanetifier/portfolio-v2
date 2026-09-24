@@ -33,6 +33,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     setProjectImageSelected,
     setProjects,
     setSelectedIndex,
+    setFromWorkPage,
     setScrollY,
     scrollY,
     setProjectSelectedCoords,
@@ -62,9 +63,12 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     const itemIndex = projects.findIndex((project) => {
       return slugify(project.title) === workPath;
     });
-    setSelectedIndex(itemIndex);
-    const itemCoords = rects[itemIndex];
-    if (scrollY === null) {
+    if (itemIndex >= 0) {
+      setSelectedIndex(itemIndex);
+      setFromWorkPage(itemIndex);
+    }
+    const itemCoords = itemIndex >= 0 ? rects[itemIndex] : undefined;
+    if (scrollY === null && itemCoords) {
       const isInFirstScreen =
         itemCoords.rects.top + itemCoords.rects.height < window.innerHeight;
 

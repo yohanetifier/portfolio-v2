@@ -488,126 +488,35 @@ const Scene = ({ projectsDetails }: Props) => {
       setIsReturning(false);
       setReset(false);
     }
+
     if (selectedIndex === null) return;
-    const tl = gsap.timeline({
-      onStart: () => {
-        lockScroll();
-      },
-      onComplete: () => {
-        setSettledIndex(selectedIndex!);
-      },
-    });
+    if (!groupRefArray.current?.[selectedIndex]) return;
 
-    if (!groupRefArray.current) return;
-    if (!groupRefArray.current[selectedIndex]) return;
+    // Reverse AVANT de créer la timeline forward (sinon tl vide → setSettledIndex
+    // immédiat → Plane re-push /work/[slug] = Projets qui “ne marche pas”)
+    if (isReturning) {
+      const targetRects =
+        projectSelectedCoords ?? projectsDetails[selectedIndex]?.rects ?? null;
+      if (!targetRects) return;
 
-    if (!isReturning) {
-      if (
-        groupRefArray.current[selectedIndex].position.x === 0.0 &&
-        groupRefArray.current[selectedIndex].position.y === 0.0 &&
-        groupRefArray.current[selectedIndex].position.y === 0.0
-      ) {
-        const initItemSelected = projectsDetails[selectedIndex];
-        const centerX =
-          initItemSelected.rects.left + initItemSelected.rects.width / 2;
-        const centerY =
-          initItemSelected.rects.top + initItemSelected.rects.height / 2;
-        const worldX = (centerX / size.width - 0.5) * viewport.width;
-        const worldY = -(centerY / size.height - 0.5) * viewport.height;
-
-        const baseLocationItemSelected = new THREE.Group();
-
-        baseLocationItemSelected.position.x = worldX;
-        baseLocationItemSelected.position.y = worldY;
-        const groupRefArrayFilter = groupRefArray.current
-          .map((el, i) => (i !== selectedIndex ? el : null))
-          .filter((el): el is THREE.Group => el !== null);
-
-        if (!fromWorkList) {
-          groupRefArrayFilter.forEach((element) => {
-            initCoords.current[element.uuid] = element.position.y;
-          });
-        }
-
-        const { childAtTheBottom, childAtTheTop } = getPositions(
-          groupRefArrayFilter,
-          baseLocationItemSelected,
-        );
-        projectsAtTheBottomRef.current = childAtTheBottom;
-        projectsAtTheTopRef.current = childAtTheTop;
-        projectsAtTheBottomRef.current.forEach((element) => {
-          projectsAtTheBottom.current[element.uuid] = element.position.y;
-        });
-        projectsAtTheTopRef.current.forEach((element) => {
-          projectsAtTheTop.current[element.uuid] = element.position.y;
-        });
-      } else {
-        const groups = groupRefArray.current.filter(
-          (el): el is THREE.Group => el !== null,
-        );
-        const selectedGroup = groupRefArray.current[selectedIndex];
-        if (!selectedGroup) return;
-        const { childAtTheBottom, childAtTheTop } = getPositions(
-          groups,
-          selectedGroup,
-        );
-        projectsAtTheBottomRef.current = childAtTheBottom;
-        projectsAtTheTopRef.current = childAtTheTop;
-      }
-
-      projectsAtTheBottomRef.current.forEach((element) => {
-        projectsAtTheBottom.current[element.uuid] = element.position.y;
-      });
-
-      projectsAtTheTopRef.current.forEach((element) => {
-        projectsAtTheTop.current[element.uuid] = element.position.y;
-      });
-
-      if (returnHome) {
-      } else {
-        tl.to(groupRefArray.current[selectedIndex]!.scale, {
-          x: viewport.width,
-          y: viewport.height,
-          duration: 1,
-        }).to(
-          groupRefArray.current[selectedIndex]!.position,
-          { x: 0, y: 0, duration: 1 },
-          '<',
-        );
-      }
-
-      projectsAtTheBottomRef.current.forEach((element) => {
-        tl.to(element.position, { y: -viewport.height, duration: 1 }, '<');
-      });
-      projectsAtTheTopRef.current.forEach((element) => {
-        tl.to(
-          element.position,
-          {
-            y: viewport.height,
-            duration: 1,
-          },
-          '<',
-        );
-      });
-    } else {
-      if (!projectSelectedCoords) return;
-      const centerX =
-        projectSelectedCoords.left + projectSelectedCoords.width / 2;
-      const centerY =
-        projectSelectedCoords.top + projectSelectedCoords.height / 2;
+      const centerX = targetRects.left + targetRects.width / 2;
+      const centerY = targetRects.top + targetRects.height / 2;
       const worldX = (centerX / size.width - 0.5) * viewport.width;
       const worldY = -(centerY / size.height - 0.5) * viewport.height;
-      const worldW =
-        (projectSelectedCoords.width / size.width) * viewport.width;
-      const worldH =
-        (projectSelectedCoords.height / size.height) * viewport.height;
+      const worldW = (targetRects.width / size.width) * viewport.width;
+      const worldH = (targetRects.height / size.height) * viewport.height;
       const reverseTl = gsap.timeline({
+        onStart: () => {
+          lockScroll();
+        },
         onComplete: () => {
           setSelectedIndex(null);
           setSettledIndex(null);
+          setFromWorkPage(-1);
           setIsReturning(false);
           setIsAnimating(false);
           clearFlag();
+          unlockScroll();
         },
       });
       reverseTl
@@ -627,7 +536,7 @@ const Scene = ({ projectsDetails }: Props) => {
         );
 
       if (fromWorkList) {
-        projectsAtTheBottomRef.current.forEach((element, i) => {
+        projectsAtTheBottomRef.current.forEach((element) => {
           reverseTl.to(
             element.position,
             {
@@ -674,7 +583,105 @@ const Scene = ({ projectsDetails }: Props) => {
           );
         });
       }
+      return;
     }
+
+    const tl = gsap.timeline({
+      onStart: () => {
+        lockScroll();
+      },
+      onComplete: () => {
+        setSettledIndex(selectedIndex!);
+      },
+    });
+
+    if (
+      groupRefArray.current[selectedIndex].position.x === 0.0 &&
+      groupRefArray.current[selectedIndex].position.y === 0.0 &&
+      groupRefArray.current[selectedIndex].position.y === 0.0
+    ) {
+      const initItemSelected = projectsDetails[selectedIndex];
+      if (!initItemSelected?.rects) return;
+      const centerX =
+        initItemSelected.rects.left + initItemSelected.rects.width / 2;
+      const centerY =
+        initItemSelected.rects.top + initItemSelected.rects.height / 2;
+      const worldX = (centerX / size.width - 0.5) * viewport.width;
+      const worldY = -(centerY / size.height - 0.5) * viewport.height;
+
+      const baseLocationItemSelected = new THREE.Group();
+
+      baseLocationItemSelected.position.x = worldX;
+      baseLocationItemSelected.position.y = worldY;
+      const groupRefArrayFilter = groupRefArray.current
+        .map((el, i) => (i !== selectedIndex ? el : null))
+        .filter((el): el is THREE.Group => el !== null);
+
+      if (!fromWorkList) {
+        groupRefArrayFilter.forEach((element) => {
+          initCoords.current[element.uuid] = element.position.y;
+        });
+      }
+
+      const { childAtTheBottom, childAtTheTop } = getPositions(
+        groupRefArrayFilter,
+        baseLocationItemSelected,
+      );
+      projectsAtTheBottomRef.current = childAtTheBottom;
+      projectsAtTheTopRef.current = childAtTheTop;
+      projectsAtTheBottomRef.current.forEach((element) => {
+        projectsAtTheBottom.current[element.uuid] = element.position.y;
+      });
+      projectsAtTheTopRef.current.forEach((element) => {
+        projectsAtTheTop.current[element.uuid] = element.position.y;
+      });
+    } else {
+      const groups = groupRefArray.current.filter(
+        (el): el is THREE.Group => el !== null,
+      );
+      const selectedGroup = groupRefArray.current[selectedIndex];
+      if (!selectedGroup) return;
+      const { childAtTheBottom, childAtTheTop } = getPositions(
+        groups,
+        selectedGroup,
+      );
+      projectsAtTheBottomRef.current = childAtTheBottom;
+      projectsAtTheTopRef.current = childAtTheTop;
+    }
+
+    projectsAtTheBottomRef.current.forEach((element) => {
+      projectsAtTheBottom.current[element.uuid] = element.position.y;
+    });
+
+    projectsAtTheTopRef.current.forEach((element) => {
+      projectsAtTheTop.current[element.uuid] = element.position.y;
+    });
+
+    if (!returnHome) {
+      tl.to(groupRefArray.current[selectedIndex]!.scale, {
+        x: viewport.width,
+        y: viewport.height,
+        duration: 1,
+      }).to(
+        groupRefArray.current[selectedIndex]!.position,
+        { x: 0, y: 0, duration: 1 },
+        '<',
+      );
+    }
+
+    projectsAtTheBottomRef.current.forEach((element) => {
+      tl.to(element.position, { y: -viewport.height, duration: 1 }, '<');
+    });
+    projectsAtTheTopRef.current.forEach((element) => {
+      tl.to(
+        element.position,
+        {
+          y: viewport.height,
+          duration: 1,
+        },
+        '<',
+      );
+    });
   }, [selectedIndex, isReturning, reset, fromHome, returnHome, goToContact, goToWork, goToProject, fromWorkPage, projectsContactCoords?.length, projectsHomeCoords?.length, projectsCoords?.length]);
 
   if (projectsDetails.length > 0) {

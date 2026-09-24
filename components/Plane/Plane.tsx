@@ -265,7 +265,7 @@ const Plane = ({
           ease: 'power3.out',
           onComplete: () => {
             // Ne pas naviguer si une autre transition (contact / works / retour) est en cours
-            if (goToContact || goToWork || goToProject || returnHome) {
+            if (goToContact || goToWork || goToProject || returnHome || isReturning) {
               return;
             }
             // Navigation uniquement à la fin de la sélection (pas au mount page projet)

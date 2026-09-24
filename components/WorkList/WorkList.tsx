@@ -39,6 +39,7 @@ export default function WorkList({
     goToWork,
     returnHome,
     goToProject,
+    setFromWorkPage,
   } = useThreeJsContext();
   const finePointer = useFinePointer();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
@@ -70,6 +71,7 @@ export default function WorkList({
     e.preventDefault();
     const formatedTitle = slugify(title);
     setSelectedIndex(index);
+    setFromWorkPage(index);
     setSelectedSlug(formatedTitle);
     setProjectImageSelected(featuredImage.src);
     setProjectSelectedCoords(e.currentTarget.getBoundingClientRect());
