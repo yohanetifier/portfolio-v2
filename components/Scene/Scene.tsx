@@ -694,6 +694,16 @@ const Scene = ({ projectsDetails }: Props) => {
       const worldH = (rects.height / size.height) * viewport.height;
       const group = groupRefArray.current[i];
       const isBottom = projectsAtTheBottomRef.current.includes(group!);
+      // Entre fin GSAP (settledIndex) et arrivée /work/[slug] (workPath),
+      // React ne doit PAS réappliquer la grille — sinon décalage puis recentrage.
+      // !isReturning : ne pas bloquer le reverse menu→projets.
+      const holdHero =
+        activeIndex === i &&
+        (Boolean(workPath) || (!isReturning && settledIndex === i));
+      const holdOthersOff =
+        activeIndex !== null &&
+        i !== activeIndex &&
+        (Boolean(workPath) || (!isReturning && settledIndex != null));
 
       return (
         <group
@@ -701,17 +711,14 @@ const Scene = ({ projectsDetails }: Props) => {
           {...(gsapOwnsPose
             ? {}
             : {
-                position: (activeIndex === i && workPath
+                position: (holdHero
                   ? [0.0, 0.0, 0]
-                  : workPath &&
-                      activeIndex !== null &&
-                      i !== activeIndex
+                  : holdOthersOff
                     ? isBottom
                       ? [0, -viewport.height, 0]
                       : [0, viewport.height, 0]
                     : [worldX, worldY, 0]) as [number, number, number],
-                // Sur page projet : fullscreen (sinon petit au centre sous le HTML → flash au retour)
-                scale: (activeIndex === i && workPath
+                scale: (holdHero
                   ? [viewport.width, viewport.height, 1]
                   : [worldW, worldH, 1]) as [number, number, number],
               })}

@@ -20,7 +20,7 @@ const NAV_LINK_CLASS =
 
 const Menu = () => {
   const { setIsOpen, isOpen } = useContext(ThemeContext);
-  const { setIsReturning, setReset } = useHeaderContext();
+  const { setIsReturning, setReset, isReturning } = useHeaderContext();
   const pathname = usePathname();
   const router = useRouter();
   const projectPath = getProjectPath(pathname);
@@ -53,7 +53,12 @@ const Menu = () => {
   // Ne pas unlockScroll au close si une transition GSAP vient de partir
   const keepScrollLockedRef = useRef(false);
   keepScrollLockedRef.current = Boolean(
-    isAnimating || goToWork || goToContact || returnHome || goToProject,
+    isAnimating ||
+      isReturning ||
+      goToWork ||
+      goToContact ||
+      returnHome ||
+      goToProject,
   );
 
   useEffect(() => {
