@@ -88,7 +88,7 @@ const Scene = ({ projectsDetails }: Props) => {
       fromTop: boolean;
     } | null)[]
   >([]);
-  // Contact→works (!fromWorkList) : garder le hero sans omettre les props R3F
+  // Contact/404→works (!fromWorkList) : garder le hero sans omettre les props R3F
   const isContactReturnPose =
     isReturning &&
     !getFlag() &&
@@ -367,7 +367,7 @@ const Scene = ({ projectsDetails }: Props) => {
         return;
       }
 
-      // Mémoriser la grille works pour le reverse (contact→projet→works)
+      // Mémoriser la grille works pour le reverse (contact/404→projet→works)
       const restoreGrid = projectsCoords?.length
         ? projectsCoords
         : projectsDetails;

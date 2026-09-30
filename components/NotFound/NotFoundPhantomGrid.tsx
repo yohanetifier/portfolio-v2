@@ -77,7 +77,7 @@ export default function NotFoundPhantomGrid({
 
   return (
     <div
-      className="fixed inset-0 z-[1]"
+      className="fixed inset-0 z-[3]"
       aria-hidden
       data-nf-phantoms
     >
@@ -85,7 +85,7 @@ export default function NotFoundPhantomGrid({
         <div
           key={index}
           data-nf-wreck={index}
-          className="absolute opacity-0"
+          className="absolute opacity-0 cursor-none"
           ref={(el) => {
             refs.current[index] = el;
           }}

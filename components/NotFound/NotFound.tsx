@@ -10,6 +10,7 @@ import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import NotFoundPhantomGrid from './NotFoundPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { slugify } from '@/utils/slugify';
+import { clearFlag } from '@/utils/fromWorkList';
 
 type Props = {
   projects: Pick<Project, 'title' | 'featuredImage'>[];
@@ -33,7 +34,11 @@ export default function NotFoundView({ projects }: Props) {
     setFromProjectSlug,
     setFromProjectIndex,
     setSelectedIndex,
+    setFromWorkPage,
     setProjectImageSelected,
+    setProjectSelectedCoords,
+    projectsCoords,
+    isAnimating,
     goToContact,
     goToWork,
     returnHome,
@@ -126,14 +131,24 @@ export default function NotFoundView({ projects }: Props) {
   };
 
   const openProject = (index: number) => {
+    if (isAnimating || goToProject || goToWork || returnHome || goToContact)
+      return;
     const project = projects[index];
     if (!project) return;
     const slug = slugify(project.title);
+    // Même trajet que contact→projet→works (pas fromWorkList)
+    clearFlag();
+    const worklistRects = projectsCoords?.[index]?.rects;
     setHoveredIndex(null);
     setSelectedIndex(index);
+    setFromWorkPage(index);
     setFromProjectIndex(index);
     setFromProjectSlug(slug);
     setProjectImageSelected(project.featuredImage.src);
+    if (worklistRects) {
+      setProjectSelectedCoords(worklistRects);
+      setScrollY(Math.max(0, Math.round(worklistRects.top - 24)));
+    }
     setGoToProject(true);
     setIsAnimating(true);
   };
@@ -149,7 +164,7 @@ export default function NotFoundView({ projects }: Props) {
       <section
         ref={contentRef}
         data-nf
-        className="fixed inset-0 z-[2] overflow-hidden text-[#12120f]"
+        className="pointer-events-none fixed inset-0 z-[2] overflow-hidden text-[#12120f]"
       >
         <div
           className="pointer-events-none absolute inset-0"
@@ -160,7 +175,7 @@ export default function NotFoundView({ projects }: Props) {
         />
 
         <div
-          className="pane relative flex h-full max-w-[min(760px,62vw)] flex-col items-start justify-start gap-[clamp(16px,3vh,36px)] overflow-y-auto px-[6vw] pb-[92px] pt-[100px] font-fabrikatMono font-normal pointer-events-none [&_a]:pointer-events-auto"
+          className="pane relative flex h-full max-w-[min(760px,62vw)] flex-col items-start justify-start gap-[clamp(16px,3vh,36px)] overflow-y-auto px-[6vw] pb-[92px] pt-[100px] font-fabrikatMono font-normal pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
         >
           <span className="text-[11px] uppercase tracking-[0.3em] text-[#12120f]">
             [ error 404 — lost at sea ]
