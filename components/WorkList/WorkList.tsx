@@ -6,8 +6,9 @@ import Link from 'next/link';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getGridMetrics, getGridPlacement } from './utils/classes';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { useHeaderContext } from '@/contexts/HeaderContext';
 import { slugify } from '@/utils/slugify';
-import { setFlag } from '@/utils/fromWorkList';
+import { getFlag, setFlag } from '@/utils/fromWorkList';
 import { unlockScroll } from '@/utils/scroll';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
@@ -28,6 +29,7 @@ export default function WorkList({
     setProjectSelectedCoords,
     setScrollY,
     scrollY,
+    selectedIndex,
     fromHome,
     isAnimating,
     setIsAnimating,
@@ -41,6 +43,7 @@ export default function WorkList({
     goToProject,
     setFromWorkPage,
   } = useThreeJsContext();
+  const { isReturning } = useHeaderContext();
   const finePointer = useFinePointer();
   const linkArray = useRef<HTMLAnchorElement[]>([]);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
@@ -81,9 +84,9 @@ export default function WorkList({
     setHoveredIndex(null);
   };
 
-  const updateProjects = () => {
+  const updateProjects = (force = false) => {
     // Pendant / juste après une transition : ne pas écraser les cibles GSAP
-    if (isAnimatingRef.current || leavingRef.current) return;
+    if (!force && (isAnimatingRef.current || leavingRef.current)) return;
     const rects = linkArray.current
       .map((el, i) => {
         return {
@@ -92,6 +95,7 @@ export default function WorkList({
         };
       })
       .filter(Boolean);
+    if (rects.length === 0) return;
     setProjects(rects);
     const localStorageValue = JSON.stringify({ rects });
     localStorage.setItem('projectsDetails', localStorageValue);
@@ -99,8 +103,9 @@ export default function WorkList({
 
   useLayoutEffect(() => {
     setIsLostPage(false);
-    unlockScroll();
-  }, [setIsLostPage]);
+    // Pendant le reverse le scroll reste verrouillé (Scene)
+    if (!isReturning) unlockScroll();
+  }, [setIsLostPage, isReturning]);
 
   // Mesure quand on est bien installé sur /work (pas en train de partir vers contact/home)
   useLayoutEffect(() => {
@@ -108,6 +113,19 @@ export default function WorkList({
       return;
     updateProjects();
   }, [fromHome, isAnimating, goToContact, goToWork, returnHome, goToProject]);
+
+  // Contact→works : scroll + re-mesure derrière le plane fullscreen
+  // + sync projectSelectedCoords (même cible que works→projet→works)
+  useLayoutEffect(() => {
+    window.scrollTo(0, scrollY ?? 0);
+    if (isReturning && !getFlag()) {
+      updateProjects(true);
+      if (selectedIndex !== null) {
+        const el = linkArray.current[selectedIndex];
+        if (el) setProjectSelectedCoords(el.getBoundingClientRect());
+      }
+    }
+  }, [isReturning, scrollY, selectedIndex, setProjectSelectedCoords]);
 
   useEffect(() => {
     const grid = document.getElementById('grid');
@@ -117,17 +135,14 @@ export default function WorkList({
       }
     }, 300);
 
-    window.addEventListener('scroll', updateProjects);
-    window.addEventListener('resize', updateProjects);
+    const onScrollOrResize = () => updateProjects();
+    window.addEventListener('scroll', onScrollOrResize);
+    window.addEventListener('resize', onScrollOrResize);
 
     return () => {
-      window.removeEventListener('scroll', updateProjects);
-      window.removeEventListener('resize', updateProjects);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
     };
-  }, []);
-
-  useLayoutEffect(() => {
-    window.scrollTo(0, scrollY!);
   }, []);
 
   useLayoutEffect(() => {

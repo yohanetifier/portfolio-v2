@@ -7,6 +7,8 @@ import gsap from 'gsap';
 import { SplitText } from 'gsap/all';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { useFinePointer } from '@/utils/useFinePointer';
+import { slugify } from '@/utils/slugify';
+import { clearFlag } from '@/utils/fromWorkList';
 import ContactPhantomGrid from './ContactPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
@@ -29,8 +31,28 @@ export default function Contact({ projects }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const mailRef = useRef<HTMLAnchorElement>(null);
   const finePointer = useFinePointer();
-  const { setProjects, setHoveredIndex, setUv, setScrollY, setIsLostPage, projectsContactCoords, goToContact, goToWork, returnHome, goToProject, isAnimating } =
-    useThreeJsContext();
+  const {
+    setProjects,
+    setHoveredIndex,
+    setUv,
+    setScrollY,
+    setIsLostPage,
+    projectsContactCoords,
+    goToContact,
+    goToWork,
+    returnHome,
+    goToProject,
+    isAnimating,
+    setIsAnimating,
+    setGoToProject,
+    setFromProjectSlug,
+    setFromProjectIndex,
+    setSelectedIndex,
+    setProjectImageSelected,
+    setProjectSelectedCoords,
+    setFromWorkPage,
+    projectsCoords,
+  } = useThreeJsContext();
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -68,6 +90,30 @@ export default function Contact({ projects }: Props) {
     goToProject,
     isAnimating,
   ]);
+
+  const openProject = (index: number) => {
+    if (isAnimating || goToProject || goToWork || returnHome || goToContact)
+      return;
+    const project = projects[index];
+    if (!project) return;
+    const slug = slugify(project.title);
+    // Pas un trajet worklist → reverse des autres = grille works (projectsCoords)
+    clearFlag();
+    const worklistRects = projectsCoords?.[index]?.rects;
+    setHoveredIndex(null);
+    setSelectedIndex(index);
+    setFromWorkPage(index);
+    setFromProjectIndex(index);
+    setFromProjectSlug(slug);
+    setProjectImageSelected(project.featuredImage.src);
+    if (worklistRects) {
+      setProjectSelectedCoords(worklistRects);
+      // Scroll appliqué APRÈS le reverse (sinon les cibles GSAP ne matchent plus)
+      setScrollY(Math.max(0, Math.round(worklistRects.top - 24)));
+    }
+    setGoToProject(true);
+    setIsAnimating(true);
+  };
 
   // Arrivée en cascade — hidden en CSS puis anim avant paint (évite flash visible→caché→visible)
   useLayoutEffect(() => {
@@ -215,6 +261,7 @@ export default function Contact({ projects }: Props) {
             setHoveredIndex(index);
           }}
           onLeave={() => setHoveredIndex(null)}
+          onSelect={openProject}
         />
       </main>
     </>

@@ -49,29 +49,28 @@ const Scene = ({ projectsDetails }: Props) => {
     mouseCoords,
     fromWorkPage,
     setFromWorkPage,
+    isLostPage,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
   const pathname = usePathname();
   const workPath = getProjectPath(pathname);
+  // /work/SlugInvalide → notFound() garde l’URL projet, mais isLostPage = vraie 404.
+  // Sinon Scene traite ça comme un projet (centre fullscreen) au lieu des épaves.
+  const onProjectPage = Boolean(workPath) && !isLostPage;
   const activeIndex =
     selectedIndex !== null
       ? selectedIndex
       : fromWorkPage >= 0
         ? fromWorkPage
         : null;
-  /**
-   * GSAP owns pose ONLY quand React poserait le mauvais départ
-   * (page projet = fullscreen, projectsDetails = petite grille).
-   *
-   * 404 / worklist / intro / contact : React garde projectsDetails = bonnes origines
-   * (même modèle que worklist→contact). isLostPage ne doit PAS activer ça.
-   */
-  const gsapOwnsPose = Boolean(
-    goToProject ||
-      (returnHome && Boolean(workPath)) ||
-      (goToContact && Boolean(workPath)),
+  // Après scroll contact→works : coords live du selected (pas phantoms hors viewport)
+  const contactGridReady = Boolean(
+    selectedIndex !== null &&
+      projectSelectedCoords &&
+      ((scrollY ?? 0) <= 0 ||
+        projectSelectedCoords.top < size.height * 0.55),
   );
   const initCoords = useRef<Record<string, number>>({});
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
@@ -79,6 +78,31 @@ const Scene = ({ projectsDetails }: Props) => {
   const projectsAtTheTop = useRef<Record<string, number>>({});
   const projectsAtTheBottomRef = useRef<THREE.Group[]>([]);
   const projectsAtTheTopRef = useRef<THREE.Group[]>([]);
+  /** Cibles worklist par index — contact→projet→works (indépendant des Group uuid) */
+  const worklistRestoreByIndexRef = useRef<
+    ({
+      x: number;
+      y: number;
+      sx: number;
+      sy: number;
+      fromTop: boolean;
+    } | null)[]
+  >([]);
+  // Contact→works (!fromWorkList) : garder le hero sans omettre les props R3F
+  const isContactReturnPose =
+    isReturning &&
+    !getFlag() &&
+    worklistRestoreByIndexRef.current.some(Boolean);
+  /**
+   * GSAP owns pose ONLY quand React poserait le mauvais départ
+   * (page projet = fullscreen, projectsDetails = petite grille).
+   */
+  const gsapOwnsPose = Boolean(
+    goToProject ||
+      (returnHome && onProjectPage) ||
+      (goToContact && onProjectPage) ||
+      isContactReturnPose,
+  );
   const router = useRouter();
 
   useLayoutEffect(() => {
@@ -158,7 +182,7 @@ const Scene = ({ projectsDetails }: Props) => {
       );
 
       const returningIndex = activeIndex;
-      const leavingProject = Boolean(workPath) && returningIndex !== null;
+      const leavingProject = onProjectPage && returningIndex !== null;
 
       // Uniquement projet → home (React sinon = petite grille au centre)
       if (leavingProject) {
@@ -266,8 +290,8 @@ const Scene = ({ projectsDetails }: Props) => {
         0,
       );
 
-      // Depuis une page projet uniquement
-      const leavingProject = Boolean(workPath);
+      // Depuis une page projet uniquement (pas une 404 sous /work/…)
+      const leavingProject = onProjectPage;
       const selected =
         fromProjectIndex >= 0 ? fromProjectIndex : selectedIndex;
 
@@ -343,6 +367,34 @@ const Scene = ({ projectsDetails }: Props) => {
         return;
       }
 
+      // Mémoriser la grille works pour le reverse (contact→projet→works)
+      const restoreGrid = projectsCoords?.length
+        ? projectsCoords
+        : projectsDetails;
+      const selectedRestoreRects =
+        projectSelectedCoords ?? restoreGrid[projectIndex]?.rects ?? null;
+      const selectedRestoreY = selectedRestoreRects
+        ? -(
+            (selectedRestoreRects.top + selectedRestoreRects.height / 2) /
+              size.height -
+            0.5
+          ) * viewport.height
+        : 0;
+      worklistRestoreByIndexRef.current = restoreGrid.map((item) => {
+        const rects = item.rects;
+        if (!rects) return null;
+        const cX = rects.left + rects.width / 2;
+        const cY = rects.top + rects.height / 2;
+        const wY = -(cY / size.height - 0.5) * viewport.height;
+        return {
+          x: (cX / size.width - 0.5) * viewport.width,
+          y: wY,
+          sx: (rects.width / size.width) * viewport.width,
+          sy: (rects.height / size.height) * viewport.height,
+          fromTop: wY > selectedRestoreY,
+        };
+      });
+
       const projectTl = gsap.timeline({
         onStart: () => {
           lockScroll();
@@ -405,11 +457,15 @@ const Scene = ({ projectsDetails }: Props) => {
               '<',
             );
         } else {
-          const isBottom = projectsAtTheBottomRef.current.includes(group);
+          // Sortie haut/bas alignée sur la future case works (pas la grille contact)
+          const restore = worklistRestoreByIndexRef.current[i];
+          const fromTop =
+            restore?.fromTop ??
+            !projectsAtTheBottomRef.current.includes(group);
           projectTl.to(
             group.position,
             {
-              y: isBottom ? -viewport.height : viewport.height,
+              y: fromTop ? viewport.height : -viewport.height,
               duration: 1,
             },
             '<',
@@ -445,9 +501,13 @@ const Scene = ({ projectsDetails }: Props) => {
           // Unlock avant setGoToWork(false) : sinon le cleanup met cancelled=true
           // et le rAF saute unlockScroll → scroll bloqué sur /work
           unlockScroll();
+          setSelectedIndex(null);
+          setSettledIndex(null);
+          setFromWorkPage(-1);
           setGoToWork(false);
           setFromProjectSlug(null);
           setFromProjectIndex(-1);
+          clearFlag();
           router.push('/work', { scroll: false });
           requestAnimationFrame(() => {
             setIsAnimating(false);
@@ -495,8 +555,22 @@ const Scene = ({ projectsDetails }: Props) => {
     // Reverse AVANT de créer la timeline forward (sinon tl vide → setSettledIndex
     // immédiat → Plane re-push /work/[slug] = Projets qui “ne marche pas”)
     if (isReturning) {
+      const fromWorkList = getFlag();
+      // Contact only — ne pas polluer works↔project avec un restore stale
+      const isContactReturn =
+        !fromWorkList && worklistRestoreByIndexRef.current.some(Boolean);
+
+      // Attendre /work + grille live après scroll (pas les phantoms hors viewport)
+      if (isContactReturn) {
+        if (workPath) return;
+        if (!contactGridReady) return;
+      }
+
+      // Même cible que works→projet→works (coords live après scroll)
       const targetRects =
-        projectSelectedCoords ?? projectsDetails[selectedIndex]?.rects ?? null;
+        projectSelectedCoords ??
+        projectsDetails[selectedIndex]?.rects ??
+        null;
       if (!targetRects) return;
 
       const centerX = targetRects.left + targetRects.width / 2;
@@ -505,6 +579,17 @@ const Scene = ({ projectsDetails }: Props) => {
       const worldY = -(centerY / size.height - 0.5) * viewport.height;
       const worldW = (targetRects.width / size.width) * viewport.width;
       const worldH = (targetRects.height / size.height) * viewport.height;
+
+      const selectedGroup = groupRefArray.current[selectedIndex]!;
+      // Garantir le départ fullscreen (mesure WorkList a pu re-render entre-temps)
+      if (isContactReturn) {
+        gsap.set(selectedGroup.position, { x: 0, y: 0 });
+        gsap.set(selectedGroup.scale, {
+          x: viewport.width,
+          y: viewport.height,
+        });
+      }
+
       const reverseTl = gsap.timeline({
         onStart: () => {
           lockScroll();
@@ -517,16 +602,17 @@ const Scene = ({ projectsDetails }: Props) => {
           setIsAnimating(false);
           clearFlag();
           unlockScroll();
+          worklistRestoreByIndexRef.current = [];
         },
       });
       reverseTl
-        .to(groupRefArray.current[selectedIndex]!.position, {
+        .to(selectedGroup.position, {
           x: worldX,
           y: worldY,
           duration: 1,
         })
         .to(
-          groupRefArray.current[selectedIndex]!.scale,
+          selectedGroup.scale,
           {
             x: worldW,
             y: worldH,
@@ -554,6 +640,36 @@ const Scene = ({ projectsDetails }: Props) => {
               y: projectsAtTheTop.current[element.uuid],
               duration: 1,
             },
+            '<',
+          );
+        });
+      } else if (isContactReturn) {
+        worklistRestoreByIndexRef.current.forEach((pose, i) => {
+          if (!pose || i === selectedIndex) return;
+          const group = groupRefArray.current[i];
+          if (!group) return;
+          const live = projectsDetails[i]?.rects;
+          const wX = live
+            ? ((live.left + live.width / 2) / size.width - 0.5) * viewport.width
+            : pose.x;
+          const wY = live
+            ? -((live.top + live.height / 2) / size.height - 0.5) *
+              viewport.height
+            : pose.y;
+          const wW = live
+            ? (live.width / size.width) * viewport.width
+            : pose.sx;
+          const wH = live
+            ? (live.height / size.height) * viewport.height
+            : pose.sy;
+          gsap.set(group.scale, { x: wW, y: wH });
+          gsap.set(group.position, {
+            x: wX,
+            y: pose.fromTop ? viewport.height : -viewport.height,
+          });
+          reverseTl.to(
+            group.position,
+            { x: wX, y: wY, duration: 1 },
             '<',
           );
         });
@@ -585,6 +701,8 @@ const Scene = ({ projectsDetails }: Props) => {
       }
       return;
     }
+
+    if (workPath) return;
 
     const tl = gsap.timeline({
       onStart: () => {
@@ -682,7 +800,22 @@ const Scene = ({ projectsDetails }: Props) => {
         '<',
       );
     });
-  }, [selectedIndex, isReturning, reset, fromHome, returnHome, goToContact, goToWork, goToProject, fromWorkPage, projectsContactCoords?.length, projectsHomeCoords?.length, projectsCoords?.length]);
+  }, [
+    selectedIndex,
+    isReturning,
+    reset,
+    fromHome,
+    returnHome,
+    goToContact,
+    goToWork,
+    goToProject,
+    fromWorkPage,
+    workPath,
+    contactGridReady,
+    projectsContactCoords?.length,
+    projectsHomeCoords?.length,
+    projectsCoords?.length,
+  ]);
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
@@ -694,22 +827,38 @@ const Scene = ({ projectsDetails }: Props) => {
       const worldH = (rects.height / size.height) * viewport.height;
       const group = groupRefArray.current[i];
       const isBottom = projectsAtTheBottomRef.current.includes(group!);
-      // Entre fin GSAP (settledIndex) et arrivée /work/[slug] (workPath),
+      // Entre fin GSAP (settledIndex) et arrivée /work/[slug] (onProjectPage),
       // React ne doit PAS réappliquer la grille — sinon décalage puis recentrage.
       // !isReturning : ne pas bloquer le reverse menu→projets.
       const holdHero =
         activeIndex === i &&
-        (Boolean(workPath) || (!isReturning && settledIndex === i));
+        (onProjectPage || (!isReturning && settledIndex === i));
       const holdOthersOff =
         activeIndex !== null &&
         i !== activeIndex &&
-        (Boolean(workPath) || (!isReturning && settledIndex != null));
+        (onProjectPage || (!isReturning && settledIndex != null));
+
+      // gsapOwnsPose : NE PAS omettre position/scale — R3F reset sinon à
+      // scale 1 au centre (flash « petit au milieu » pendant le return contact).
+      const gsapPosition: [number, number, number] = group
+        ? [group.position.x, group.position.y, group.position.z]
+        : activeIndex === i
+          ? [0, 0, 0]
+          : [worldX, worldY, 0];
+      const gsapScale: [number, number, number] = group
+        ? [group.scale.x, group.scale.y, group.scale.z]
+        : activeIndex === i
+          ? [viewport.width, viewport.height, 1]
+          : [worldW, worldH, 1];
 
       return (
         <group
           key={i}
           {...(gsapOwnsPose
-            ? {}
+            ? {
+                position: gsapPosition,
+                scale: gsapScale,
+              }
             : {
                 position: (holdHero
                   ? [0.0, 0.0, 0]
@@ -730,7 +879,7 @@ const Scene = ({ projectsDetails }: Props) => {
             imageUrl={imageUrl}
             isSelected={settledIndex === i}
             isHovered={hoveredIndex === i}
-            isProjectView={activeIndex === i && Boolean(workPath)}
+            isProjectView={activeIndex === i && onProjectPage}
           />
         </group>
       );

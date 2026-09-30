@@ -7,12 +7,12 @@ import { animateText } from '@/common/utils/animateText';
 import { useParams, usePathname } from 'next/navigation';
 import { getFullSizeImage } from '@/utils/getFullSizeImage';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { useHeaderContext } from '@/contexts/HeaderContext';
 import { getGridMetrics, getGridPlacement } from '../WorkList/utils/classes';
 import { Project as ProjectModel } from '@/src/models/Project';
 import Link from 'next/link';
 import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { slugify } from '@/utils/slugify';
-import { clearFlag, getFlag } from '@/utils/fromWorkList';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 
@@ -40,6 +40,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     goToContact,
     returnHome,
   } = useThreeJsContext();
+  const { isReturning } = useHeaderContext();
   const workPath = usePathname().split('/')[2];
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -114,9 +115,10 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
 
   // Masque le HTML projet avant le paint → le canvas 3D prend le relais sans flash
   useLayoutEffect(() => {
-    if ((!goToContact && !returnHome) || !overlayRef.current) return;
+    if ((!goToContact && !returnHome && !isReturning) || !overlayRef.current)
+      return;
     gsap.set(overlayRef.current, { opacity: 0, pointerEvents: 'none' });
-  }, [goToContact, returnHome]);
+  }, [goToContact, returnHome, isReturning]);
 
   return (
     <div className="w-screen min-h-screen relative z-[3]">

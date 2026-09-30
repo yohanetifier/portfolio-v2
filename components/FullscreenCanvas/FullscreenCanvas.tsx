@@ -34,8 +34,8 @@ const FullscreenCanvas = () => {
         position: 'fixed',
         top: '0px',
         left: '0px',
-        zIndex: 1,
-        // pointerEvents: 'auto',
+        // Au-dessus du HTML pendant les transitions (évite flash worklist/projet)
+        zIndex: isAnimating ? 20 : 1,
       }}
       id="fullscreen"
     >
