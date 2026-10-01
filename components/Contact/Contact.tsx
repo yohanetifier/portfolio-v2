@@ -12,6 +12,7 @@ import { clearFlag } from '@/utils/fromWorkList';
 import ContactPhantomGrid from './ContactPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
+import { PAPER } from '@/utils/theme';
 
 gsap.registerPlugin(SplitText);
 
@@ -183,7 +184,7 @@ export default function Contact({ projects }: Props) {
 
   // Accès direct / refresh sur Contact (sans écraser une anim en cours)
   useEffect(() => {
-    document.body.style.backgroundColor = '#f4f3f0';
+    document.body.style.backgroundColor = PAPER;
     return () => {
       // Laissé à Scene (returnHome / goToWork) — pas de snap blanc ici
     };

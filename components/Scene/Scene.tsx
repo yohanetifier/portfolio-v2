@@ -14,6 +14,7 @@ import { clearFlag, getFlag } from '@/utils/fromWorkList';
 import { useRouter } from 'next/navigation';
 import { lockScroll, unlockScroll } from '@/utils/scroll';
 import { INTRO } from '@/utils/introTiming';
+import { PAPER } from '@/utils/theme';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -268,7 +269,7 @@ const Scene = ({ projectsDetails }: Props) => {
 
       returnHomeTl.to(
         document.body,
-        { backgroundColor: '#ffffff', duration: 1, ease: 'power2.inOut' },
+        { backgroundColor: PAPER, duration: 1, ease: 'power2.inOut' },
         0,
       );
 
@@ -377,7 +378,7 @@ const Scene = ({ projectsDetails }: Props) => {
 
       contactTl.to(
         document.body,
-        { backgroundColor: '#f4f3f0', duration: 1, ease: 'power2.inOut' },
+        { backgroundColor: PAPER, duration: 1, ease: 'power2.inOut' },
         0,
       );
 
@@ -503,7 +504,7 @@ const Scene = ({ projectsDetails }: Props) => {
 
       projectTl.to(
         document.body,
-        { backgroundColor: '#ffffff', duration: 1, ease: 'power2.inOut' },
+        { backgroundColor: PAPER, duration: 1, ease: 'power2.inOut' },
         0,
       );
 
@@ -606,7 +607,7 @@ const Scene = ({ projectsDetails }: Props) => {
 
       workTl.to(
         document.body,
-        { backgroundColor: '#ffffff', duration: 1, ease: 'power2.inOut' },
+        { backgroundColor: PAPER, duration: 1, ease: 'power2.inOut' },
         0,
       );
 

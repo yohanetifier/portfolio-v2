@@ -11,6 +11,7 @@ import NotFoundPhantomGrid from './NotFoundPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { slugify } from '@/utils/slugify';
 import { clearFlag } from '@/utils/fromWorkList';
+import { PAPER } from '@/utils/theme';
 
 type Props = {
   projects: Pick<Project, 'title' | 'featuredImage'>[];
@@ -48,7 +49,7 @@ export default function NotFoundView({ projects }: Props) {
   useLayoutEffect(() => {
     setIsLostPage(true);
     setScrollY(0);
-    document.body.style.backgroundColor = '#f4f3f0';
+    document.body.style.backgroundColor = PAPER;
     return () => {
       setIsLostPage(false);
     };
@@ -170,7 +171,8 @@ export default function NotFoundView({ projects }: Props) {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'radial-gradient(72% 58% at 30% 46%, rgba(244,243,240,0.96) 0%, rgba(244,243,240,0.78) 46%, rgba(244,243,240,0.18) 78%, rgba(244,243,240,0) 100%)',
+              // Voile dérivé du fond (--background) — suit PAPER
+              'radial-gradient(72% 58% at 30% 46%, color-mix(in srgb, var(--background) 96%, transparent) 0%, color-mix(in srgb, var(--background) 78%, transparent) 46%, color-mix(in srgb, var(--background) 18%, transparent) 78%, transparent 100%)',
           }}
         />
 

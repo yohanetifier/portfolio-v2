@@ -183,7 +183,7 @@ const Menu = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[90] md:hidden bg-[#f4f3ef] text-[#12120f] transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+      className={`fixed inset-0 z-[90] md:hidden bg-paper text-[#12120f] transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
         isOpen ? 'translate-y-0' : 'translate-y-[-100%]'
       }`}
       aria-hidden={!isOpen}

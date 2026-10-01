@@ -175,13 +175,13 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
           </h1>
         </div>
 
-        <div className="relative z-[20] bg-white">
+        <div className="relative z-[20] bg-paper">
           {mediaUrls.map((element, index) => {
             if (element.endsWith('mp4')) {
               return (
                 <div
                   key={index}
-                  className="w-full overflow-hidden block aspect-video bg-white"
+                  className="w-full overflow-hidden block aspect-video bg-paper"
                 >
                   <video
                     key={index}
@@ -204,7 +204,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
                   width={1600}
                   height={1000}
                   sizes="100vw"
-                  className="w-full h-auto relative z-20 block bg-white"
+                  className="w-full h-auto relative z-20 block bg-paper"
                   style={{ width: '100%', height: 'auto' }}
                 />
               );

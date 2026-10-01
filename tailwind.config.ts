@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import { PAPER } from './utils/theme';
 
 export default {
   content: [
@@ -13,6 +14,7 @@ export default {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
         title: '#f4f3f0',
+        paper: PAPER,
       },
       keyframes: {
         fadeIn: {

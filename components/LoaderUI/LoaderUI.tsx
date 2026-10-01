@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { INTRO } from '@/utils/introTiming';
 import { lockScroll, unlockScroll } from '@/utils/scroll';
+import { animateText } from '@/common/utils/animateText';
+import { scrambleText } from '@/utils/scrambleText';
 
 function isLostPath(pathname: string | null, isLostPage: boolean) {
   if (isLostPage) return true;
@@ -29,7 +31,7 @@ const LoaderUI = () => {
   const { setIntroReady, isLostPage } = useThreeJsContext();
   const pathname = usePathname();
   const skipLoader = skipLoaderPath(pathname, isLostPage);
-
+  const titleRef = useRef<HTMLSpanElement>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [display, setDisplay] = useState(0);
@@ -91,13 +93,18 @@ const LoaderUI = () => {
     }
   };
 
+  // useEffect(() => {
+  //   if (!titleRef.current) return;
+  //   scrambleText('yohan', display);
+  // }, [display]);
+
   if (hasLoaded || skipLoader) return null;
 
   return (
     <>
       <div className="fixed inset-0 z-[199]" aria-hidden />
       <div
-        className="fixed inset-0 z-[200] bg-white"
+        className="fixed inset-0 z-[200] bg-paper"
         style={{
           transition: `clip-path ${INTRO.wipeDuration}s ${INTRO.wipeEase}`,
           clipPath: isExiting ? 'inset(0 0 100% 0)' : 'inset(0%)',
@@ -107,17 +114,27 @@ const LoaderUI = () => {
           if (e.propertyName === 'clip-path') finishLoader();
         }}
       >
-        <span
-          className="absolute bottom-[50px] left-[50px] font-fabrikatMono"
+        {/* Compteur au-dessus du nom — bloc ancré en bas à gauche */}
+        <div
+          className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-[max(1.25rem,env(safe-area-inset-left))] flex flex-col gap-[14px] md:bottom-[50px] md:left-[50px]"
           style={{
-            fontSize: 'clamp(54px, 9.5vw, 124px)',
             transition: `opacity 0.45s ${INTRO.wipeEase}, transform 0.45s ${INTRO.wipeEase}`,
             opacity: isExiting ? 0 : 1,
             transform: isExiting ? 'translateY(12px)' : 'translateY(0)',
           }}
         >
-          {Math.round(display)}%
-        </span>
+          <span className="font-fabrikatMono text-[11px] uppercase tracking-[0.14em]">
+            [ {String(Math.round(display)).padStart(3, '0')} ]
+          </span>
+          <span
+            ref={titleRef}
+            aria-label="Yohan Etifier"
+            className="font-sans font-bold leading-[0.9] tracking-[-0.04em]"
+            style={{ fontSize: 'clamp(40px, 12vw, 148px)' }}
+          >
+            {scrambleText('Yohan Etifier', display)}
+          </span>
+        </div>
       </div>
     </>
   );
