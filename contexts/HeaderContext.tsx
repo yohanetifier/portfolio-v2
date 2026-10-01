@@ -22,11 +22,13 @@ const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 
 export function HeaderProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [isHeaderVisible, setHeaderVisible] = useState(true);
+  // false sur `/` dès le 1er paint (évite flash header en prod / SSR)
+  const [isHeaderVisible, setHeaderVisible] = useState(
+    () => Boolean(pathname && pathname !== '/'),
+  );
   const [isReturning, setIsReturning] = useState(false);
   const [reset, setReset] = useState(false);
 
-  // On prod, pathname can be null on first paint — keep header hidden on intro.
   useEffect(() => {
     if (!pathname || pathname === '/') {
       setHeaderVisible(false);
