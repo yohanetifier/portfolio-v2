@@ -2,7 +2,7 @@
 import Button from '@/components/Button/Button';
 import { animateText } from '@/common/utils/animateText';
 import { Project } from '@/src/models/Project';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { lockScroll } from '@/utils/scroll';
@@ -27,6 +27,7 @@ export default function Home({
     setIsAnimating,
     setIsLostPage,
     projectsHomeCoords,
+    introReady,
   } = useThreeJsContext();
 
   const handleClick = () => {
@@ -56,13 +57,31 @@ export default function Home({
     return () => setHeaderVisible(true);
   }, [setHeaderVisible]);
 
+  // Cachés avant paint — prêts pour l’entrée sync loader
+  useLayoutEffect(() => {
+    if (!titlesRef.current) return;
+    gsap.set(titlesRef.current, { opacity: 0, y: 18 });
+  }, []);
+
+  // Entrée des titres un peu après le début du wipe (pas pile au déclenchement)
+  useEffect(() => {
+    if (!introReady || !titlesRef.current) return;
+    gsap.to(titlesRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: 1.15,
+      delay: 0.45,
+      ease: 'power2.inOut',
+      overwrite: 'auto',
+    });
+  }, [introReady]);
+
   const updateProjects = () => {
     if (!projectsHomeCoords?.length) return;
     setProjects(projectsHomeCoords);
   };
 
   useEffect(() => {
-    // document.documentElement.style.overflow = 'hidden';
     lockScroll();
     setScrollY(0);
     updateProjects();

@@ -1,9 +1,11 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { useProgress } from '@react-three/drei';
+import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 const LoaderUI = () => {
   const { progress, active, total } = useProgress();
+  const { setIntroReady } = useThreeJsContext();
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [display, setDisplay] = useState(0);
@@ -32,7 +34,8 @@ const LoaderUI = () => {
         displayRef.current = 100;
         setDisplay(100);
         setIsExiting(true);
-        return; // stop la boucle rAF
+        setIntroReady(true); // Home lance l’entrée des titres en sync avec le wipe
+        return;
       }
 
       setDisplay(displayRef.current);
@@ -40,7 +43,7 @@ const LoaderUI = () => {
     };
     id = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(id);
-  }, []);
+  }, [setIntroReady]);
 
   if (hasLoaded) return null;
 

@@ -60,6 +60,9 @@ interface ThreeJsContextType {
   setMouseCoords: (arg: Uv) => void;
   cursorHover: boolean;
   setCursorHover: (arg: boolean) => void;
+  /** Loader en wipe → Home peut lancer l’entrée des titres */
+  introReady: boolean;
+  setIntroReady: (arg: boolean) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
@@ -95,6 +98,7 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [uv, setUv] = useState<Uv>({ x: null, y: null });
   const [mouseCoords, setMouseCoords] = useState<Uv>({ x: null, y: null });
   const [cursorHover, setCursorHover] = useState(false);
+  const [introReady, setIntroReady] = useState(false);
 
   return (
     <ThreeJsContext.Provider
@@ -145,6 +149,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setFromWorkPage,
         cursorHover,
         setCursorHover,
+        introReady,
+        setIntroReady,
       }}
     >
       {children}
