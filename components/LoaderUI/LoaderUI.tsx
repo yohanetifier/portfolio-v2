@@ -6,10 +6,23 @@ import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { INTRO } from '@/utils/introTiming';
 import { lockScroll, unlockScroll } from '@/utils/scroll';
 
+function isLostPath(pathname: string | null, isLostPage: boolean) {
+  if (isLostPage) return true;
+  if (!pathname) return false;
+  return (
+    pathname !== '/' &&
+    pathname !== '/contact' &&
+    !pathname.startsWith('/work') &&
+    !pathname.startsWith('/blogs')
+  );
+}
+
 const LoaderUI = () => {
   const { progress, active, total } = useProgress();
-  const { setIntroReady } = useThreeJsContext();
+  const { setIntroReady, isLostPage } = useThreeJsContext();
   const pathname = usePathname();
+  const skipLoader = isLostPath(pathname, isLostPage);
+
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [display, setDisplay] = useState(0);
@@ -19,21 +32,29 @@ const LoaderUI = () => {
   const pathnameRef = useRef(pathname);
   pathnameRef.current = pathname;
 
-  // Scroll + Lenis lock pendant tout le loader
+  // 404 / lost : pas de loader UX — textures loadent en silence
   useEffect(() => {
-    lockScroll();
-  }, []);
+    if (!skipLoader) {
+      lockScroll();
+      return;
+    }
+    setIntroReady(true);
+    setHasLoaded(true);
+    unlockScroll();
+  }, [skipLoader, setIntroReady]);
 
   useEffect(() => {
+    if (skipLoader) return;
     if (total > 0 && !active && progress >= 100) {
       assetsReadyRef.current = true;
       progressRef.current = 100;
     } else {
       progressRef.current = progress;
     }
-  }, [progress, active, total]);
+  }, [progress, active, total, skipLoader]);
 
   useEffect(() => {
+    if (skipLoader) return;
     let id = 0;
     const tick = () => {
       displayRef.current =
@@ -52,11 +73,10 @@ const LoaderUI = () => {
     };
     id = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(id);
-  }, [setIntroReady]);
+  }, [setIntroReady, skipLoader]);
 
   const finishLoader = () => {
     setHasLoaded(true);
-    // Home reste lockée ; ailleurs on rend le scroll
     if (pathnameRef.current === '/') {
       lockScroll();
     } else {
@@ -64,11 +84,10 @@ const LoaderUI = () => {
     }
   };
 
-  if (hasLoaded) return null;
+  if (hasLoaded || skipLoader) return null;
 
   return (
     <>
-      {/* Bloque clics pendant le wipe (clip-path laisse passer les events) */}
       <div className="fixed inset-0 z-[199]" aria-hidden />
       <div
         className="fixed inset-0 z-[200] bg-white"
