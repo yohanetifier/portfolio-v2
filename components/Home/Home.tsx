@@ -9,6 +9,7 @@ import { lockScroll } from '@/utils/scroll';
 import gsap from 'gsap';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
+import { INTRO } from '@/utils/introTiming';
 
 export default function Home({
   projects,
@@ -60,18 +61,18 @@ export default function Home({
   // Cachés avant paint — prêts pour l’entrée sync loader
   useLayoutEffect(() => {
     if (!titlesRef.current) return;
-    gsap.set(titlesRef.current, { opacity: 0, y: 18 });
+    gsap.set(titlesRef.current, { opacity: 0, y: INTRO.titlesY });
   }, []);
 
-  // Entrée des titres un peu après le début du wipe (pas pile au déclenchement)
+  // Titres après le démarrage des wrecks (même beat que INTRO)
   useEffect(() => {
     if (!introReady || !titlesRef.current) return;
     gsap.to(titlesRef.current, {
       opacity: 1,
       y: 0,
-      duration: 1.15,
-      delay: 0.45,
-      ease: 'power2.inOut',
+      duration: INTRO.titlesDuration,
+      delay: INTRO.titlesDelay,
+      ease: INTRO.titlesEase,
       overwrite: 'auto',
     });
   }, [introReady]);

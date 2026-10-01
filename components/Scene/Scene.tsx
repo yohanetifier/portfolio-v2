@@ -13,6 +13,7 @@ import { getProjectPath } from '@/utils/getProjectPath';
 import { clearFlag, getFlag } from '@/utils/fromWorkList';
 import { useRouter } from 'next/navigation';
 import { lockScroll, unlockScroll } from '@/utils/scroll';
+import { INTRO } from '@/utils/introTiming';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -159,21 +160,25 @@ const Scene = ({ projectsDetails }: Props) => {
       gsap.set(group.scale, { x: 0, y: 0, z: 1 });
       if (opacityUniform) gsap.set(opacityUniform, { value: 0 });
 
-      const at = 0.45 + i * 0.07;
+      const at = INTRO.wrecksDelay + i * INTRO.wrecksStagger;
       tl.to(
         group.scale,
         {
           x: worldW,
           y: worldH,
-          duration: 1.15,
-          ease: 'power2.inOut',
+          duration: INTRO.wrecksDuration,
+          ease: INTRO.wrecksEase,
         },
         at,
       );
       if (opacityUniform) {
         tl.to(
           opacityUniform,
-          { value: 1, duration: 1.15, ease: 'power2.inOut' },
+          {
+            value: 1,
+            duration: INTRO.wrecksDuration,
+            ease: INTRO.wrecksEase,
+          },
           at,
         );
       }
