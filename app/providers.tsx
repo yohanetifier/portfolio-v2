@@ -5,6 +5,7 @@ import { ThreeJsProvider } from '@/contexts/ThreeJsContext';
 import MenuProvider from '@/contexts/MenuProvider';
 import SmoothScroll from '@/components/SmoothScroll/SmoothScroll';
 import CursorFollow from '@/components/CursorFollow/CursorFollow';
+import LoaderUI from '@/components/LoaderUI/LoaderUI';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ThreeJsProvider>
           <SmoothScroll>
             <CursorFollow />
+            <LoaderUI />
             {children}
           </SmoothScroll>
         </ThreeJsProvider>
