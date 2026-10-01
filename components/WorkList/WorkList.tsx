@@ -13,6 +13,7 @@ import { unlockScroll } from '@/utils/scroll';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { useFinePointer } from '@/utils/useFinePointer';
+import { OPEN_WHOOSH, playSound } from '@/utils/playSound';
 
 gsap.registerPlugin(Flip, ScrollTrigger, SplitText);
 
@@ -70,6 +71,7 @@ export default function WorkList({
     index: number,
     featuredImage: { src: string; alt: string },
   ) => {
+    playSound(OPEN_WHOOSH);
     setActive(false);
     e.preventDefault();
     const formatedTitle = slugify(title);
@@ -109,7 +111,14 @@ export default function WorkList({
 
   // Mesure quand on est bien installé sur /work (pas en train de partir vers contact/home)
   useLayoutEffect(() => {
-    if (fromHome || isAnimating || goToContact || goToWork || returnHome || goToProject)
+    if (
+      fromHome ||
+      isAnimating ||
+      goToContact ||
+      goToWork ||
+      returnHome ||
+      goToProject
+    )
       return;
     updateProjects();
   }, [fromHome, isAnimating, goToContact, goToWork, returnHome, goToProject]);

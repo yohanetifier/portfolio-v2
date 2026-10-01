@@ -79,8 +79,7 @@ const Scene = ({ projectsDetails }: Props) => {
   const contactGridReady = Boolean(
     selectedIndex !== null &&
       projectSelectedCoords &&
-      ((scrollY ?? 0) <= 0 ||
-        projectSelectedCoords.top < size.height * 0.55),
+      ((scrollY ?? 0) <= 0 || projectSelectedCoords.top < size.height * 0.55),
   );
   const initCoords = useRef<Record<string, number>>({});
   const groupRefArray = useRef<(THREE.Group | null)[]>([]);
@@ -384,8 +383,7 @@ const Scene = ({ projectsDetails }: Props) => {
 
       // Depuis une page projet uniquement (pas une 404 sous /work/…)
       const leavingProject = onProjectPage;
-      const selected =
-        fromProjectIndex >= 0 ? fromProjectIndex : selectedIndex;
+      const selected = fromProjectIndex >= 0 ? fromProjectIndex : selectedIndex;
 
       if (leavingProject && selected !== null) {
         const selectedGroup = groupRefArray.current[selected];
@@ -552,8 +550,7 @@ const Scene = ({ projectsDetails }: Props) => {
           // Sortie haut/bas alignée sur la future case works (pas la grille contact)
           const restore = worklistRestoreByIndexRef.current[i];
           const fromTop =
-            restore?.fromTop ??
-            !projectsAtTheBottomRef.current.includes(group);
+            restore?.fromTop ?? !projectsAtTheBottomRef.current.includes(group);
           projectTl.to(
             group.position,
             {
@@ -660,9 +657,7 @@ const Scene = ({ projectsDetails }: Props) => {
 
       // Même cible que works→projet→works (coords live après scroll)
       const targetRects =
-        projectSelectedCoords ??
-        projectsDetails[selectedIndex]?.rects ??
-        null;
+        projectSelectedCoords ?? projectsDetails[selectedIndex]?.rects ?? null;
       if (!targetRects) return;
 
       const centerX = targetRects.left + targetRects.width / 2;
@@ -759,11 +754,7 @@ const Scene = ({ projectsDetails }: Props) => {
             x: wX,
             y: pose.fromTop ? viewport.height : -viewport.height,
           });
-          reverseTl.to(
-            group.position,
-            { x: wX, y: wY, duration: 1 },
-            '<',
-          );
+          reverseTl.to(group.position, { x: wX, y: wY, duration: 1 }, '<');
         });
       } else {
         projectsAtTheBottomRef.current.forEach((element) => {

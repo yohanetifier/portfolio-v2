@@ -12,16 +12,23 @@ function isLostPath(pathname: string | null, isLostPage: boolean) {
   return (
     pathname !== '/' &&
     pathname !== '/contact' &&
+    pathname !== '/about' &&
     !pathname.startsWith('/work') &&
     !pathname.startsWith('/blogs')
   );
+}
+
+/** Pages sans preload textures — pas de loader % */
+function skipLoaderPath(pathname: string | null, isLostPage: boolean) {
+  // /about charge des wrecks → laisser le loader (textures)
+  return isLostPath(pathname, isLostPage);
 }
 
 const LoaderUI = () => {
   const { progress, active, total } = useProgress();
   const { setIntroReady, isLostPage } = useThreeJsContext();
   const pathname = usePathname();
-  const skipLoader = isLostPath(pathname, isLostPage);
+  const skipLoader = skipLoaderPath(pathname, isLostPage);
 
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isExiting, setIsExiting] = useState(false);

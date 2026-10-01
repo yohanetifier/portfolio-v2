@@ -10,6 +10,7 @@ import gsap from 'gsap';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 import { INTRO } from '@/utils/introTiming';
+import { OPEN_WHOOSH, playSound } from '@/utils/playSound';
 
 export default function Home({
   projects,
@@ -32,6 +33,7 @@ export default function Home({
   } = useThreeJsContext();
 
   const handleClick = () => {
+    playSound(OPEN_WHOOSH);
     setFromHome(true);
     lockScroll();
     setIsAnimating(true);
