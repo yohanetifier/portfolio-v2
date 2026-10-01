@@ -167,7 +167,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
         {/* Transparent : laisse voir le plane WebGL en hero */}
         <div className="w-screen h-screen relative flex justify-center items-center font-fabrikatMono">
           <h1
-            className="fixed z-1 text-[5vw] text-white"
+            className="fixed z-1 text-[clamp(2.5rem,5vw,5rem)] text-white"
             ref={titleRef}
             onPointerEnter={() => animateText(titleRef.current!)}
           >
