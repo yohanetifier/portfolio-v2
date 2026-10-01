@@ -26,6 +26,10 @@ const FullscreenCanvas = () => {
     isLostRoute ||
     isAnimating;
 
+  // Trail 3D seulement home + worklist — page projet = HTML au-dessus du canvas
+  const showThreeCursor =
+    finePointer && (pathname === '/' || pathname === '/work');
+
   return (
     <Canvas
       style={{
@@ -41,7 +45,7 @@ const FullscreenCanvas = () => {
     >
       {showScene ? (
         <>
-          {finePointer ? <Cursor /> : null}
+          {showThreeCursor ? <Cursor /> : null}
           <Scene projectsDetails={projectsDetails} />
         </>
       ) : null}

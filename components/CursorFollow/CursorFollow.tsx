@@ -8,9 +8,9 @@ import { useEffect, useRef } from 'react';
 
 const SELECTOR = 'a, button, [data-cursor]';
 
-/** Pages où le trail 3D remplace le curseur idle */
+/** Pages où le trail 3D remplace le curseur idle (pas /work/[slug] : HTML au-dessus du canvas) */
 function hasThreeCursor(pathname: string | null) {
-  return pathname === '/' || (pathname?.startsWith('/work') ?? false);
+  return pathname === '/' || pathname === '/work';
 }
 
 export default function CursorFollow() {

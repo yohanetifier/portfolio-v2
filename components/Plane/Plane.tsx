@@ -103,11 +103,14 @@ vec2 coverUv(vec2 uv, float planeAspect, float textureAspect) {
   return (uv - 0.5) * scale + 0.5;
 }
 
+uniform float uOpacity;
+
 void main() {
   float planeAspect = uPlaneScale.x / max(uPlaneScale.y, 0.0001);
   float textureAspect = uTextureSize.x / max(uTextureSize.y, 0.0001);
   vec2 uv = coverUv(vUv, planeAspect, textureAspect);
-  gl_FragColor = texture2D(uTexture, uv);
+  vec4 tex = texture2D(uTexture, uv);
+  gl_FragColor = vec4(tex.rgb, uOpacity);
 }
 `;
 
@@ -155,6 +158,7 @@ const Plane = ({
         texture.image?.height || 1,
       ),
     },
+    uOpacity: { value: 1.0 },
   });
 
   useEffect(() => {
@@ -300,6 +304,7 @@ const Plane = ({
         vertexShader={vertexShader}
         uniforms={uniforms.current}
         ref={materialRef}
+        transparent
         depthTest={false}
       />
     </mesh>

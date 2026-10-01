@@ -50,12 +50,21 @@ const Scene = ({ projectsDetails }: Props) => {
     fromWorkPage,
     setFromWorkPage,
     isLostPage,
+    introReady,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
+  /** GSAP scale/opacity intro home — empêche React d’écraser le stagger */
+  const [introOwnsPose, setIntroOwnsPose] = useState(false);
+  /** true après intro jouée (ou skip si pas sur home au wipe) */
+  const [introRevealed, setIntroRevealed] = useState(false);
+  const introPlayedRef = useRef(false);
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
   const pathname = usePathname();
   const workPath = getProjectPath(pathname);
+  const onHome = pathname === '/';
+  /** Home : wrecks invisibles jusqu’à la fin du stagger intro */
+  const awaitingHomeIntro = onHome && !introRevealed;
   // /work/SlugInvalide → notFound() garde l’URL projet, mais isLostPage = vraie 404.
   // Sinon Scene traite ça comme un projet (centre fullscreen) au lieu des épaves.
   const onProjectPage = Boolean(workPath) && !isLostPage;
@@ -101,9 +110,87 @@ const Scene = ({ projectsDetails }: Props) => {
     goToProject ||
       (returnHome && onProjectPage) ||
       (goToContact && onProjectPage) ||
-      isContactReturnPose,
+      isContactReturnPose ||
+      introOwnsPose,
   );
   const router = useRouter();
+
+  // Intro Awards : scale + fade stagger au wipe (one-shot, sync titres)
+  useLayoutEffect(() => {
+    if (!introReady || introPlayedRef.current) return;
+    introPlayedRef.current = true;
+
+    // Loader fini ailleurs que home → pas d’intro wrecks
+    if (!onHome) {
+      setIntroRevealed(true);
+      return;
+    }
+    if (!projectsDetails.length) {
+      introPlayedRef.current = false;
+      return;
+    }
+
+    const groups = groupRefArray.current;
+    const ready = projectsDetails.every((_, i) => groups[i]);
+    if (!ready) {
+      introPlayedRef.current = false;
+      return;
+    }
+
+    setIntroOwnsPose(true);
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setIntroOwnsPose(false);
+        setIntroRevealed(true);
+      },
+    });
+
+    projectsDetails.forEach(({ rects }, i) => {
+      const group = groups[i];
+      if (!group) return;
+
+      const worldW = (rects.width / size.width) * viewport.width;
+      const worldH = (rects.height / size.height) * viewport.height;
+      const mesh = group.children[0] as THREE.Mesh | undefined;
+      const mat = mesh?.material as THREE.ShaderMaterial | undefined;
+      const opacityUniform = mat?.uniforms?.uOpacity;
+
+      gsap.set(group.scale, { x: 0, y: 0, z: 1 });
+      if (opacityUniform) gsap.set(opacityUniform, { value: 0 });
+
+      const at = 0.45 + i * 0.07;
+      tl.to(
+        group.scale,
+        {
+          x: worldW,
+          y: worldH,
+          duration: 1.15,
+          ease: 'power2.inOut',
+        },
+        at,
+      );
+      if (opacityUniform) {
+        tl.to(
+          opacityUniform,
+          { value: 1, duration: 1.15, ease: 'power2.inOut' },
+          at,
+        );
+      }
+    });
+
+    return () => {
+      tl.kill();
+    };
+  }, [
+    introReady,
+    onHome,
+    projectsDetails,
+    size.width,
+    size.height,
+    viewport.width,
+    viewport.height,
+  ]);
 
   useLayoutEffect(() => {
     const fromWorkList = getFlag();
@@ -867,9 +954,11 @@ const Scene = ({ projectsDetails }: Props) => {
                       ? [0, -viewport.height, 0]
                       : [0, viewport.height, 0]
                     : [worldX, worldY, 0]) as [number, number, number],
-                scale: (holdHero
-                  ? [viewport.width, viewport.height, 1]
-                  : [worldW, worldH, 1]) as [number, number, number],
+                scale: (awaitingHomeIntro
+                  ? [0, 0, 1]
+                  : holdHero
+                    ? [viewport.width, viewport.height, 1]
+                    : [worldW, worldH, 1]) as [number, number, number],
               })}
           ref={(el) => {
             groupRefArray.current[i] = el;
