@@ -10,15 +10,15 @@ import gsap from 'gsap';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 import { INTRO } from '@/utils/introTiming';
-import { OPEN_WHOOSH, playSound } from '@/utils/playSound';
+import { OPEN_WHOOSH, playSound, setSoundEnabled } from '@/utils/playSound';
 
 export default function Home({
   projects,
 }: {
   projects: Pick<Project, 'featuredImage'>[];
 }) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const welcomeRef = useRef<HTMLButtonElement>(null);
+  const withSoundRef = useRef<HTMLButtonElement>(null);
+  const withoutSoundRef = useRef<HTMLButtonElement>(null);
   const titlesRef = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const { setHeaderVisible } = useHeaderContext();
@@ -32,7 +32,9 @@ export default function Home({
     introReady,
   } = useThreeJsContext();
 
-  const handleClick = () => {
+  // Le clic sert aussi de geste user : le navigateur autorise le son à partir d'ici
+  const handleClick = (withSound: boolean) => {
+    setSoundEnabled(withSound);
     playSound(OPEN_WHOOSH);
     setFromHome(true);
     lockScroll();
@@ -102,16 +104,16 @@ export default function Home({
         className="absolute w-full h-[100px] md:w-[80%]  2xl:w-[60%] z-20 flex items-center justify-between"
       >
         <Button
-          onClick={handleClick}
-          onMouseEnter={() => animateText(welcomeRef.current!)}
-          title={'welcome'}
-          ref={welcomeRef}
+          onClick={() => handleClick(true)}
+          onMouseEnter={() => animateText(withSoundRef.current!)}
+          title={'enter with sound'}
+          ref={withSoundRef}
         />
         <Button
-          onClick={handleClick}
-          onMouseEnter={() => animateText(buttonRef.current!)}
-          title={'click to start'}
-          ref={buttonRef}
+          onClick={() => handleClick(false)}
+          onMouseEnter={() => animateText(withoutSoundRef.current!)}
+          title={'enter without sound'}
+          ref={withoutSoundRef}
         />
       </div>
     </div>

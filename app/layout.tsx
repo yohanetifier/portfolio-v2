@@ -4,6 +4,7 @@ import Header from '@/components/Header/Header';
 import Menu from '@/components/Menu/Menu';
 import { Providers } from './providers';
 import FullscreenCanvas from '@/components/FullscreenCanvas/FullscreenCanvas';
+import SoundToggle from '@/components/SoundToggle/SoundToggle';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://yohanetifier.com'),
@@ -105,6 +106,7 @@ export default function RootLayout({
           <FullscreenCanvas />
           <Menu />
           <Header />
+          <SoundToggle />
           {children}
         </Providers>
       </body>

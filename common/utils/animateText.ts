@@ -77,7 +77,7 @@ export const animateText = (ref: HTMLElement) => {
         },
         repeatRefresh: true,
         repeatDelay: 0.04,
-        delay: (position + 1) * 1,
+        delay: (position + 1) * 0.07,
         innerHTML: () =>
           lettersAndSymbols[
             Math.floor(Math.random() * lettersAndSymbols.length)

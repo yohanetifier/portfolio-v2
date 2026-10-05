@@ -12,7 +12,7 @@ const Button = forwardRef<HTMLButtonElement, Props>(
     return (
       <button
         ref={ref}
-        className={`${className}  text-[10px] lg:text-[16px] w-[200px] h-[50px] z-10`}
+        className={`${className}  text-[10px] lg:text-[16px] min-w-[200px] h-[50px] whitespace-nowrap z-10`}
         onClick={onClick}
         onMouseEnter={onMouseEnter}
       >
