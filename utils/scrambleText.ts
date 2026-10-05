@@ -1,6 +1,10 @@
 import { lettersAndSymbols } from '@/common/utils/animateText';
 
-export const scrambleText = (text: string, progress: number) => {
+export const scrambleText = (
+  text: string,
+  progress: number,
+  noise: string,
+): string => {
   const textLength = text.length;
   const factor = 100 / textLength;
   const revealedCount = Math.floor(progress / factor);
@@ -10,11 +14,19 @@ export const scrambleText = (text: string, progress: number) => {
       if (char === ' ' || i < revealedCount) {
         return char;
       } else {
-        return lettersAndSymbols[
-          Math.floor(Math.random() * lettersAndSymbols.length)
-        ];
+        return noise[i];
       }
     })
+    .join('');
+};
 
+export const randomChars = (length: number): string => {
+  const len = Array.from({ length });
+  return len
+    .map(() => {
+      return lettersAndSymbols[
+        Math.floor(Math.random() * lettersAndSymbols.length)
+      ];
+    })
     .join('');
 };
