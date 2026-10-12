@@ -15,10 +15,25 @@ import { useRouter } from 'next/navigation';
 import { lockScroll, unlockScroll } from '@/utils/scroll';
 import { INTRO } from '@/utils/introTiming';
 import { PAPER } from '@/utils/theme';
+import { DECK_FAN, DECK_SHUFFLE, getDeckRotation } from '@/utils/deck';
 
 type Props = {
   projectsDetails: ProjectItem[];
 };
+
+/** Rect écran (px, DOM fantôme) → centre et taille en unités monde Three.js */
+function rectToWorld(
+  rects: ProjectItem['rects'],
+  size: { width: number; height: number },
+  viewport: { width: number; height: number },
+) {
+  return {
+    x: ((rects.left + rects.width / 2) / size.width - 0.5) * viewport.width,
+    y: -((rects.top + rects.height / 2) / size.height - 0.5) * viewport.height,
+    w: (rects.width / size.width) * viewport.width,
+    h: (rects.height / size.height) * viewport.height,
+  };
+}
 
 const Scene = ({ projectsDetails }: Props) => {
   const { viewport, size } = useThree();
@@ -116,7 +131,7 @@ const Scene = ({ projectsDetails }: Props) => {
   );
   const router = useRouter();
 
-  // Intro Awards : scale + fade stagger au wipe (one-shot, sync titres)
+  // Intro : les cartes tombent une par une sur le paquet au centre (one-shot, sync titres)
   useLayoutEffect(() => {
     if (!introReady || introPlayedRef.current) return;
     introPlayedRef.current = true;
@@ -147,38 +162,49 @@ const Scene = ({ projectsDetails }: Props) => {
       },
     });
 
+    // px écran → unités monde (même conversion que les rects)
+    const pxToWorld = viewport.width / size.width;
+
+    // Index croissant = du dessous vers le dessus : la dernière carte tombe en dernier, au-dessus
     projectsDetails.forEach(({ rects }, i) => {
       const group = groups[i];
       if (!group) return;
 
+      const centerX = rects.left + rects.width / 2;
+      const centerY = rects.top + rects.height / 2;
+      const worldX = (centerX / size.width - 0.5) * viewport.width;
+      const worldY = -(centerY / size.height - 0.5) * viewport.height;
       const worldW = (rects.width / size.width) * viewport.width;
       const worldH = (rects.height / size.height) * viewport.height;
+      const rotation = getDeckRotation(i);
       const mesh = group.children[0] as THREE.Mesh | undefined;
       const mat = mesh?.material as THREE.ShaderMaterial | undefined;
       const opacityUniform = mat?.uniforms?.uOpacity;
 
-      gsap.set(group.scale, { x: 0, y: 0, z: 1 });
+      // Départ : au-dessus du paquet, un peu décalée et de travers, invisible
+      gsap.set(group.position, {
+        x:
+          worldX +
+          gsap.utils.random(-1, 1) * INTRO.deckDropSpreadPx * pxToWorld,
+        y: worldY + viewport.height * INTRO.deckDropHeight,
+      });
+      gsap.set(group.rotation, {
+        z: rotation + gsap.utils.random(-1, 1) * INTRO.deckDropTilt,
+      });
+      gsap.set(group.scale, { x: worldW, y: worldH, z: 1 });
       if (opacityUniform) gsap.set(opacityUniform, { value: 0 });
 
-      const at = INTRO.wrecksDelay + i * INTRO.wrecksStagger;
-      tl.to(
-        group.scale,
-        {
-          x: worldW,
-          y: worldH,
-          duration: INTRO.wrecksDuration,
-          ease: INTRO.wrecksEase,
-        },
+      const at = INTRO.deckDelay + i * INTRO.deckStagger;
+      const drop = { duration: INTRO.deckDuration, ease: INTRO.deckEase };
+      tl.to(group.position, { x: worldX, y: worldY, ...drop }, at).to(
+        group.rotation,
+        { z: rotation, ...drop },
         at,
       );
       if (opacityUniform) {
         tl.to(
           opacityUniform,
-          {
-            value: 1,
-            duration: INTRO.wrecksDuration,
-            ease: INTRO.wrecksEase,
-          },
+          { value: 1, duration: INTRO.deckFadeDuration, ease: 'power2.out' },
           at,
         );
       }
@@ -197,6 +223,184 @@ const Scene = ({ projectsDetails }: Props) => {
     viewport.height,
   ]);
 
+  // Paquet de l'intro : posé, au repos sur la Home (ni intro, ni départ vers Works)
+  const isDeckIdle =
+    onHome &&
+    introRevealed &&
+    !fromHome &&
+    projectsDetails.length > 0 &&
+    projectsDetails === projectsHomeCoords;
+  /** Indices du dessous vers le dessus (dernier = carte visible) */
+  const deckOrderRef = useRef<number[]>([]);
+  /** Carte en cours de mélange : animée par GSAP, l'éventail ne la touche pas */
+  const shufflingIndexRef = useRef<number | null>(null);
+  /** v = ouverture 0 → 1, cx = position souris relative au paquet (-1 → 1) */
+  const fanRef = useRef({ v: 0, target: 0, cx: 0 });
+  const pointerRef = useRef<{ x: number; y: number } | null>(null);
+  const reducedMotionRef = useRef(false);
+
+  useEffect(() => {
+    reducedMotionRef.current = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    // Souris uniquement : au doigt, pas de survol donc pas d'éventail
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') {
+        pointerRef.current = { x: e.clientX, y: e.clientY };
+      }
+    };
+    window.addEventListener('pointermove', onMove);
+    return () => window.removeEventListener('pointermove', onMove);
+  }, []);
+
+  // Paquet : toutes les 1,5 s, la carte du dessus glisse sur le côté et repasse dessous.
+  // useLayoutEffect : nettoyé avant que la transition Home → Works ne prenne la main.
+  useLayoutEffect(() => {
+    if (!isDeckIdle) return;
+
+    const groups = groupRefArray.current;
+    const order = projectsDetails.map((_, i) => i);
+    deckOrderRef.current = order;
+    groups.forEach((group) => {
+      if (group) group.renderOrder = 0;
+    });
+    if (reducedMotionRef.current) return;
+
+    const pxToWorld = viewport.width / size.width;
+    let tl: gsap.core.Timeline | null = null;
+
+    const shuffle = () => {
+      // Pas de mélange pendant que l'éventail est ouvert
+      if (fanRef.current.target > 0) return;
+      const top = order[order.length - 1];
+      const group = groups[top];
+      const rects = projectsDetails[top]?.rects;
+      if (!group || !rects) return;
+
+      const { x, y, w } = rectToWorld(rects, size, viewport);
+      const { ease } = DECK_SHUFFLE;
+      shufflingIndexRef.current = top;
+
+      tl = gsap
+        .timeline({
+          onComplete: () => {
+            shufflingIndexRef.current = null;
+          },
+        })
+        .to(group.position, {
+          x: x + w * DECK_SHUFFLE.outX,
+          y: y + DECK_SHUFFLE.liftPx * pxToWorld,
+          duration: DECK_SHUFFLE.outDuration,
+          ease,
+        })
+        .to(
+          group.rotation,
+          {
+            z: DECK_SHUFFLE.outRotation,
+            duration: DECK_SHUFFLE.outDuration,
+            ease,
+          },
+          '<',
+        )
+        .add(() => {
+          // Hors du paquet : on la fait passer dessous (dessinée en premier)
+          order.unshift(order.pop()!);
+          order.forEach((cardNumber, index) => {
+            const g = groups[cardNumber];
+            if (g) g.renderOrder = index;
+          });
+        })
+        .to(group.position, { x, y, duration: DECK_SHUFFLE.backDuration, ease })
+        .to(
+          group.rotation,
+          {
+            z: getDeckRotation(top),
+            duration: DECK_SHUFFLE.backDuration,
+            ease,
+          },
+          '<',
+        );
+    };
+
+    const id = window.setInterval(shuffle, DECK_SHUFFLE.intervalMs);
+    return () => {
+      window.clearInterval(id);
+      tl?.kill();
+      shufflingIndexRef.current = null;
+    };
+    // Dimensions en primitives : un nouvel objet size/viewport ne relance pas le mélange
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isDeckIdle,
+    projectsDetails,
+    size.width,
+    size.height,
+    viewport.width,
+    viewport.height,
+  ]);
+
+  // Éventail : chaque frame, ouverture lissée  selonle survol, puis pose de chaque carte
+  useFrame((_, delta) => {
+    const fan = fanRef.current;
+    if (!isDeckIdle) {
+      fan.v = 0;
+      fan.target = 0;
+      return;
+    }
+
+    const n = projectsDetails.length;
+    // Carte du dessus dans le DOM fantôme (sans décalage) = centre du paquet
+    const deck = projectsDetails[n - 1].rects;
+    const centerX = deck.left + deck.width / 2;
+    const centerY = deck.top + deck.height / 2;
+    const pointer = pointerRef.current;
+    const isNear =
+      !reducedMotionRef.current &&
+      pointer !== null &&
+      Math.abs(pointer.x - centerX) < deck.width * DECK_FAN.hoverX &&
+      Math.abs(pointer.y - centerY) < deck.height * DECK_FAN.hoverY;
+    fan.target = isNear ? 1 : 0;
+
+    // Lissage indépendant du nombre d'images par seconde (cf. dt du loader)
+    const open = 1 - Math.pow(1 - DECK_FAN.openSmoothing, delta * 60);
+    const follow = 1 - Math.pow(1 - DECK_FAN.poseSmoothing, delta * 60);
+    if (pointer) {
+      const cx = THREE.MathUtils.clamp(
+        (pointer.x - centerX) / deck.width,
+        -1,
+        1,
+      );
+      fan.cx += (cx - fan.cx) * open;
+    }
+    fan.v += (fan.target - fan.v) * open;
+
+    const radius =
+      (deck.height / size.height) * viewport.height * DECK_FAN.radius;
+    deckOrderRef.current.forEach((index, depth) => {
+      if (index === shufflingIndexRef.current) return;
+      const group = groupRefArray.current[index];
+      const rects = projectsDetails[index]?.rects;
+      if (!group || !rects) return;
+
+      const base = rectToWorld(rects, size, viewport);
+      // 0 au centre de l'éventail, négatif vers le dessus du paquet
+      const spread = n - 1 - depth - (n - 1) / 2;
+      const angle =
+        ((-spread * DECK_FAN.spreadDeg + fan.cx * DECK_FAN.followDeg) *
+          fan.v *
+          Math.PI) /
+        180;
+      // Sur un cercle autour d'un pivot sous le paquet : à droite → plus bas
+      const x = base.x + Math.sin(angle) * radius * fan.v;
+      const y = base.y - (1 - Math.cos(angle)) * radius * fan.v;
+      const rotation = getDeckRotation(index) * (1 - fan.v) - angle;
+
+      group.position.x += (x - group.position.x) * follow;
+      group.position.y += (y - group.position.y) * follow;
+      group.rotation.z += (rotation - group.rotation.z) * follow;
+    });
+  });
+
   useLayoutEffect(() => {
     const fromWorkList = getFlag();
     if (fromHome) {
@@ -213,6 +417,10 @@ const Scene = ({ projectsDetails }: Props) => {
               })),
             );
           }
+          // Fin du paquet : ordre de dessin par défaut pour les autres pages
+          groupRefArray.current.forEach((group) => {
+            if (group) group.renderOrder = 0;
+          });
           setFromHome(false);
           setIsAnimating(false);
           router.push(`/work`, { scroll: false });
@@ -231,7 +439,9 @@ const Scene = ({ projectsDetails }: Props) => {
 
         homeTl
           .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
-          .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
+          .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<')
+          // Sortie du paquet : la carte se redresse
+          .to(group.rotation, { z: 0, duration: 1 }, '<');
       });
     }
 
@@ -329,16 +539,19 @@ const Scene = ({ projectsDetails }: Props) => {
           const selectedGroup = groupRefArray.current[returningIndex];
           returnHomeTl
             .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
-            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
+            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<')
+            .to(group.rotation, { z: getDeckRotation(i), duration: 1 }, '<');
           if (selectedGroup) {
             returnHomeTl
               .to(selectedGroup.position, { y: 0, x: 0, duration: 1 }, '<')
               .to(selectedGroup.scale, { x: 0, y: 0, duration: 1 }, '<');
           }
         } else {
+          // Retour au paquet : la carte reprend son inclinaison
           returnHomeTl
             .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
-            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<');
+            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<')
+            .to(group.rotation, { z: getDeckRotation(i), duration: 1 }, '<');
         }
       });
 

@@ -3,6 +3,7 @@ import { Project } from '@/src/models/Project';
 import Image from 'next/image';
 import React, { useLayoutEffect, useRef } from 'react';
 import { getStartingClass } from '../WorkList/utils/classes';
+import { DECK_STEP_PX } from '@/utils/deck';
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
 
 export default function IntroPhantomGrid({
@@ -47,7 +48,13 @@ export default function IntroPhantomGrid({
         {projects.map(({ featuredImage }, index) => (
           <div
             key={index}
-            className={`${getStartingClass(index)}`}
+            className={getStartingClass()}
+            // Centré + cartes du dessous légèrement plus hautes (bord visible)
+            style={{
+              transform: `translate(-50%, calc(-50% - ${
+                (projects.length - 1 - index) * DECK_STEP_PX
+              }px))`,
+            }}
             ref={(el) => {
               imgRefArray.current[index] = el;
             }}
