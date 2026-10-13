@@ -2,7 +2,16 @@ const ROW_CYCLE = 7;
 const BASE_ROWS = 10;
 const BASE_HEIGHT_VH = 300;
 
+// Cases rangées de haut en bas (ordre de lecture) : l'index d'un projet dans la
+// grille = son rang dans la liste = l'ordre du « projet suivant »
 const GRID_PATTERN = [
+  {
+    className:
+      'w-[28.542vw] h-[18.854vw] relative left-[6.25vw] bottom-[5.208vw]',
+    colStart: 5,
+    colEnd: 8,
+    rowStart: 2,
+  },
   {
     className:
       'w-[20.208vw] h-[24.219vw] relative right-[6.25vw] bottom-[5.208vw] z-[10]',
@@ -16,13 +25,6 @@ const GRID_PATTERN = [
     colStart: 6,
     colEnd: 9,
     rowStart: 4,
-  },
-  {
-    className:
-      'w-[28.542vw] h-[18.854vw] relative left-[6.25vw] bottom-[5.208vw]',
-    colStart: 5,
-    colEnd: 8,
-    rowStart: 2,
   },
   {
     className: 'w-[20.208vw] h-[24.219vw] relative top-[7.813vw]',

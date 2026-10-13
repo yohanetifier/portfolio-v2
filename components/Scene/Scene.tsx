@@ -17,6 +17,7 @@ import { INTRO } from '@/utils/introTiming';
 import { PAPER } from '@/utils/theme';
 import { DECK_FAN, DECK_SHUFFLE, getDeckRotation } from '@/utils/deck';
 import { LIST_EXIT, VIEW_SWITCH } from '@/utils/worksView';
+import { getNextRect, nextProjectStore } from '@/utils/nextProject';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -403,6 +404,37 @@ const Scene = ({ projectsDetails }: Props) => {
       group.position.x += (x - group.position.x) * follow;
       group.position.y += (y - group.position.y) * follow;
       group.rotation.z += (rotation - group.rotation.z) * follow;
+    });
+  });
+
+  // Page projet : l'image du projet suivant suit la piste de scroll (NextProject),
+  // petite puis plein écran. Pendant ce temps le hero courant est masqué : il est
+  // fixe derrière la page et se verrait à travers la section transparente.
+  useFrame(() => {
+    if (!onProjectPage) return;
+    // Progressions fournies par les ScrollTrigger de NextProject
+    const { el, index, enter, progress } = nextProjectStore;
+    const blocked =
+      goToContact || returnHome || goToWork || goToProject || isReturning;
+    let driving = -1;
+
+    // enter > 0 : la section est entrée dans l'écran
+    if (el && index >= 0 && index !== activeIndex && !blocked && enter > 0) {
+      const rect = getNextRect(enter, progress, size.width, size.height);
+      const group = groupRefArray.current[index];
+      if (group) {
+        const { x, y, w, h } = rectToWorld(rect, size, viewport);
+        group.position.set(x, y, 0);
+        group.scale.set(w, h, 1);
+        group.rotation.z = 0;
+        driving = index;
+      }
+    }
+
+    groupRefArray.current.forEach((group, i) => {
+      if (!group) return;
+      group.visible = !(driving >= 0 && i === activeIndex);
+      group.renderOrder = i === driving ? 2 : 0;
     });
   });
 
@@ -976,27 +1008,32 @@ const Scene = ({ projectsDetails }: Props) => {
         );
 
       if (fromWorkList) {
-        projectsAtTheBottomRef.current.forEach((element) => {
-          reverseTl.to(
-            element.position,
-            {
-              y: projectsAtTheBottom.current[element.uuid],
-              duration: 1,
-            },
-            '<',
-          );
+        // Les autres reviennent dans la disposition enregistrée par Works (relue par
+        // la page projet). Pas les positions mémorisées au départ : après un « projet
+        // suivant », le projet ouvert au départ doit revenir aussi, et la disposition
+        // a pu être recentrée sur le nouveau projet.
+        // Classement refait par rapport au projet qui revient (même règle que
+        // getPositions) : celui du départ de Works est faux après un « projet suivant »
+        const top: THREE.Group[] = [];
+        const bottom: THREE.Group[] = [];
+        groupRefArray.current.forEach((group, i) => {
+          if (!group || i === selectedIndex) return;
+          const rects = projectsDetails[i]?.rects;
+          if (!rects) return;
+          const { x, y, w, h } = rectToWorld(rects, size, viewport);
+          // Au-dessus du projet : arrive du haut ; en dessous : arrive du bas
+          const fromTop = y > worldY;
+          (fromTop ? top : bottom).push(group);
+          gsap.set(group.position, {
+            x,
+            y: fromTop ? viewport.height : -viewport.height,
+          });
+          gsap.set(group.scale, { x: w, y: h });
+          reverseTl.to(group.position, { y, duration: 1 }, '<');
         });
-
-        projectsAtTheTopRef.current.forEach((element) => {
-          reverseTl.to(
-            element.position,
-            {
-              y: projectsAtTheTop.current[element.uuid],
-              duration: 1,
-            },
-            '<',
-          );
-        });
+        // React lit ce classement tant qu'on est encore sur la page projet
+        projectsAtTheTopRef.current = top;
+        projectsAtTheBottomRef.current = bottom;
       } else if (isContactReturn) {
         worklistRestoreByIndexRef.current.forEach((pose, i) => {
           if (!pose || i === selectedIndex) return;
@@ -1052,7 +1089,13 @@ const Scene = ({ projectsDetails }: Props) => {
       return;
     }
 
-    if (workPath) return;
+    // Déjà sur une page projet (projet suivant, accès direct) : pas d'animation,
+    // l'image est déjà plein écran. Mais le plane « sélectionné » doit suivre :
+    // c'est lui qui retrouve son ondulation au retour vers Works.
+    if (workPath) {
+      setSettledIndex(selectedIndex);
+      return;
+    }
 
     const tl = gsap.timeline({
       onStart: () => {

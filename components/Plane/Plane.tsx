@@ -283,6 +283,17 @@ const Plane = ({
       );
       return () => tweens.forEach((t) => t.kill());
     }
+
+    // Ni sélectionné ni hero : l'ondulation revient. Cas du projet suivant :
+    // l'ancien hero cède sa place sans passer par un retour vers Works.
+    tweens.push(
+      gsap.to(amplitude, {
+        value: PLANE_AMPLITUDE,
+        duration: 1,
+        ease: 'power2.out',
+      }),
+    );
+    return () => tweens.forEach((t) => t.kill());
   }, [
     isSelected,
     isReturning,

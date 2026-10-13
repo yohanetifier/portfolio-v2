@@ -15,6 +15,9 @@ import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage
 import { slugify } from '@/utils/slugify';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
+import NextProject from './NextProject';
+import { getLenis, unlockScroll } from '@/utils/scroll';
+import { nextProjectStore } from '@/utils/nextProject';
 
 interface Props {
   data: ProjectType;
@@ -42,6 +45,9 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   } = useThreeJsContext();
   const { isReturning } = useHeaderContext();
   const workPath = usePathname().split('/')[2];
+  const currentIndex = projects.findIndex(
+    (item) => slugify(item.title) === workPath,
+  );
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const updateProjects = () => {
@@ -100,8 +106,28 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
   };
 
   useLayoutEffect(() => {
+    // Une page projet commence toujours en haut : Lenis doit le savoir aussi
+    // (sinon, arrivée par le « projet suivant », il garde la position de l'ancienne page)
+    getLenis()?.scrollTo(0, { immediate: true, force: true });
     updateProjects();
     setProjectImageSelected(data.featuredImage.src);
+    // Arrivée par le scroll « projet suivant » : l'image est déjà là, le titre entre
+    if (nextProjectStore.justSwapped && titleRef.current) {
+      nextProjectStore.justSwapped = false;
+      gsap.fromTo(
+        titleRef.current,
+        { opacity: 0, yPercent: 40 },
+        {
+          opacity: 1,
+          yPercent: 0,
+          duration: 0.9,
+          ease: 'expo.out',
+          delay: 0.1,
+          // Bloqué par NextProject au changement de projet
+          onComplete: unlockScroll,
+        },
+      );
+    }
     const handleScroll = () => {
       const offset = window.innerHeight / 2;
       const offScreen = window.scrollY > offset;
@@ -215,6 +241,8 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
             }
           })}
         </div>
+
+        <NextProject projects={projects} currentIndex={currentIndex} />
       </div>
     </div>
   );
