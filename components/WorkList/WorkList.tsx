@@ -465,6 +465,27 @@ export default function WorkList({
     });
   };
 
+  // Sur Works, worksView = la vue affichée : le Scene s'y fie pour caler ses départs
+  useEffect(() => {
+    setWorksView(view);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
+
+  // Départ vers Home / Contact depuis la liste : même sortie que liste → grille.
+  // Le Scene lance les images à LIST_EXIT.handoffAt, une fois les titres sortis.
+  useEffect(() => {
+    if (!(goToContact || returnHome) || viewRef.current !== 'list') return;
+    hoveredRowRef.current = null;
+    setHoveredIndex(null);
+    revealTimerRef.current?.kill();
+    revealPendingRef.current = false;
+    const tl = exitListText();
+    return () => {
+      tl?.kill();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goToContact, returnHome]);
+
   // Sortie interrompue (navigation pendant l'animation) : ne pas laisser le scroll bloqué
   useEffect(
     () => () => {

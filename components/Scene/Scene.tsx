@@ -16,7 +16,7 @@ import { lockScroll, unlockScroll } from '@/utils/scroll';
 import { INTRO } from '@/utils/introTiming';
 import { PAPER } from '@/utils/theme';
 import { DECK_FAN, DECK_SHUFFLE, getDeckRotation } from '@/utils/deck';
-import { VIEW_SWITCH } from '@/utils/worksView';
+import { LIST_EXIT, VIEW_SWITCH } from '@/utils/worksView';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -491,6 +491,11 @@ const Scene = ({ projectsDetails }: Props) => {
       });
     }
 
+    // Départ de Works en liste (vers Home ou Contact) : les titres sortent d'abord,
+    // les images partent au même relais que pour liste → grille
+    const listExitDelay =
+      pathname === '/work' && worksView === 'list' ? LIST_EXIT.handoffAt : 0;
+
     if (returnHome) {
       // Attendre les cibles intro
       if (!projectsHomeCoords?.length) {
@@ -572,6 +577,7 @@ const Scene = ({ projectsDetails }: Props) => {
         returningIndex !== null &&
         returningIndex > (projectsHomeCoords?.length ?? 0) - 1;
 
+      returnHomeTl.addLabel('planes', listExitDelay);
       projectsHomeCoords?.map(({ rects }, i) => {
         const group = groupRefArray.current[i];
         if (!group) return;
@@ -584,20 +590,20 @@ const Scene = ({ projectsDetails }: Props) => {
         if (itemsNotOnTheIntroPage && returningIndex !== null) {
           const selectedGroup = groupRefArray.current[returningIndex];
           returnHomeTl
-            .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
-            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<')
-            .to(group.rotation, { z: getDeckRotation(i), duration: 1 }, '<');
+            .to(group.position, { y: worldY, x: worldX, duration: 1 }, 'planes')
+            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, 'planes')
+            .to(group.rotation, { z: getDeckRotation(i), duration: 1 }, 'planes');
           if (selectedGroup) {
             returnHomeTl
-              .to(selectedGroup.position, { y: 0, x: 0, duration: 1 }, '<')
-              .to(selectedGroup.scale, { x: 0, y: 0, duration: 1 }, '<');
+              .to(selectedGroup.position, { y: 0, x: 0, duration: 1 }, 'planes')
+              .to(selectedGroup.scale, { x: 0, y: 0, duration: 1 }, 'planes');
           }
         } else {
           // Retour au paquet : la carte reprend son inclinaison
           returnHomeTl
-            .to(group.position, { y: worldY, x: worldX, duration: 1 }, '<')
-            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, '<')
-            .to(group.rotation, { z: getDeckRotation(i), duration: 1 }, '<');
+            .to(group.position, { y: worldY, x: worldX, duration: 1 }, 'planes')
+            .to(group.scale, { x: worldW, y: worldH, duration: 1 }, 'planes')
+            .to(group.rotation, { z: getDeckRotation(i), duration: 1 }, 'planes');
         }
       });
 
@@ -679,6 +685,7 @@ const Scene = ({ projectsDetails }: Props) => {
       }
       // 404 / worklist → contact : React garde projectsDetails
 
+      contactTl.addLabel('planes', listExitDelay);
       projectsContactCoords.forEach(({ rects }, i) => {
         const group = groupRefArray.current[i];
         if (!group) return;
@@ -693,12 +700,12 @@ const Scene = ({ projectsDetails }: Props) => {
           .to(
             group.position,
             { y: worldY, x: worldX, duration: 1, ease: 'power2.inOut' },
-            '<',
+            'planes',
           )
           .to(
             group.scale,
             { x: worldW, y: worldH, duration: 1, ease: 'power2.inOut' },
-            '<',
+            'planes',
           );
       });
 
