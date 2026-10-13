@@ -8,6 +8,9 @@ export type ProjectCoordsItem = {
   rects: DOMRect;
 };
 
+/** Affichage de la page Works */
+export type WorksView = 'grid' | 'list';
+
 interface Uv {
   x: number | null;
   y: number | null;
@@ -63,6 +66,12 @@ interface ThreeJsContextType {
   /** Loader en wipe → Home peut lancer l’entrée des titres */
   introReady: boolean;
   setIntroReady: (arg: boolean) => void;
+  /** Dernière vue Works choisie (restaurée au retour d'une page projet) */
+  worksView: WorksView;
+  setWorksView: (arg: WorksView) => void;
+  /** Bascule grille ↔ liste en cours : GSAP déplace les planes vers les nouvelles cibles */
+  isViewSwitching: boolean;
+  setIsViewSwitching: (arg: boolean) => void;
 }
 
 const ThreeJsContext = createContext<ThreeJsContextType | undefined>(undefined);
@@ -99,6 +108,8 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
   const [mouseCoords, setMouseCoords] = useState<Uv>({ x: null, y: null });
   const [cursorHover, setCursorHover] = useState(false);
   const [introReady, setIntroReady] = useState(false);
+  const [worksView, setWorksView] = useState<WorksView>('grid');
+  const [isViewSwitching, setIsViewSwitching] = useState(false);
 
   return (
     <ThreeJsContext.Provider
@@ -151,6 +162,10 @@ export const ThreeJsProvider = ({ children }: { children: ReactNode }) => {
         setCursorHover,
         introReady,
         setIntroReady,
+        worksView,
+        setWorksView,
+        isViewSwitching,
+        setIsViewSwitching,
       }}
     >
       {children}

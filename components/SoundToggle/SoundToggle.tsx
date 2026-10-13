@@ -18,7 +18,7 @@ const SoundToggle = () => {
       aria-pressed={enabled}
       aria-label={enabled ? 'Turn sound off' : 'Turn sound on'}
       tabIndex={isVisible ? 0 : -1}
-      className={`fixed right-[max(1rem,env(safe-area-inset-right))] top-[max(0.75rem,env(safe-area-inset-top))] z-[110] cursor-pointer font-fabrikatMono text-[9px] uppercase tracking-[0.14em] text-white mix-blend-difference transition-opacity duration-500 ${
+      className={`fixed right-[max(7.5vw,env(safe-area-inset-right))] md:right-[max(5vw,env(safe-area-inset-right))] top-[max(0.75rem,env(safe-area-inset-top))] z-[110] cursor-pointer font-fabrikatMono text-[9px] uppercase tracking-[0.14em] text-white mix-blend-difference transition-opacity duration-500 ${
         isVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
       }`}
     >

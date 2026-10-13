@@ -91,8 +91,12 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
 
       setProjectSelectedCoords(updatedProjectCoord);
     }
-    const localStorageValue = JSON.stringify({ rects });
-    localStorage.setItem('projectsDetails', localStorageValue);
+    // Ne pas écraser la disposition laissée par Works (grille ou liste) :
+    // le retour doit viser celle-là. Sa propre grille ne sert qu'en accès direct.
+    if (checkIfProjectsAlreadySet === null) {
+      const localStorageValue = JSON.stringify({ rects });
+      localStorage.setItem('projectsDetails', localStorageValue);
+    }
   };
 
   useLayoutEffect(() => {

@@ -16,6 +16,7 @@ import { lockScroll, unlockScroll } from '@/utils/scroll';
 import { INTRO } from '@/utils/introTiming';
 import { PAPER } from '@/utils/theme';
 import { DECK_FAN, DECK_SHUFFLE, getDeckRotation } from '@/utils/deck';
+import { VIEW_SWITCH } from '@/utils/worksView';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -68,6 +69,9 @@ const Scene = ({ projectsDetails }: Props) => {
     setFromWorkPage,
     isLostPage,
     introReady,
+    worksView,
+    isViewSwitching,
+    setIsViewSwitching,
   } = useThreeJsContext();
 
   const [settledIndex, setSettledIndex] = useState<number | null>();
@@ -127,7 +131,8 @@ const Scene = ({ projectsDetails }: Props) => {
       (returnHome && onProjectPage) ||
       (goToContact && onProjectPage) ||
       isContactReturnPose ||
-      introOwnsPose,
+      introOwnsPose ||
+      isViewSwitching,
   );
   const router = useRouter();
 
@@ -400,6 +405,47 @@ const Scene = ({ projectsDetails }: Props) => {
       group.rotation.z += (rotation - group.rotation.z) * follow;
     });
   });
+
+  // Works : bascule grille ↔ liste. WorkList a envoyé les nouvelles cibles
+  // (projectsDetails) dans le même rendu que isViewSwitching → on y glisse.
+  useLayoutEffect(() => {
+    if (!isViewSwitching) return;
+    const groups = groupRefArray.current;
+    let done = false;
+    const tl = gsap.timeline({
+      onComplete: () => {
+        done = true;
+        unlockScroll();
+        setIsViewSwitching(false);
+      },
+    });
+    const { duration, ease, stagger } = VIEW_SWITCH;
+
+    projectsDetails.forEach(({ rects }, i) => {
+      const group = groups[i];
+      if (!group || !rects) return;
+      const { x, y, w, h } = rectToWorld(rects, size, viewport);
+      const at = i * stagger;
+      tl.to(group.position, { x, y, duration, ease }, at)
+        .to(group.scale, { x: w, y: h, duration, ease }, at)
+        .to(group.rotation, { z: 0, duration, ease }, at);
+    });
+
+    return () => {
+      tl.kill();
+      if (!done) unlockScroll();
+    };
+    // Les cibles sont lues au moment du lancement, une seule fois par bascule
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isViewSwitching]);
+
+  // Liste : l'aperçu survolé passe devant les autres planes (il les chevauche)
+  useEffect(() => {
+    if (pathname !== '/work' || hoveredIndex === null) return;
+    groupRefArray.current.forEach((group, i) => {
+      if (group) group.renderOrder = worksView === 'list' && i === hoveredIndex ? 1 : 0;
+    });
+  }, [hoveredIndex, worksView, pathname]);
 
   useLayoutEffect(() => {
     const fromWorkList = getFlag();
