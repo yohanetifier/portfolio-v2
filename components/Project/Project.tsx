@@ -16,6 +16,7 @@ import { slugify } from '@/utils/slugify';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import NextProject from './NextProject';
+import ProjectNav from './ProjectNav';
 import { getLenis, holdScroll, releaseScroll } from '@/utils/scroll';
 import { nextProjectStore } from '@/utils/nextProject';
 
@@ -290,6 +291,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
 
         <NextProject projects={projects} currentIndex={currentIndex} />
       </div>
+      <ProjectNav projects={projects} currentIndex={currentIndex} />
     </div>
   );
 };

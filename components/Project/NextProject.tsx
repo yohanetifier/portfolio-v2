@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -10,14 +9,9 @@ import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { Project as ProjectModel } from '@/src/models/Project';
 import { slugify } from '@/utils/slugify';
-import { getLenis, lockScroll } from '@/utils/scroll';
-import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
-import {
-  NEXT_PROJECT,
-  focusWorksLayout,
-  measureTrack,
-  nextProjectStore,
-} from '@/utils/nextProject';
+import { getLenis } from '@/utils/scroll';
+import { useOpenProject } from './useOpenProject';
+import { NEXT_PROJECT, measureTrack, nextProjectStore } from '@/utils/nextProject';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -34,20 +28,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
  * de route sous l'image : la nouvelle page la prend comme hero, sans coupure.
  */
 const NextProject = ({ projects, currentIndex }: Props) => {
-  const router = useRouter();
-  const {
-    setSelectedIndex,
-    setFromWorkPage,
-    setSelectedSlug,
-    setProjectImageSelected,
-    setProjectSelectedCoords,
-    scrollY,
-    setScrollY,
-    goToContact,
-    goToWork,
-    goToProject,
-    returnHome,
-  } = useThreeJsContext();
+  const { goToContact, goToWork, goToProject, returnHome } =
+    useThreeJsContext();
+  const openProject = useOpenProject(projects);
   const { isReturning } = useHeaderContext();
 
   const trackRef = useRef<HTMLElement>(null);
@@ -60,11 +43,6 @@ const NextProject = ({ projects, currentIndex }: Props) => {
   const nextIndex = (currentIndex + 1) % projects.length;
   const next = projects[nextIndex];
   const href = `/work/${slugify(next.title)}`;
-
-  // Scroll mémorisé au départ de Works : lu dans swap(), capturée une seule fois
-  // par useGSAP → via une ref, toujours à jour (même piège que blockedRef)
-  const scrollYRef = useRef(scrollY);
-  scrollYRef.current = scrollY;
 
   // Une autre transition (header, menu, retour) a la main : on ne bascule pas
   const blockedRef = useRef(false);
@@ -116,36 +94,7 @@ const NextProject = ({ projects, currentIndex }: Props) => {
   // L'image est plein écran : on change de projet sous elle
   const swap = () => {
     swappedRef.current = true;
-    // L'élan du scroll (inertie du trackpad) ne doit pas continuer sur la nouvelle
-    // page : on bloque, la page suivante débloque une fois son titre entré
-    lockScroll();
-    // Le Scene arrête de piloter l'image : React la tient en hero (index sélectionné)
-    nextProjectStore.index = -1;
-    nextProjectStore.justSwapped = true;
-
-    setSelectedIndex(nextIndex);
-    setFromWorkPage(nextIndex);
-    setSelectedSlug(slugify(next.title));
-    setProjectImageSelected(next.featuredImage.src);
-    // Retour vers Works : l'image doit rétrécir dans SA case, pas celle du projet
-    // quitté. Si cette case est hors écran au scroll mémorisé, on recentre le scroll
-    // et toute la disposition enregistrée (relue par la nouvelle page au montage).
-    const saved = getProjectsFromLocalStorage('projectsDetails');
-    const focused = saved?.rects
-      ? focusWorksLayout(
-          saved.rects,
-          nextIndex,
-          scrollYRef.current ?? 0,
-          window.innerHeight,
-        )
-      : null;
-    if (focused) {
-      localStorage.setItem('projectsDetails', JSON.stringify({ rects: focused.items }));
-      setScrollY(focused.scroll);
-      setProjectSelectedCoords(focused.items[nextIndex].rects as DOMRect);
-    }
-
-    router.push(href);
+    openProject(nextIndex);
   };
 
   const trySwap = () => {
