@@ -119,12 +119,15 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     // ne doit pas traverser la nouvelle page : sinon il enchaîne une 2e bascule.
     // On tient la page en haut jusqu'à 300 ms de calme, ou jusqu'à un nouveau geste
     // (toucher, clic, touche) : l'utilisateur reprend alors la main tout de suite.
+    // Et jamais plus d'1 s : la molette ne distingue pas l'inertie d'un vrai scroll.
     // Sur mobile, overflow hidden n'arrête pas l'élan → on ramène la page en haut.
     const gestures = ['pointerdown', 'keydown'] as const;
     let released = false;
     let settleTimer: number | undefined;
+    let maxTimer: number | undefined;
     const removeHold = () => {
       window.clearTimeout(settleTimer);
+      window.clearTimeout(maxTimer);
       window.removeEventListener('scroll', holdTop);
       window.removeEventListener('wheel', settle);
       gestures.forEach((type) => window.removeEventListener(type, release));
@@ -154,6 +157,7 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
         window.addEventListener(type, release, { passive: true }),
       );
       settle();
+      maxTimer = window.setTimeout(release, 1000);
       gsap.fromTo(
         titleRef.current,
         { opacity: 0, yPercent: 40 },
