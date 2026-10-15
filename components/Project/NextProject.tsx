@@ -15,6 +15,7 @@ import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage
 import {
   NEXT_PROJECT,
   focusWorksLayout,
+  measureTrack,
   nextProjectStore,
 } from '@/utils/nextProject';
 
@@ -83,8 +84,8 @@ const NextProject = ({ projects, currentIndex }: Props) => {
       if (e.type === 'wheel' && getLenis()?.isStopped) return;
       armedRef.current = true;
       // Déjà au bout (l'élan y a mené) : le scroll ne bouge plus, aucun onUpdate
-      // ne viendrait → on bascule tout de suite
-      if (nextProjectStore.progress >= NEXT_PROJECT.swapAt) trySwapRef.current();
+      // ne viendrait → on tente la bascule tout de suite
+      trySwapRef.current();
     };
     const events = ['pointerdown', 'wheel', 'keydown'] as const;
     events.forEach((type) =>
@@ -155,7 +156,8 @@ const NextProject = ({ projects, currentIndex }: Props) => {
       !swappedRef.current &&
       !blockedRef.current &&
       armedRef.current &&
-      nextProjectStore.progress >= NEXT_PROJECT.swapAt
+      // Mesurée, pas lue dans le store : iOS peut laisser une valeur périmée
+      measureTrack(track, window.innerHeight).progress >= NEXT_PROJECT.swapAt
     ) {
       swap();
     }

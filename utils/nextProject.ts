@@ -74,6 +74,23 @@ export function getNextRect(
   return new DOMRect(width / 2 - w / 2, cy - h / 2, w, h);
 }
 
+const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+
+/**
+ * Progressions mesurées sur la piste elle-même (mêmes bornes que les ScrollTrigger).
+ * Lu à chaque image par le Scene : jamais périmé, même si iOS ramène la page en
+ * haut sans envoyer d'événement scroll (les ScrollTrigger gardent alors l'ancienne valeur).
+ */
+export function measureTrack(el: HTMLElement, viewportHeight: number) {
+  const { top, height } = el.getBoundingClientRect();
+  return {
+    // 'top bottom' → 'top top' : le haut de la piste monte du bas au haut de l'écran
+    enter: clamp01(1 - top / viewportHeight),
+    // 'top top' → 'bottom bottom' : la piste défile sous l'écran
+    progress: clamp01(-top / Math.max(height - viewportHeight, 1)),
+  };
+}
+
 /** Rectangle tel qu'il est enregistré dans le localStorage (DOMRect sérialisé) */
 type SavedRect = {
   x: number;

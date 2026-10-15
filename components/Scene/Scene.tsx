@@ -17,7 +17,7 @@ import { INTRO } from '@/utils/introTiming';
 import { PAPER } from '@/utils/theme';
 import { DECK_FAN, DECK_SHUFFLE, getDeckRotation } from '@/utils/deck';
 import { LIST_EXIT, VIEW_SWITCH } from '@/utils/worksView';
-import { getNextRect, nextProjectStore } from '@/utils/nextProject';
+import { getNextRect, measureTrack, nextProjectStore } from '@/utils/nextProject';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -412,11 +412,14 @@ const Scene = ({ projectsDetails }: Props) => {
   // fixe derrière la page et se verrait à travers la section transparente.
   useFrame(() => {
     if (!onProjectPage) return;
-    // Progressions fournies par les ScrollTrigger de NextProject
-    const { el, index, enter, progress } = nextProjectStore;
+    const { el, index } = nextProjectStore;
     const blocked =
       goToContact || returnHome || goToWork || goToProject || isReturning;
     let driving = -1;
+    // Mesurées sur la piste, pas lues dans le store (voir measureTrack)
+    const { enter, progress } = el
+      ? measureTrack(el, size.height)
+      : { enter: 0, progress: 0 };
 
     // enter > 0 : la section est entrée dans l'écran
     if (el && index >= 0 && index !== activeIndex && !blocked && enter > 0) {
