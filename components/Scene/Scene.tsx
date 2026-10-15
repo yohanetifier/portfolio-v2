@@ -83,7 +83,7 @@ const Scene = ({ projectsDetails }: Props) => {
   const introPlayedRef = useRef(false);
   /**
    * Animation de transition finie, en attente du changement de route : les drapeaux
-   * (goToContact, goToWork…) ne sont levés qu'une fois l'URL arrivée. Sinon, URL encore
+   * (goToContact, goToWork, returnHome…) ne sont levés qu'une fois l'URL arrivée. Sinon, URL encore
    * l'ancienne, la page quittée se croit installée et renvoie sa grille au Scene
    * (ou React repose le hero) → les images y retournent avant de sauter en place.
    */
@@ -539,6 +539,8 @@ const Scene = ({ projectsDetails }: Props) => {
       pathname === '/work' && worksView === 'list' ? LIST_EXIT.handoffAt : 0;
 
     if (returnHome) {
+      // Animation déjà jouée, la route change : ne pas la relancer
+      if (pendingRouteRef.current) return;
       // Attendre les cibles intro
       if (!projectsHomeCoords?.length) {
         return;
@@ -556,17 +558,20 @@ const Scene = ({ projectsDetails }: Props) => {
           }
           // Unlock avant setState : le cleanup (cancelled=true) tourne juste après
           unlockScroll();
-          setSelectedIndex(null);
-          setSettledIndex(null);
-          setSelectedSlug('');
-          setFromWorkPage(-1);
-          setFromProjectSlug(null);
-          setFromProjectIndex(-1);
-          setReturnHome(false);
+          // Drapeaux levés à l'arrivée sur / (voir pendingRouteRef)
+          pendingRouteRef.current = () => {
+            setSelectedIndex(null);
+            setSettledIndex(null);
+            setSelectedSlug('');
+            setFromWorkPage(-1);
+            setFromProjectSlug(null);
+            setFromProjectIndex(-1);
+            setReturnHome(false);
+            requestAnimationFrame(() => {
+              setIsAnimating(false);
+            });
+          };
           router.push(`/`, { scroll: false });
-          requestAnimationFrame(() => {
-            setIsAnimating(false);
-          });
         },
       });
 
