@@ -81,6 +81,13 @@ const Scene = ({ projectsDetails }: Props) => {
   /** true après intro jouée (ou skip si pas sur home au wipe) */
   const [introRevealed, setIntroRevealed] = useState(false);
   const introPlayedRef = useRef(false);
+  /**
+   * Animation de transition finie, en attente du changement de route : les drapeaux
+   * (goToContact, goToWork…) ne sont levés qu'une fois l'URL arrivée. Sinon, URL encore
+   * l'ancienne, la page quittée se croit installée et renvoie sa grille au Scene
+   * (ou React repose le hero) → les images y retournent avant de sauter en place.
+   */
+  const pendingRouteRef = useRef<(() => void) | null>(null);
   const { isReturning, setIsReturning, reset, setReset } = useHeaderContext();
   const pathname = usePathname();
   const workPath = getProjectPath(pathname);
@@ -649,6 +656,8 @@ const Scene = ({ projectsDetails }: Props) => {
     }
 
     if (goToContact) {
+      // Animation déjà jouée, la route change : ne pas la relancer
+      if (pendingRouteRef.current) return;
       if (!projectsContactCoords?.length) {
         return;
       }
@@ -664,15 +673,18 @@ const Scene = ({ projectsDetails }: Props) => {
             setProjects(projectsContactCoords);
           }
           unlockScroll();
-          router.replace('/contact', { scroll: false });
-          setGoToContact(false);
-          setSelectedIndex(null);
-          setSettledIndex(null);
-          requestAnimationFrame(() => {
+          // Drapeaux levés à l'arrivée sur /contact (voir pendingRouteRef)
+          pendingRouteRef.current = () => {
+            setGoToContact(false);
+            setSelectedIndex(null);
+            setSettledIndex(null);
             requestAnimationFrame(() => {
-              setIsAnimating(false);
+              requestAnimationFrame(() => {
+                setIsAnimating(false);
+              });
             });
-          });
+          };
+          router.replace('/contact', { scroll: false });
         },
       });
 
@@ -867,6 +879,8 @@ const Scene = ({ projectsDetails }: Props) => {
     }
 
     if (goToWork) {
+      // Animation déjà jouée, la route change : ne pas la relancer
+      if (pendingRouteRef.current) return;
       if (!projectsCoords?.length) {
         return;
       }
@@ -892,17 +906,20 @@ const Scene = ({ projectsDetails }: Props) => {
           // Unlock avant setGoToWork(false) : sinon le cleanup met cancelled=true
           // et le rAF saute unlockScroll → scroll bloqué sur /work
           unlockScroll();
-          setSelectedIndex(null);
-          setSettledIndex(null);
-          setFromWorkPage(-1);
-          setGoToWork(false);
-          setFromProjectSlug(null);
-          setFromProjectIndex(-1);
-          clearFlag();
+          // Drapeaux levés à l'arrivée sur /work (voir pendingRouteRef)
+          pendingRouteRef.current = () => {
+            setSelectedIndex(null);
+            setSettledIndex(null);
+            setFromWorkPage(-1);
+            setGoToWork(false);
+            setFromProjectSlug(null);
+            setFromProjectIndex(-1);
+            clearFlag();
+            requestAnimationFrame(() => {
+              setIsAnimating(false);
+            });
+          };
           router.push('/work', { scroll: false });
-          requestAnimationFrame(() => {
-            setIsAnimating(false);
-          });
         },
       });
 
@@ -1212,6 +1229,17 @@ const Scene = ({ projectsDetails }: Props) => {
     projectsHomeCoords?.length,
     projectsCoords?.length,
   ]);
+
+  // La route a changé : on lève les drapeaux de la transition. Au premier changement,
+  // même si ce n'est pas la route attendue (retour navigateur…) : sinon l'attente
+  // bloquerait toutes les transitions suivantes. Déclaré après l'effet principal,
+  // qui voit donc encore l'attente et ne relance pas l'animation.
+  useLayoutEffect(() => {
+    const finish = pendingRouteRef.current;
+    if (!finish) return;
+    pendingRouteRef.current = null;
+    finish();
+  }, [pathname]);
 
   if (projectsDetails.length > 0) {
     return projectsDetails.map(({ rects, imageUrl }, i) => {
