@@ -16,7 +16,7 @@ import { slugify } from '@/utils/slugify';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import NextProject from './NextProject';
-import { getLenis, unlockScroll } from '@/utils/scroll';
+import { getLenis, holdScroll, releaseScroll } from '@/utils/scroll';
 import { nextProjectStore } from '@/utils/nextProject';
 
 interface Props {
@@ -49,6 +49,9 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     (item) => slugify(item.title) === workPath,
   );
   const overlayRef = useRef<HTMLDivElement>(null);
+  // Arrivée par le scroll « projet suivant » : lu au premier rendu et gardé dans
+  // une ref, pour survivre au double passage des effets (StrictMode, en dev)
+  const arrivedBySwapRef = useRef(nextProjectStore.justSwapped);
 
   const updateProjects = () => {
     const checkIfProjectsAlreadySet =
@@ -111,9 +114,46 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     getLenis()?.scrollTo(0, { immediate: true, force: true });
     updateProjects();
     setProjectImageSelected(data.featuredImage.src);
-    // Arrivée par le scroll « projet suivant » : l'image est déjà là, le titre entre
-    if (nextProjectStore.justSwapped && titleRef.current) {
+    // Arrivée par le scroll « projet suivant » : l'image est déjà là, le titre entre.
+    // L'élan du geste fait sur la page précédente (swipe mobile, inertie du trackpad)
+    // ne doit pas traverser la nouvelle page : sinon il enchaîne une 2e bascule.
+    // On tient la page en haut jusqu'à 300 ms de calme, ou jusqu'à un nouveau geste
+    // (toucher, clic, touche) : l'utilisateur reprend alors la main tout de suite.
+    // Sur mobile, overflow hidden n'arrête pas l'élan → on ramène la page en haut.
+    const gestures = ['pointerdown', 'keydown'] as const;
+    let released = false;
+    let settleTimer: number | undefined;
+    const removeHold = () => {
+      window.clearTimeout(settleTimer);
+      window.removeEventListener('scroll', holdTop);
+      window.removeEventListener('wheel', settle);
+      gestures.forEach((type) => window.removeEventListener(type, release));
+    };
+    const release = () => {
+      if (released) return;
+      released = true;
+      removeHold();
+      releaseScroll();
+    };
+    // Chaque scroll ou coup de molette relance l'attente : 300 ms de calme = fini
+    const settle = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(release, 300);
+    };
+    const holdTop = () => {
+      if (window.scrollY !== 0) window.scrollTo(0, 0);
+      settle();
+    };
+    if (arrivedBySwapRef.current && titleRef.current) {
       nextProjectStore.justSwapped = false;
+      // Blocage que les autres animations ne lèvent pas (le Plane débloque à 1 s)
+      holdScroll();
+      window.addEventListener('scroll', holdTop);
+      window.addEventListener('wheel', settle, { passive: true });
+      gestures.forEach((type) =>
+        window.addEventListener(type, release, { passive: true }),
+      );
+      settle();
       gsap.fromTo(
         titleRef.current,
         { opacity: 0, yPercent: 40 },
@@ -123,10 +163,10 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
           duration: 0.9,
           ease: 'expo.out',
           delay: 0.1,
-          // Bloqué par NextProject au changement de projet
-          onComplete: unlockScroll,
         },
       );
+    } else {
+      released = true;
     }
     const handleScroll = () => {
       const offset = window.innerHeight / 2;
@@ -140,6 +180,8 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      // Page quittée pendant l'arrivée : on ne laisse pas le scroll bloqué
+      release();
     };
   }, []);
 

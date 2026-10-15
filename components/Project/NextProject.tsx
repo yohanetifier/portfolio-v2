@@ -71,8 +71,26 @@ const NextProject = ({ projects, currentIndex }: Props) => {
     goToContact || goToWork || goToProject || returnHome || isReturning,
   );
 
+  // Bascule armée par un geste fait sur CETTE page : sur mobile, l'élan d'un swipe
+  // commencé sur la page précédente continue et enchaînerait une 2e bascule
+  const armedRef = useRef(false);
+
   useEffect(() => {
     setMounted(true);
+    const arm = (e: Event) => {
+      if (armedRef.current) return;
+      // Molette pendant le blocage d'arrivée = inertie du geste précédent
+      if (e.type === 'wheel' && getLenis()?.isStopped) return;
+      armedRef.current = true;
+      // Déjà au bout (l'élan y a mené) : le scroll ne bouge plus, aucun onUpdate
+      // ne viendrait → on bascule tout de suite
+      if (nextProjectStore.progress >= NEXT_PROJECT.swapAt) trySwapRef.current();
+    };
+    const events = ['pointerdown', 'wheel', 'keydown'] as const;
+    events.forEach((type) =>
+      window.addEventListener(type, arm, { passive: true }),
+    );
+    return () => events.forEach((type) => window.removeEventListener(type, arm));
   }, []);
 
   // Inscription auprès du Scene (qui lit la piste à chaque image)
@@ -129,6 +147,23 @@ const NextProject = ({ projects, currentIndex }: Props) => {
     router.push(href);
   };
 
+  const trySwap = () => {
+    const track = trackRef.current;
+    if (
+      track &&
+      nextProjectStore.el === track &&
+      !swappedRef.current &&
+      !blockedRef.current &&
+      armedRef.current &&
+      nextProjectStore.progress >= NEXT_PROJECT.swapAt
+    ) {
+      swap();
+    }
+  };
+  // Lu par des écouteurs posés une seule fois : toujours la version à jour
+  const trySwapRef = useRef(trySwap);
+  trySwapRef.current = trySwap;
+
   // Deux ScrollTrigger sur la piste : l'entrée de la section, puis la croissance.
   // Lenis est déjà branché sur ScrollTrigger (SmoothScroll.tsx).
   useGSAP(
@@ -173,13 +208,7 @@ const NextProject = ({ projects, currentIndex }: Props) => {
               if (!isMine()) return;
               nextProjectStore.progress = self.progress;
               updateCounter();
-              if (
-                !swappedRef.current &&
-                !blockedRef.current &&
-                self.progress >= NEXT_PROJECT.swapAt
-              ) {
-                swap();
-              }
+              trySwap();
             },
           },
         })
