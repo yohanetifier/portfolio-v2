@@ -15,7 +15,7 @@ import { OPEN_WHOOSH, playSound, setSoundEnabled } from '@/utils/playSound';
 export default function Home({
   projects,
 }: {
-  projects: Pick<Project, 'featuredImage'>[];
+  projects: Pick<Project, 'featuredImage' | 'title'>[];
 }) {
   const withSoundRef = useRef<HTMLButtonElement>(null);
   const withoutSoundRef = useRef<HTMLButtonElement>(null);

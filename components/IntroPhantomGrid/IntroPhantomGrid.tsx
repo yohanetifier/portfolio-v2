@@ -5,19 +5,25 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { getStartingClass } from '../WorkList/utils/classes';
 import { DECK_STEP_PX } from '@/utils/deck';
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
+import { projectList } from '@/utils/projectList';
 
 export default function IntroPhantomGrid({
   projects,
   /** false = affichage/mesure désactivée (évite d’écraser les coords depuis un phantom caché) */
   writeCoords = true,
 }: {
-  projects: Pick<Project, 'featuredImage'>[];
+  projects: Pick<Project, 'featuredImage' | 'title'>[];
   writeCoords?: boolean;
 }) {
   const wrapperImage = useRef<HTMLDivElement>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const imgRefArray = useRef<(HTMLDivElement | null)[]>([]);
   const { setProjectsHomeCoords } = useThreeJsContext();
+
+  // Présente sur toutes les pages : elle rend la liste des projets lisible partout
+  useLayoutEffect(() => {
+    projectList.current = projects;
+  }, [projects]);
 
   useLayoutEffect(() => {
     if (!writeCoords) return;
