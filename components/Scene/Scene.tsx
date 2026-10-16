@@ -472,10 +472,18 @@ const Scene = ({ projectsDetails }: Props) => {
         : null,
       );
     }
+    // L'éventail se centre dans l'espace libre du menu : entre ses liens et le
+    // trait du pied de page (mesurés : leur place dépend du texte et de l'écran)
+    const links = document.querySelector('[data-menu-links]');
+    const rule = document.querySelector('[data-rule]');
+    const centerY =
+      links && rule
+        ? (links.getBoundingClientRect().bottom + rule.getBoundingClientRect().top) / 2
+        : undefined;
     const tl = gsap.timeline();
     groups.forEach((group, i) => {
       if (!group) return;
-      const card = getFanCard(i, groups.length, size.width, size.height);
+      const card = getFanCard(i, groups.length, size.width, size.height, centerY);
       const { x, y, w, h } = rectToWorld(
         new DOMRect(card.cx - card.w / 2, card.cy - card.h / 2, card.w, card.h),
         size,

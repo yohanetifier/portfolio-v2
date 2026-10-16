@@ -319,7 +319,11 @@ const Menu = () => {
         className="pointer-events-none invisible fixed inset-0 z-[96] flex flex-col px-[8vw] pt-[20vh] text-[#12120f] md:hidden [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
         aria-hidden={!isOpen}
       >
-        <nav className="flex flex-col gap-[2px]" aria-label="Menu">
+        <nav
+          data-menu-links
+          className="flex flex-col gap-[2px]"
+          aria-label="Menu"
+        >
           {links.map(({ label, sup, onClick, current }, i) => (
             <button
               key={label}

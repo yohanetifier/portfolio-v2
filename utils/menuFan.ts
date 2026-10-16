@@ -1,7 +1,8 @@
 /** Menu mobile : les images du site se rangent en éventail en bas du menu */
 
 export const MENU_FAN = {
-  /** Centre vertical de l'éventail, en part de la hauteur de l'écran */
+  /** Centre vertical de l'éventail, en part de la hauteur de l'écran (si on n'a
+   *  pas pu mesurer l'espace libre du menu) */
   centerY: 0.68,
   /** Largeur d'une carte, en part de la largeur de l'écran ; hauteur = largeur × ratio */
   cardWidth: 0.32,
@@ -23,6 +24,8 @@ export function getFanCard(
   n: number,
   width: number,
   height: number,
+  /** Centre vertical voulu (px), sinon MENU_FAN.centerY */
+  centerY = height * MENU_FAN.centerY,
 ) {
   // k : de -(n-1)/2 (1re carte) à +(n-1)/2 (dernière), 0 au milieu
   const k = i - (n - 1) / 2;
@@ -30,7 +33,7 @@ export function getFanCard(
   const w = width * MENU_FAN.cardWidth;
   return {
     cx: width / 2 + k * step * width * MENU_FAN.spread,
-    cy: height * MENU_FAN.centerY + k * k * MENU_FAN.arc,
+    cy: centerY + k * k * MENU_FAN.arc,
     w,
     h: w * MENU_FAN.ratio,
     rotation: k * step * MENU_FAN.angle,
