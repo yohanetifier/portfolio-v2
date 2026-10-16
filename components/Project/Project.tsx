@@ -291,7 +291,11 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
 
         <NextProject projects={projects} currentIndex={currentIndex} />
       </div>
-      <ProjectNav projects={projects} currentIndex={currentIndex} />
+      <ProjectNav
+        projects={projects}
+        currentIndex={currentIndex}
+        contentRef={overlayRef}
+      />
     </div>
   );
 };

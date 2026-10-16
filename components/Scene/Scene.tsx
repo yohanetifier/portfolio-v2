@@ -18,6 +18,7 @@ import { PAPER } from '@/utils/theme';
 import { DECK_FAN, DECK_SHUFFLE, getDeckRotation } from '@/utils/deck';
 import { LIST_EXIT, VIEW_SWITCH } from '@/utils/worksView';
 import { getNextRect, measureTrack, nextProjectStore } from '@/utils/nextProject';
+import { projectFly } from '@/utils/projectFly';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -35,6 +36,13 @@ function rectToWorld(
     w: (rects.width / size.width) * viewport.width,
     h: (rects.height / size.height) * viewport.height,
   };
+}
+
+/** Opacité d'un plane (uniform du shader de Plane), pour l'aperçu des flèches */
+function setPlaneOpacity(group: THREE.Group, value: number) {
+  const mesh = group.children[0] as THREE.Mesh | undefined;
+  const material = mesh?.material as THREE.ShaderMaterial | undefined;
+  if (material?.uniforms?.uOpacity) material.uniforms.uOpacity.value = value;
 }
 
 const Scene = ({ projectsDetails }: Props) => {
@@ -417,19 +425,71 @@ const Scene = ({ projectsDetails }: Props) => {
   // Page projet : l'image du projet suivant suit la piste de scroll (NextProject),
   // petite puis plein écran. Pendant ce temps le hero courant est masqué : il est
   // fixe derrière la page et se verrait à travers la section transparente.
+  // Flèches ← → : l'aperçu puis le vol de l'image du projet visé suivent
+  // projectFly, par-dessus le hero (laissé visible : le contenu de la page s'est
+  // effacé devant lui pendant le vol).
+  const lastFlyIndexRef = useRef(-1);
   useFrame(() => {
-    if (!onProjectPage) return;
+    // Image des flèches rendue : on la range hors de l'écran (sinon elle resterait
+    // à sa dernière place, React ne repose pas une pose qui n'a pas changé) et
+    // on lui rend son opacité. Sauf si elle est devenue le hero.
+    const last = lastFlyIndexRef.current;
+    if (last >= 0 && (projectFly.index !== last || !onProjectPage)) {
+      const group = groupRefArray.current[last];
+      if (group) {
+        if (last !== activeIndex) group.position.y = viewport.height;
+        setPlaneOpacity(group, 1);
+      }
+      lastFlyIndexRef.current = -1;
+    }
+    if (!onProjectPage) {
+      projectFly.index = -1;
+      return;
+    }
     const { el, index } = nextProjectStore;
     const blocked =
       goToContact || returnHome || goToWork || goToProject || isReturning;
     let driving = -1;
+    let hideHero = false;
     // Mesurées sur la piste, pas lues dans le store (voir measureTrack)
     const { enter, progress } = el
       ? measureTrack(el, size.height)
       : { enter: 0, progress: 0 };
 
+    // Le projet visé est devenu le hero (React le tient plein écran) : vol fini
+    if (projectFly.index === activeIndex) projectFly.index = -1;
+
+    if (projectFly.index >= 0 && !blocked) {
+      const group = groupRefArray.current[projectFly.index];
+      if (group) {
+        // Du rect (aperçu, départ) au plein écran du canvas, selon full
+        const { rect, full } = projectFly;
+        const world = rectToWorld(
+          new DOMRect(
+            rect.x * (1 - full),
+            rect.y * (1 - full),
+            rect.w + (size.width - rect.w) * full,
+            rect.h + (size.height - rect.h) * full,
+          ),
+          size,
+          viewport,
+        );
+        group.position.set(world.x, world.y, 0);
+        group.scale.set(world.w, world.h, 1);
+        group.rotation.z = 0;
+        setPlaneOpacity(group, projectFly.opacity);
+        driving = projectFly.index;
+        lastFlyIndexRef.current = projectFly.index;
+      }
+    }
     // enter > 0 : la section est entrée dans l'écran
-    if (el && index >= 0 && index !== activeIndex && !blocked && enter > 0) {
+    else if (
+      el &&
+      index >= 0 &&
+      index !== activeIndex &&
+      !blocked &&
+      enter > 0
+    ) {
       const rect = getNextRect(enter, progress, size.width, size.height);
       const group = groupRefArray.current[index];
       if (group) {
@@ -438,12 +498,13 @@ const Scene = ({ projectsDetails }: Props) => {
         group.scale.set(w, h, 1);
         group.rotation.z = 0;
         driving = index;
+        hideHero = true;
       }
     }
 
     groupRefArray.current.forEach((group, i) => {
       if (!group) return;
-      group.visible = !(driving >= 0 && i === activeIndex);
+      group.visible = !(hideHero && i === activeIndex);
       group.renderOrder = i === driving ? 2 : 0;
     });
   });
