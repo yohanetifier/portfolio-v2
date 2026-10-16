@@ -433,12 +433,17 @@ const Scene = ({ projectsDetails }: Props) => {
   // Menu mobile ouvert : chaque image quitte sa place dans la page et rejoint sa
   // carte de l'éventail, l'une après l'autre. Sa place est mémorisée d'abord :
   // la fermeture l'y ramènera.
-  const { isOpen: menuOpen } = useContext(ThemeContext);
+  const { isOpen: menuOpen, setFanRaised } = useContext(ThemeContext);
+  // Un lien du menu a lancé une transition : les images partent de l'éventail.
+  // Les transitions d'une page projet ne doivent alors pas les replacer d'abord
+  // (hero plein écran, autres hors écran) : elles partent de là où elles sont
+  const fromMenuFanRef = useRef(false);
   const menuPosesRef = useRef<
     ({ x: number; y: number; w: number; h: number; rotation: number } | null)[]
   >([]);
   useEffect(() => {
     if (!menuOpen) return;
+    setFanRaised(true);
     const groups = groupRefArray.current;
     // Rouvert pendant le retour : les places mémorisées restent celles de la page
     if (menuPosesRef.current.length === 0) {
@@ -480,9 +485,9 @@ const Scene = ({ projectsDetails }: Props) => {
   }, [menuOpen]);
 
   // Menu fermé : chaque image revient à sa place mémorisée. Un lien du menu
-  // lance aussi une transition (Contact, Works…) : elle doit partir de la page,
-  // donc retour instantané. useLayoutEffect déclaré avant celui des transitions :
-  // il passe en premier, les transitions lisent déjà les bonnes positions.
+  // lance aussi une transition (Contact, Works…) : c'est elle qui déplace les
+  // images. useLayoutEffect déclaré avant celui des transitions : il passe en
+  // premier, les transitions lisent déjà les bonnes positions.
   useLayoutEffect(() => {
     const poses = menuPosesRef.current;
     if (menuOpen || poses.length === 0) return;
@@ -492,23 +497,38 @@ const Scene = ({ projectsDetails }: Props) => {
     });
 
     if (goToContact || goToWork || returnHome || isReturning || goToProject) {
-      // Tout de suite, sans attendre la prochaine image (un tween de durée 0
-      // ne s'appliquerait qu'à la prochaine image : trop tard)
-      groups.forEach((group, i) => {
-        const pose = poses[i];
-        if (!group || !pose) return;
-        group.position.set(pose.x, pose.y, 0);
-        group.scale.set(pose.w, pose.h, 1);
-        group.rotation.z = pose.rotation;
-      });
       menuPosesRef.current = [];
-      return;
+      fromMenuFanRef.current = true;
+      if (!returnHome) {
+        // La transition part de l'éventail (elle anime depuis la position
+        // actuelle) mais ne touche pas à la rotation : on redresse les cartes.
+        // Vers l'intro, la transition remet elle-même l'inclinaison du paquet.
+        groups.forEach((group, i) => {
+          const pose = poses[i];
+          if (group && pose) {
+            gsap.to(group.rotation, { z: pose.rotation, duration: 1, ease: 'power2.inOut' });
+          }
+        });
+      }
+      // Les cartes restent visibles au-dessus du voile pendant la transition
+      const lower = gsap.delayedCall(1.1, () => {
+        setFanRaised(false);
+        fromMenuFanRef.current = false;
+      });
+      return () => {
+        lower.kill();
+        setFanRaised(false);
+        fromMenuFanRef.current = false;
+      };
     }
 
+    // Le canvas reste au-dessus du voile pendant le retour : les cartes restent
+    // visibles jusqu'à leur place, puis il redescend sous la page
     const back = { duration: 1, ease: 'expo.inOut' };
     const tl = gsap.timeline({
       onComplete: () => {
         menuPosesRef.current = [];
+        setFanRaised(false);
       },
     });
     groups.forEach((group, i) => {
@@ -749,8 +769,9 @@ const Scene = ({ projectsDetails }: Props) => {
       const returningIndex = activeIndex;
       const leavingProject = onProjectPage && returningIndex !== null;
 
-      // Uniquement projet → home (React sinon = petite grille au centre)
-      if (leavingProject) {
+      // Uniquement projet → home (React sinon = petite grille au centre).
+      // Pas depuis l'éventail du menu : les cartes partent de là où elles sont
+      if (leavingProject && !fromMenuFanRef.current) {
         projectsAtTheBottomRef.current = [];
         projectsAtTheTopRef.current = [];
         const selectedGroup = groupRefArray.current[returningIndex!];
@@ -868,7 +889,8 @@ const Scene = ({ projectsDetails }: Props) => {
       const leavingProject = onProjectPage;
       const selected = fromProjectIndex >= 0 ? fromProjectIndex : selectedIndex;
 
-      if (leavingProject && selected !== null) {
+      // Pas depuis l'éventail du menu : les cartes partent de là où elles sont
+      if (leavingProject && selected !== null && !fromMenuFanRef.current) {
         const selectedGroup = groupRefArray.current[selected];
         projectsAtTheBottomRef.current = [];
         projectsAtTheTopRef.current = [];
@@ -1214,6 +1236,13 @@ const Scene = ({ projectsDetails }: Props) => {
           // Au-dessus du projet : arrive du haut ; en dessous : arrive du bas
           const fromTop = y > worldY;
           (fromTop ? top : bottom).push(group);
+          // Depuis l'éventail du menu : chaque carte rejoint sa case d'où elle est
+          if (fromMenuFanRef.current) {
+            reverseTl
+              .to(group.position, { x, y, duration: 1 }, '<')
+              .to(group.scale, { x: w, y: h, duration: 1 }, '<');
+            return;
+          }
           gsap.set(group.position, {
             x,
             y: fromTop ? viewport.height : -viewport.height,

@@ -12,7 +12,7 @@ const FullscreenCanvas = () => {
   const { projectsDetails, isLostPage, isAnimating } = useThreeJsContext();
   const pathname = usePathname();
   const finePointer = useFinePointer();
-  const { isOpen: menuOpen } = useContext(ThemeContext);
+  const { isOpen: menuOpen, fanRaised } = useContext(ThemeContext);
   // Catch-all /xxx = vraie page 404 (pas not-found.tsx) → garder le canvas
   const isLostRoute =
     isLostPage ||
@@ -40,10 +40,10 @@ const FullscreenCanvas = () => {
         position: 'fixed',
         top: '0px',
         left: '0px',
-        // Menu mobile ouvert : entre son voile (z-90) et son texte (z-96), pour
-        // l'éventail. Au-dessus du HTML pendant les transitions (évite flash
-        // worklist/projet)
-        zIndex: menuOpen ? 95 : isAnimating ? 20 : 1,
+        // Menu mobile : entre son voile (z-90) et son texte (z-96), pour
+        // l'éventail, jusqu'à la fin du retour des images à la fermeture.
+        // Au-dessus du HTML pendant les transitions (évite flash worklist/projet)
+        zIndex: menuOpen || fanRaised ? 95 : isAnimating ? 20 : 1,
       }}
       id="fullscreen"
     >

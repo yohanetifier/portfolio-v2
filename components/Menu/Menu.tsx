@@ -133,7 +133,7 @@ const Menu = () => {
       tl.set(root, { autoAlpha: 1 })
         .set(words, { yPercent: 115 })
         .set(fades, { opacity: 0, y: 10 })
-        .set(rule, { scaleX: 0 })
+        .set(rule, { scaleX: 0, opacity: 1 })
         .fromTo(
           veil,
           { clipPath: 'inset(0% 0% 100% 0%)' },
@@ -177,7 +177,11 @@ const Menu = () => {
         },
         0,
       )
-        .to(fades, { opacity: 0, duration: d(0.3), ease: 'power2.in' }, 0)
+        .to(
+          [fades, rule],
+          { opacity: 0, duration: d(0.3), ease: 'power2.in' },
+          0,
+        )
         .to(
           veil,
           {
