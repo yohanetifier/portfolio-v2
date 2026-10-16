@@ -3,7 +3,6 @@
 import { ThemeContext } from '@/contexts/MenuProvider';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
-import { clearFlag } from '@/utils/fromWorkList';
 import { getProjectPath } from '@/utils/getProjectPath';
 import { lockScroll, unlockScroll } from '@/utils/scroll';
 import gsap from 'gsap';
@@ -42,9 +41,7 @@ const Menu = () => {
   const {
     selectedIndex,
     setSelectedIndex,
-    setReturnHome,
     setIsAnimating,
-    setFromWorkPage,
     fromWorkPage,
     setGoToContact,
     setGoToWork,
@@ -203,23 +200,6 @@ const Menu = () => {
     return null;
   };
 
-  /** Identique Header.handleNav('/') */
-  const goHome = () => {
-    if (pathname === '/') {
-      close();
-      return;
-    }
-    clearFlag();
-    if (selectedIndex !== null) {
-      setFromWorkPage(selectedIndex);
-    }
-    setFromProjectSlug(null);
-    setFromProjectIndex(-1);
-    setReturnHome(true);
-    setIsAnimating(true);
-    close();
-  };
-
   /** Identique Header.handleWorkPath / returnToWorkList — flags tout de suite */
   const goToProjets = () => {
     if (pathname === '/work' && !projectPath) {
@@ -302,7 +282,6 @@ const Menu = () => {
 
   const count = projectsDetails.length;
   const links = [
-    { label: 'Home', onClick: goHome, current: pathname === '/' },
     {
       label: 'Works',
       sup: count > 0 ? `(${pad(count)})` : undefined,

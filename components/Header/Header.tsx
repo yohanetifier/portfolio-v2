@@ -79,6 +79,8 @@ const Header = () => {
     path: string,
   ) => {
     e.preventDefault();
+    // Logo touché depuis le menu mobile (il n'a plus de lien Home) : on le ferme
+    if (isOpen) setIsOpen(false);
     if (path === '/') {
       clearFlag();
       if (selectedIndex !== null) {
@@ -148,8 +150,10 @@ const Header = () => {
             </button>
           )}
           <div
+            // Menu ouvert : l'en-tête ne mélange plus ses couleurs → logo encre,
+            // pour rester visible sur le voile papier (c'est le chemin vers l'intro)
             className={`col-start-1 col-end-3 flex justify-between ${
-              isOpen ? 'max-md:opacity-0 max-md:pointer-events-none' : ''
+              isOpen ? 'max-md:text-[#12120f]' : ''
             }`}
           >
           <Link
