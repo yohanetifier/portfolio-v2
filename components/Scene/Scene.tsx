@@ -1,7 +1,13 @@
 'use client';
 
 import { ProjectItem, useThreeJsContext } from '@/contexts/ThreeJsContext';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import Plane from '../Plane/Plane';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -19,6 +25,8 @@ import { DECK_FAN, DECK_SHUFFLE, getDeckRotation } from '@/utils/deck';
 import { LIST_EXIT, VIEW_SWITCH } from '@/utils/worksView';
 import { getNextRect, measureTrack, nextProjectStore } from '@/utils/nextProject';
 import { projectFly } from '@/utils/projectFly';
+import { getFanCard } from '@/utils/menuFan';
+import { ThemeContext } from '@/contexts/MenuProvider';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -421,6 +429,52 @@ const Scene = ({ projectsDetails }: Props) => {
       group.rotation.z += (rotation - group.rotation.z) * follow;
     });
   });
+
+  // Menu mobile ouvert : chaque image quitte sa place dans la page et rejoint sa
+  // carte de l'éventail, l'une après l'autre. Sa place est mémorisée d'abord :
+  // la fermeture l'y ramènera.
+  const { isOpen: menuOpen } = useContext(ThemeContext);
+  const menuPosesRef = useRef<
+    ({ x: number; y: number; w: number; h: number; rotation: number } | null)[]
+  >([]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const groups = groupRefArray.current;
+    menuPosesRef.current = groups.map((group) =>
+      group
+        ? {
+            x: group.position.x,
+            y: group.position.y,
+            w: group.scale.x,
+            h: group.scale.y,
+            rotation: group.rotation.z,
+          }
+        : null,
+    );
+    const tl = gsap.timeline();
+    groups.forEach((group, i) => {
+      if (!group) return;
+      const card = getFanCard(i, groups.length, size.width, size.height);
+      const { x, y, w, h } = rectToWorld(
+        new DOMRect(card.cx - card.w / 2, card.cy - card.h / 2, card.w, card.h),
+        size,
+        viewport,
+      );
+      // Les cartes de droite passent devant celles de gauche
+      group.renderOrder = i;
+      const at = 0.05 + i * 0.025;
+      const move = { duration: 1.05, ease: 'expo.inOut' };
+      tl.to(group.position, { x, y, ...move }, at)
+        .to(group.scale, { x: w, y: h, ...move }, at)
+        // Degrés (sens horaire) → radians (Three.js tourne dans l'autre sens)
+        .to(group.rotation, { z: (-card.rotation * Math.PI) / 180, ...move }, at);
+    });
+    return () => {
+      tl.kill();
+    };
+    // Dimensions lues à l'ouverture : le menu ne suit pas un redimensionnement
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuOpen]);
 
   // Page projet : l'image du projet suivant suit la piste de scroll (NextProject),
   // petite puis plein écran. Pendant ce temps le hero courant est masqué : il est
