@@ -295,18 +295,26 @@ const Menu = () => {
     },
   ];
 
-  // autoAlpha (opacity + visibility) piloté par GSAP : fermé, rien n'est
-  // visible ni atteignable au clavier
+  // Deux calques : le voile (z-90) et le texte (z-96). Le canvas des images
+  // pourra se glisser entre les deux (éventail au-dessus du voile, sous le texte)
   return (
-    <div
-      ref={rootRef}
-      className="invisible fixed inset-0 z-[90] text-[#12120f] md:hidden"
-      aria-hidden={!isOpen}
-    >
-      {/* Voile papier : il descend du haut (clip-path) */}
-      <div ref={veilRef} className="absolute inset-0 bg-paper" />
+    <>
+      {/* Voile papier : il descend du haut (clip-path). Replié dès le HTML du
+          serveur : sinon il couvrirait la page avant que React prenne la main */}
+      <div
+        ref={veilRef}
+        className="fixed inset-0 z-[90] bg-paper [clip-path:inset(0_0_100%_0)] md:hidden"
+        aria-hidden
+      />
 
-      <div className="relative flex h-full flex-col px-[8vw] pt-[20vh]">
+      {/* Texte : autoAlpha (opacity + visibility) piloté par GSAP, fermé =
+          ni visible ni atteignable au clavier. Transparent aux clics, sauf
+          les liens : les cartes en dessous devront pouvoir être touchées */}
+      <div
+        ref={rootRef}
+        className="pointer-events-none invisible fixed inset-0 z-[96] flex flex-col px-[8vw] pt-[20vh] text-[#12120f] md:hidden [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
+        aria-hidden={!isOpen}
+      >
         <nav className="flex flex-col gap-[2px]" aria-label="Menu">
           {links.map(({ label, sup, onClick, current }, i) => (
             <button
@@ -387,7 +395,7 @@ const Menu = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
