@@ -31,7 +31,9 @@ export function useOpenProject(
   const scrollYRef = useRef(scrollY);
   scrollYRef.current = scrollY;
 
-  return (index: number) => {
+  // worksScroll : scroll de Works auquel correspond la disposition enregistrée
+  // (par défaut, celui mémorisé dans le contexte)
+  return (index: number, worksScroll?: number) => {
     const project = projects[index];
     if (!project) return;
 
@@ -54,7 +56,7 @@ export function useOpenProject(
       ? focusWorksLayout(
           saved.rects,
           index,
-          scrollYRef.current ?? 0,
+          worksScroll ?? scrollYRef.current ?? 0,
           window.innerHeight,
         )
       : null;

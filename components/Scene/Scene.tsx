@@ -16,7 +16,8 @@ import { getPositions } from '../WorkList/utils/getPositions';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { usePathname } from 'next/navigation';
 import { getProjectPath } from '@/utils/getProjectPath';
-import { clearFlag, getFlag } from '@/utils/fromWorkList';
+import { clearFlag, getFlag, setFlag } from '@/utils/fromWorkList';
+import { getProjectsFromLocalStorage } from '@/utils/getProjectsFromLocalStorage';
 import { useRouter } from 'next/navigation';
 import { lockScroll, unlockScroll } from '@/utils/scroll';
 import { INTRO } from '@/utils/introTiming';
@@ -27,6 +28,8 @@ import { getNextRect, measureTrack, nextProjectStore } from '@/utils/nextProject
 import { projectFly } from '@/utils/projectFly';
 import { getFanCard } from '@/utils/menuFan';
 import { ThemeContext } from '@/contexts/MenuProvider';
+import { projectList } from '@/utils/projectList';
+import { useOpenProject } from '../Project/useOpenProject';
 
 type Props = {
   projectsDetails: ProjectItem[];
@@ -576,11 +579,40 @@ const Scene = ({ projectsDetails }: Props) => {
 
   // La carte touchée grandit jusqu'au plein écran, les autres s'effacent. Le menu
   // se ferme (son texte sort), sans ramener les cartes dans la page
+  // Lue à chaque rendu : la liste est remplie par la page affichée
+  const openProject = useOpenProject(projectList.current);
+
   const flyFromFan = (index: number) => {
     fanFlightRef.current = index;
     setMenuOpen(false);
     const fly = { duration: 1, ease: 'power3.inOut' };
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Le projet déjà affiché : rien à ouvrir, il est de nouveau en hero
+        if (onProjectPage && index === activeIndex) finishFanFlight();
+        // Sinon on l'ouvre sous la carte, comme les flèches (titre qui entre) ;
+        // le rangement se fait à l'arrivée de la page (effet sur pathname)
+        else {
+          // Retour vers Works ensuite : toutes les images doivent rejoindre une
+          // disposition de Works enregistrée, comme après un clic dans la grille
+          if (!onProjectPage && pathname !== '/work' && projectsCoords?.length) {
+            // Contact, 404 : pas de Works mesurée ici → sa grille fantôme
+            // (scroll 0). Elle n'a que les positions : on y joint les images
+            const rects = projectsCoords.map(({ rects }, i) => ({
+              rects,
+              imageUrl: projectList.current[i]?.featuredImage.src,
+            }));
+            localStorage.setItem('projectsDetails', JSON.stringify({ rects }));
+            setFlag();
+            openProject(index, 0);
+          } else {
+            if (getProjectsFromLocalStorage('projectsDetails')?.rects) setFlag();
+            // Works : la disposition enregistrée correspond au scroll actuel
+            openProject(index, pathname === '/work' ? window.scrollY : undefined);
+          }
+        }
+      },
+    });
     groupRefArray.current.forEach((group, i) => {
       if (!group) return;
       // Touchée pendant l'ouverture : on arrête son arrivée dans l'éventail
@@ -595,6 +627,25 @@ const Scene = ({ projectsDetails }: Props) => {
         if (opacity) tl.to(opacity, { value: 0, duration: 0.35 }, 0);
       }
     });
+  };
+
+  // Vol fini (page arrivée, ou projet déjà affiché) : les autres cartes, effacées
+  // et restées dans l'éventail, sont rangées hors de l'écran et retrouvent leur
+  // opacité ; le canvas redescend sous la page
+  const finishFanFlight = () => {
+    const flown = fanFlightRef.current;
+    groupRefArray.current.forEach((group, i) => {
+      if (!group) return;
+      group.renderOrder = 0;
+      if (i !== flown) {
+        group.position.set(0, viewport.height, 0);
+        group.rotation.z = 0;
+        setPlaneOpacity(group, 1);
+      }
+    });
+    fanFlightRef.current = -1;
+    menuPosesRef.current = [];
+    setFanRaised(false);
   };
 
   // Page projet : l'image du projet suivant suit la piste de scroll (NextProject),
@@ -1489,6 +1540,12 @@ const Scene = ({ projectsDetails }: Props) => {
     if (!finish) return;
     pendingRouteRef.current = null;
     finish();
+  }, [pathname]);
+
+  // Le projet ouvert depuis l'éventail du menu est arrivé : on range le reste
+  useLayoutEffect(() => {
+    if (fanFlightRef.current >= 0) finishFanFlight();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   if (projectsDetails.length > 0) {
