@@ -4,9 +4,9 @@ import gsap from 'gsap';
 import { Project as ProjectModel } from '@/src/models/Project';
 import { lockScroll } from '@/utils/scroll';
 import {
+  FlyRect,
   PROJECT_FLY,
   getFlyStart,
-  getPeekRect,
   projectFly,
   scaleRect,
 } from '@/utils/projectFly';
@@ -17,7 +17,8 @@ const reducedMotion = () =>
 
 /**
  * Image du projet voisin, posée par le Scene sur projectFly à chaque image :
- * - peek : au survol d'une flèche, l'aperçu apparaît sous la barre ;
+ * - peek : au survol d'une flèche ou d'un numéro, l'aperçu apparaît sur target
+ *   (s'il en montrait déjà un autre, il y glisse en changeant d'image) ;
  * - unpeek : il s'efface ;
  * - fly : le contenu de la page s'efface, l'image (l'aperçu s'il est là) vole
  *   jusqu'au plein écran, puis on ouvre le projet sous elle.
@@ -31,12 +32,20 @@ export function useFlyToProject(
   const tweenRef = useRef<gsap.core.Animation | null>(null);
   const flyingRef = useRef(false);
 
-  const peek = (index: number, bar: DOMRect) => {
+  const peek = (index: number, target: FlyRect) => {
     if (flyingRef.current) return;
-    const target = getPeekRect(bar, window.innerWidth);
     tweenRef.current?.kill();
-    // Autre projet (ou rien) affiché : le nouveau part petit et transparent
-    if (projectFly.index !== index) {
+    // Un aperçu bien visible d'un autre projet : on change d'image sur place,
+    // puis il glisse vers sa nouvelle place (d'un numéro à son voisin)
+    if (
+      projectFly.index >= 0 &&
+      projectFly.index !== index &&
+      projectFly.opacity > 0.3
+    ) {
+      projectFly.index = index;
+    }
+    // Rien d'affiché : le nouveau part petit et transparent
+    else if (projectFly.index !== index) {
       projectFly.index = index;
       projectFly.full = 0;
       projectFly.opacity = 0;
@@ -68,7 +77,7 @@ export function useFlyToProject(
       .to(projectFly, { opacity: 0 }, 0);
   };
 
-  const fly = (index: number, dir: 'prev' | 'next', bar: DOMRect | null) => {
+  const fly = (index: number, dir: 'prev' | 'next', from: FlyRect | null) => {
     flyingRef.current = true;
     tweenRef.current?.kill();
     if (reducedMotion()) {
@@ -83,7 +92,7 @@ export function useFlyToProject(
     if (projectFly.index !== index) {
       projectFly.rect = getFlyStart(
         dir,
-        bar,
+        from,
         window.innerWidth,
         window.innerHeight,
       );

@@ -18,7 +18,8 @@ const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { isOpen, setIsOpen } = useContext(ThemeContext);
-  const { isHeaderVisible, setIsReturning, setReset } = useHeaderContext();
+  const { isHeaderVisible, setIsReturning, setReset, hideBack } =
+    useHeaderContext();
   const isIntro = !pathname || pathname === '/';
   const {
     selectedIndex,
@@ -131,7 +132,10 @@ const Header = () => {
             <button
               type="button"
               onClick={handleBack}
-              className="absolute bottom-0 left-0 z-[5] flex h-[44px] w-[44px] cursor-pointer items-start justify-start border-0 bg-transparent p-0 md:h-[16px] md:w-[16px]"
+              className={`absolute bottom-0 left-0 z-[5] flex h-[44px] w-[44px] cursor-pointer items-start justify-start border-0 bg-transparent p-0 transition-opacity duration-300 md:h-[16px] md:w-[16px] ${
+                // Numéros dépliés (mobile seulement) : ils prennent sa place
+                hideBack ? 'max-md:!pointer-events-none max-md:opacity-0' : ''
+              }`}
               aria-label="Retour"
             >
               <Image

@@ -60,10 +60,21 @@ const imageSize = (width: number) => {
 /** Hauteur de l'aperçu sur un écran de cette largeur (pour placer sa légende) */
 export const peekHeight = (width: number) => imageSize(width).h;
 
-/** Aperçu : sous la barre, aligné sur son bord droit (celui des flèches) */
+/** Aperçu des flèches : sous la barre, aligné sur son bord droit (celui des flèches) */
 export function getPeekRect(bar: DOMRect, width: number): FlyRect {
   const { w, h } = imageSize(width);
   return { x: bar.right - w, y: bar.bottom + PROJECT_FLY.gap, w, h };
+}
+
+/** Aperçu d'un numéro : centré sous lui, sans sortir de l'écran */
+export function getPeekRectBelow(anchor: DOMRect, width: number): FlyRect {
+  const { w, h } = imageSize(width);
+  const { edge, gap } = PROJECT_FLY;
+  const x = Math.min(
+    Math.max(anchor.left + anchor.width / 2 - w / 2, edge),
+    width - w - edge,
+  );
+  return { x, y: anchor.bottom + gap, w, h };
 }
 
 /** Même rectangle, réduit autour de son centre (apparition, disparition) */
@@ -74,17 +85,17 @@ export function scaleRect(rect: FlyRect, scale: number): FlyRect {
 }
 
 /**
- * Départ du vol sans aperçu : sous la barre si elle est visible (tap mobile),
- * sinon au bord de l'écran du côté de la direction (clavier, barre partie
- * avec le scroll).
+ * Départ du vol sans aperçu : là où l'aperçu se serait affiché (from : sous les
+ * flèches ou sous le numéro touché, en mobile) s'il est à l'écran, sinon au bord
+ * de l'écran du côté de la direction (clavier, barre partie avec le scroll).
  */
 export function getFlyStart(
   dir: 'prev' | 'next',
-  bar: DOMRect | null,
+  from: FlyRect | null,
   width: number,
   height: number,
 ): FlyRect {
-  if (bar && bar.bottom > 0 && bar.top < height) return getPeekRect(bar, width);
+  if (from && from.y + from.h > 0 && from.y < height) return from;
   const { w, h } = imageSize(width);
   const x = dir === 'next' ? width - w - PROJECT_FLY.edge : PROJECT_FLY.edge;
   return { x, y: height / 2 - h / 2, w, h };

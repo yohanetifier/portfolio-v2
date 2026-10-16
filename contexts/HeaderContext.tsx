@@ -16,6 +16,9 @@ interface HeaderContextType {
   setIsReturning: (arg: boolean) => void;
   reset: boolean;
   setReset: (arg: boolean) => void;
+  /** Page projet : la barre déplie ses numéros à la place de la flèche retour (mobile) */
+  hideBack: boolean;
+  setHideBack: (arg: boolean) => void;
 }
 
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
@@ -28,6 +31,7 @@ export function HeaderProvider({ children }: { children: ReactNode }) {
   );
   const [isReturning, setIsReturning] = useState(false);
   const [reset, setReset] = useState(false);
+  const [hideBack, setHideBack] = useState(false);
 
   useEffect(() => {
     if (!pathname || pathname === '/') {
@@ -44,6 +48,8 @@ export function HeaderProvider({ children }: { children: ReactNode }) {
         setIsReturning,
         reset,
         setReset,
+        hideBack,
+        setHideBack,
       }}
     >
       {children}
