@@ -48,9 +48,15 @@ function rectToWorld(
 
 /** Opacité d'un plane (uniform du shader de Plane), pour l'aperçu des flèches */
 function setPlaneOpacity(group: THREE.Group, value: number) {
+  const uniform = getPlaneOpacity(group);
+  if (uniform) uniform.value = value;
+}
+
+/** L'uniform d'opacité lui-même, pour l'animer avec GSAP */
+function getPlaneOpacity(group: THREE.Group) {
   const mesh = group.children[0] as THREE.Mesh | undefined;
   const material = mesh?.material as THREE.ShaderMaterial | undefined;
-  if (material?.uniforms?.uOpacity) material.uniforms.uOpacity.value = value;
+  return material?.uniforms?.uOpacity ?? null;
 }
 
 const Scene = ({ projectsDetails }: Props) => {
@@ -433,7 +439,11 @@ const Scene = ({ projectsDetails }: Props) => {
   // Menu mobile ouvert : chaque image quitte sa place dans la page et rejoint sa
   // carte de l'éventail, l'une après l'autre. Sa place est mémorisée d'abord :
   // la fermeture l'y ramènera.
-  const { isOpen: menuOpen, setFanRaised } = useContext(ThemeContext);
+  const {
+    isOpen: menuOpen,
+    setIsOpen: setMenuOpen,
+    setFanRaised,
+  } = useContext(ThemeContext);
   // Un lien du menu a lancé une transition : les images partent de l'éventail.
   // Les transitions d'une page projet ne doivent alors pas les replacer d'abord
   // (hero plein écran, autres hors écran) : elles partent de là où elles sont
@@ -490,7 +500,8 @@ const Scene = ({ projectsDetails }: Props) => {
   // premier, les transitions lisent déjà les bonnes positions.
   useLayoutEffect(() => {
     const poses = menuPosesRef.current;
-    if (menuOpen || poses.length === 0) return;
+    // Une carte s'envole : elle et les autres ne reviennent pas dans la page
+    if (menuOpen || poses.length === 0 || fanFlightRef.current >= 0) return;
     const groups = groupRefArray.current;
     groups.forEach((group) => {
       if (group) group.renderOrder = 0;
@@ -549,16 +560,41 @@ const Scene = ({ projectsDetails }: Props) => {
   // Menu ouvert : toucher une carte de l'éventail. Elles se chevauchent : le
   // rayon traverse toutes celles sous le doigt, on garde celle du dessus (celle
   // dessinée en dernier, d'index le plus grand : renderOrder = index)
+  // Carte touchée qui s'envole (-1 = aucune)
+  const fanFlightRef = useRef(-1);
+
   const onFanTap = (e: ThreeEvent<MouseEvent>) => {
-    if (!menuOpen) return;
+    if (!menuOpen || fanFlightRef.current >= 0) return;
     // Un seul traitement par tap, même si plusieurs cartes sont touchées
     e.stopPropagation();
     const touched = e.intersections
       .map(({ object }) => groupRefArray.current.indexOf(object.parent as THREE.Group))
       .filter((i) => i >= 0);
     if (touched.length === 0) return;
-    const index = Math.max(...touched);
-    console.log('Carte touchée :', index, projectsDetails[index]?.imageUrl);
+    flyFromFan(Math.max(...touched));
+  };
+
+  // La carte touchée grandit jusqu'au plein écran, les autres s'effacent. Le menu
+  // se ferme (son texte sort), sans ramener les cartes dans la page
+  const flyFromFan = (index: number) => {
+    fanFlightRef.current = index;
+    setMenuOpen(false);
+    const fly = { duration: 1, ease: 'power3.inOut' };
+    const tl = gsap.timeline();
+    groupRefArray.current.forEach((group, i) => {
+      if (!group) return;
+      // Touchée pendant l'ouverture : on arrête son arrivée dans l'éventail
+      gsap.killTweensOf([group.position, group.scale, group.rotation]);
+      if (i === index) {
+        group.renderOrder = 100;
+        tl.to(group.position, { x: 0, y: 0, ...fly }, 0.15)
+          .to(group.scale, { x: viewport.width, y: viewport.height, ...fly }, 0.15)
+          .to(group.rotation, { z: 0, ...fly }, 0.15);
+      } else {
+        const opacity = getPlaneOpacity(group);
+        if (opacity) tl.to(opacity, { value: 0, duration: 0.35 }, 0);
+      }
+    });
   };
 
   // Page projet : l'image du projet suivant suit la piste de scroll (NextProject),
