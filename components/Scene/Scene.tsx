@@ -440,7 +440,9 @@ const Scene = ({ projectsDetails }: Props) => {
   useEffect(() => {
     if (!menuOpen) return;
     const groups = groupRefArray.current;
-    menuPosesRef.current = groups.map((group) =>
+    // Rouvert pendant le retour : les places mémorisées restent celles de la page
+    if (menuPosesRef.current.length === 0) {
+      menuPosesRef.current = groups.map((group) =>
       group
         ? {
             x: group.position.x,
@@ -450,7 +452,8 @@ const Scene = ({ projectsDetails }: Props) => {
             rotation: group.rotation.z,
           }
         : null,
-    );
+      );
+    }
     const tl = gsap.timeline();
     groups.forEach((group, i) => {
       if (!group) return;
@@ -473,6 +476,53 @@ const Scene = ({ projectsDetails }: Props) => {
       tl.kill();
     };
     // Dimensions lues à l'ouverture : le menu ne suit pas un redimensionnement
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuOpen]);
+
+  // Menu fermé : chaque image revient à sa place mémorisée. Un lien du menu
+  // lance aussi une transition (Contact, Works…) : elle doit partir de la page,
+  // donc retour instantané. useLayoutEffect déclaré avant celui des transitions :
+  // il passe en premier, les transitions lisent déjà les bonnes positions.
+  useLayoutEffect(() => {
+    const poses = menuPosesRef.current;
+    if (menuOpen || poses.length === 0) return;
+    const groups = groupRefArray.current;
+    groups.forEach((group) => {
+      if (group) group.renderOrder = 0;
+    });
+
+    if (goToContact || goToWork || returnHome || isReturning || goToProject) {
+      // Tout de suite, sans attendre la prochaine image (un tween de durée 0
+      // ne s'appliquerait qu'à la prochaine image : trop tard)
+      groups.forEach((group, i) => {
+        const pose = poses[i];
+        if (!group || !pose) return;
+        group.position.set(pose.x, pose.y, 0);
+        group.scale.set(pose.w, pose.h, 1);
+        group.rotation.z = pose.rotation;
+      });
+      menuPosesRef.current = [];
+      return;
+    }
+
+    const back = { duration: 1, ease: 'expo.inOut' };
+    const tl = gsap.timeline({
+      onComplete: () => {
+        menuPosesRef.current = [];
+      },
+    });
+    groups.forEach((group, i) => {
+      const pose = poses[i];
+      if (!group || !pose) return;
+      const at = i * 0.02;
+      tl.to(group.position, { x: pose.x, y: pose.y, ...back }, at)
+        .to(group.scale, { x: pose.w, y: pose.h, ...back }, at)
+        .to(group.rotation, { z: pose.rotation, ...back }, at);
+    });
+    return () => {
+      tl.kill();
+    };
+    // Drapeaux de transition lus au moment de la fermeture
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
