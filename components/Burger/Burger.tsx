@@ -1,49 +1,32 @@
 'use client';
 
 import { ThemeContext } from '@/contexts/MenuProvider';
-import { useParams } from 'next/navigation';
 import React, { useContext } from 'react';
 
 const Burger = () => {
   const { setIsOpen, isOpen } = useContext(ThemeContext);
-  const { project } = useParams();
-  const onProject = Boolean(project);
+  // Fermé : blanc, l'en-tête est en mix-blend-difference → noir sur le papier,
+  // contrasté sur les images. Ouvert : l'en-tête ne mélange plus → croix encre
+  const barColor = isOpen ? 'bg-[#12120f]' : 'bg-white';
 
-  // Menu ouvert (fond crème) = croix noire ; projet = blanc ; sinon gris
-  const barColor = isOpen
-    ? 'bg-[#12120f]'
-    : onProject
-      ? 'bg-white'
-      : 'bg-gray-700';
-
-  const bar = `absolute left-0 block h-[2px] w-full origin-center transition-all duration-300 ease-out ${barColor}`;
+  // 2 barres fines, 6 px d'écart : elles se rejoignent au centre et se croisent
+  const bar = `block h-[1.5px] w-[22px] transition-[transform,background-color] duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${barColor}`;
 
   return (
     <button
       type="button"
-      className="absolute right-0 top-[50px] z-[110] flex h-[20px] w-[28px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 md:hidden"
+      // Zone tactile de 44 px, décalée pour aligner les barres sur la marge
+      className="absolute right-[-11px] top-[38px] z-[110] flex h-[44px] w-[44px] cursor-pointer flex-col items-center justify-center gap-[6px] border-0 bg-transparent p-0 outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[-6px] focus-visible:outline-current md:hidden"
       onClick={() => setIsOpen(!isOpen)}
       aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
       aria-expanded={isOpen}
     >
-      {/* 3 barres : haut + bas → croix ; milieu disparaît */}
-      <span className="relative block h-[14px] w-[22px]">
-        <span
-          className={`${bar} top-0 ${
-            isOpen ? 'translate-y-[6px] rotate-45' : 'translate-y-0 rotate-0'
-          }`}
-        />
-        <span
-          className={`${bar} top-[6px] ${
-            isOpen ? 'scale-x-0 opacity-0' : 'scale-x-100 opacity-100'
-          }`}
-        />
-        <span
-          className={`${bar} top-[12px] ${
-            isOpen ? '-translate-y-[6px] -rotate-45' : 'translate-y-0 rotate-0'
-          }`}
-        />
-      </span>
+      <span
+        className={`${bar} ${isOpen ? 'translate-y-[3.75px] rotate-45' : ''}`}
+      />
+      <span
+        className={`${bar} ${isOpen ? '-translate-y-[3.75px] -rotate-45' : ''}`}
+      />
     </button>
   );
 };
