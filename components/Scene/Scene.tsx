@@ -9,7 +9,7 @@ import React, {
   useState,
 } from 'react';
 import Plane from '../Plane/Plane';
-import { useFrame, useThree } from '@react-three/fiber';
+import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { getPositions } from '../WorkList/utils/getPositions';
@@ -545,6 +545,21 @@ const Scene = ({ projectsDetails }: Props) => {
     // Drapeaux de transition lus au moment de la fermeture
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
+
+  // Menu ouvert : toucher une carte de l'éventail. Elles se chevauchent : le
+  // rayon traverse toutes celles sous le doigt, on garde celle du dessus (celle
+  // dessinée en dernier, d'index le plus grand : renderOrder = index)
+  const onFanTap = (e: ThreeEvent<MouseEvent>) => {
+    if (!menuOpen) return;
+    // Un seul traitement par tap, même si plusieurs cartes sont touchées
+    e.stopPropagation();
+    const touched = e.intersections
+      .map(({ object }) => groupRefArray.current.indexOf(object.parent as THREE.Group))
+      .filter((i) => i >= 0);
+    if (touched.length === 0) return;
+    const index = Math.max(...touched);
+    console.log('Carte touchée :', index, projectsDetails[index]?.imageUrl);
+  };
 
   // Page projet : l'image du projet suivant suit la piste de scroll (NextProject),
   // petite puis plein écran. Pendant ce temps le hero courant est masqué : il est
@@ -1477,6 +1492,7 @@ const Scene = ({ projectsDetails }: Props) => {
       return (
         <group
           key={i}
+          onClick={onFanTap}
           {...(gsapOwnsPose
             ? {
                 position: gsapPosition,
