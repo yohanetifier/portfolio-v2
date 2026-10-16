@@ -445,6 +445,7 @@ const Scene = ({ projectsDetails }: Props) => {
   const {
     isOpen: menuOpen,
     setIsOpen: setMenuOpen,
+    fanRaised,
     setFanRaised,
   } = useContext(ThemeContext);
   // Un lien du menu a lancé une transition : les images partent de l'éventail.
@@ -481,6 +482,7 @@ const Scene = ({ projectsDetails }: Props) => {
         ? (links.getBoundingClientRect().bottom + rule.getBoundingClientRect().top) / 2
         : undefined;
     const tl = gsap.timeline();
+    let heroOpacity: { value: number } | null = null;
     groups.forEach((group, i) => {
       if (!group) return;
       const card = getFanCard(i, groups.length, size.width, size.height, centerY);
@@ -491,6 +493,15 @@ const Scene = ({ projectsDetails }: Props) => {
       );
       // Les cartes de droite passent devant celles de gauche
       group.renderOrder = i;
+      // Hero caché par la section « projet suivant » : il apparaît en rejoignant
+      // l'éventail, au lieu de surgir en plein écran
+      if (i === activeIndex && heroHiddenRef.current) {
+        heroOpacity = getPlaneOpacity(group);
+        if (heroOpacity) {
+          heroOpacity.value = 0;
+          tl.to(heroOpacity, { value: 1, duration: 0.6 }, 0.35);
+        }
+      }
       const at = 0.05 + i * 0.025;
       const move = { duration: 1.05, ease: 'expo.inOut' };
       tl.to(group.position, { x, y, ...move }, at)
@@ -500,6 +511,8 @@ const Scene = ({ projectsDetails }: Props) => {
     });
     return () => {
       tl.kill();
+      // Fermé avant la fin du fondu : le hero ne doit pas rester à moitié visible
+      if (heroOpacity) heroOpacity.value = 1;
     };
     // Dimensions lues à l'ouverture : le menu ne suit pas un redimensionnement
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -663,6 +676,8 @@ const Scene = ({ projectsDetails }: Props) => {
   // projectFly, par-dessus le hero (laissé visible : le contenu de la page s'est
   // effacé devant lui pendant le vol).
   const lastFlyIndexRef = useRef(-1);
+  // Le hero était-il caché par la section « projet suivant » ? (lu par le menu)
+  const heroHiddenRef = useRef(false);
   useFrame(() => {
     // Image des flèches rendue : on la range hors de l'écran (sinon elle resterait
     // à sa dernière place, React ne repose pas une pose qui n'a pas changé) et
@@ -681,8 +696,16 @@ const Scene = ({ projectsDetails }: Props) => {
       return;
     }
     const { el, index } = nextProjectStore;
+    // Le menu a la main sur les images (éventail ouvert, cartes qui reviennent,
+    // carte en vol) : le projet suivant ne doit ni les déplacer ni cacher le hero
+    const menuHasImages = menuOpen || fanRaised || fanFlightRef.current >= 0;
     const blocked =
-      goToContact || returnHome || goToWork || goToProject || isReturning;
+      goToContact ||
+      returnHome ||
+      goToWork ||
+      goToProject ||
+      isReturning ||
+      menuHasImages;
     let driving = -1;
     let hideHero = false;
     // Mesurées sur la piste, pas lues dans le store (voir measureTrack)
@@ -736,10 +759,15 @@ const Scene = ({ projectsDetails }: Props) => {
       }
     }
 
+    // Hero caché juste avant que le menu prenne la main : l'éventail le fera
+    // apparaître en fondu plutôt que de le montrer d'un coup en plein écran
+    if (!blocked) heroHiddenRef.current = hideHero;
+
     groupRefArray.current.forEach((group, i) => {
       if (!group) return;
       group.visible = !(hideHero && i === activeIndex);
-      group.renderOrder = i === driving ? 2 : 0;
+      // L'éventail fixe son propre ordre (les cartes de droite devant)
+      if (!menuHasImages) group.renderOrder = i === driving ? 2 : 0;
     });
   });
 
