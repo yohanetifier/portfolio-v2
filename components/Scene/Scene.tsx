@@ -452,6 +452,9 @@ const Scene = ({ projectsDetails }: Props) => {
   // Les transitions d'une page projet ne doivent alors pas les replacer d'abord
   // (hero plein écran, autres hors écran) : elles partent de là où elles sont
   const fromMenuFanRef = useRef(false);
+  // Page projet : le hero était-il hors de vue à l'ouverture (contenu scrollé,
+  // section « projet suivant ») ? Il ne doit alors pas apparaître en plein écran
+  const heroCoveredRef = useRef(false);
   const menuPosesRef = useRef<
     ({ x: number; y: number; w: number; h: number; rotation: number } | null)[]
   >([]);
@@ -461,6 +464,9 @@ const Scene = ({ projectsDetails }: Props) => {
     const groups = groupRefArray.current;
     // Rouvert pendant le retour : les places mémorisées restent celles de la page
     if (menuPosesRef.current.length === 0) {
+      heroCoveredRef.current =
+        onProjectPage &&
+        (heroHiddenRef.current || window.scrollY > window.innerHeight / 2);
       menuPosesRef.current = groups.map((group) =>
       group
         ? {
@@ -495,11 +501,13 @@ const Scene = ({ projectsDetails }: Props) => {
       group.renderOrder = i;
       // Hero caché par la section « projet suivant » : il apparaît en rejoignant
       // l'éventail, au lieu de surgir en plein écran
-      if (i === activeIndex && heroHiddenRef.current) {
+      if (i === activeIndex && heroCoveredRef.current) {
         heroOpacity = getPlaneOpacity(group);
         if (heroOpacity) {
           heroOpacity.value = 0;
-          tl.to(heroOpacity, { value: 1, duration: 0.6 }, 0.35);
+          // Le déplacement (expo.inOut) démarre lentement : on attend qu'il soit
+          // bien lancé, sinon on le verrait apparaître encore en plein écran
+          tl.to(heroOpacity, { value: 1, duration: 0.4 }, 0.7);
         }
       }
       const at = 0.05 + i * 0.025;
@@ -559,13 +567,27 @@ const Scene = ({ projectsDetails }: Props) => {
 
     // Le canvas reste au-dessus du voile pendant le retour : les cartes restent
     // visibles jusqu'à leur place, puis il redescend sous la page
+    // Hero hors de vue avant l'ouverture : il s'efface en remontant à sa place
+    // (sinon on le reverrait en plein écran par-dessus la page), puis retrouve
+    // son opacité une fois le canvas redescendu sous la page
+    const heroGroup = activeIndex !== null ? groups[activeIndex] : null;
+    const heroOpacity =
+      heroCoveredRef.current && heroGroup ? getPlaneOpacity(heroGroup) : null;
     const back = { duration: 1, ease: 'expo.inOut' };
     const tl = gsap.timeline({
       onComplete: () => {
         menuPosesRef.current = [];
         setFanRaised(false);
+        if (heroOpacity) {
+          gsap.delayedCall(0.15, () => {
+            heroOpacity.value = 1;
+          });
+        }
       },
     });
+    if (heroOpacity) {
+      tl.to(heroOpacity, { value: 0, duration: 0.45, ease: 'power2.in' }, 0);
+    }
     groups.forEach((group, i) => {
       const pose = poses[i];
       if (!group || !pose) return;
