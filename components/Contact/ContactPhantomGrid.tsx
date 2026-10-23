@@ -27,6 +27,10 @@ export default function ContactPhantomGrid({
 }: Props) {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const { setProjectsContactCoords } = useThreeJsContext();
+  // Grille presque carrée : 9 projets → 3 colonnes, 12 → 4, 20 → 5. Avec 3
+  // colonnes fixes, chaque projet en plus ajoute des rangées, et la grille
+  // (calée en bas en mobile) remonte sur le texte.
+  const cols = Math.max(3, Math.ceil(Math.sqrt(projects.length)));
 
   useLayoutEffect(() => {
     const update = () => {
@@ -59,8 +63,12 @@ export default function ContactPhantomGrid({
       aria-hidden
     >
       <div
-        className="grid grid-cols-3 gap-2 max-md:[--sq:min(17vw,_70px)] md:gap-4 md:[--sq:min(9vw,_110px)] [--sq:min(9vw,_110px)]"
-        style={{ width: 'calc(var(--sq) * 3 + 1rem)' }}
+        className="grid gap-2 max-md:[--sq:min(17vw,_70px)] md:gap-4 md:[--sq:min(9vw,_110px)] [--sq:min(9vw,_110px)]"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+          // cols carrés + les écarts de 0,5 rem entre eux
+          width: `calc(var(--sq) * ${cols} + ${(cols - 1) * 0.5}rem)`,
+        }}
       >
         {projects.map((_, index) => (
           <div
