@@ -483,15 +483,16 @@ const Scene = ({ projectsDetails }: Props) => {
     // trait du pied de page (mesurés : leur place dépend du texte et de l'écran)
     const links = document.querySelector('[data-menu-links]');
     const rule = document.querySelector('[data-rule]');
-    const centerY =
-      links && rule
-        ? (links.getBoundingClientRect().bottom + rule.getBoundingClientRect().top) / 2
-        : undefined;
+    const top = links?.getBoundingClientRect().bottom;
+    const bottom = rule?.getBoundingClientRect().top;
+    const centerY = top !== undefined && bottom !== undefined ? (top + bottom) / 2 : undefined;
+    // Hauteur libre : sur un petit écran, les cartes rapetissent pour y tenir
+    const space = top !== undefined && bottom !== undefined ? bottom - top : undefined;
     const tl = gsap.timeline();
     let heroOpacity: { value: number } | null = null;
     groups.forEach((group, i) => {
       if (!group) return;
-      const card = getFanCard(i, groups.length, size.width, size.height, centerY);
+      const card = getFanCard(i, groups.length, size.width, size.height, centerY, space);
       const { x, y, w, h } = rectToWorld(
         new DOMRect(card.cx - card.w / 2, card.cy - card.h / 2, card.w, card.h),
         size,
