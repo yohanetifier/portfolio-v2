@@ -284,6 +284,15 @@ const Menu = () => {
     close();
   };
 
+  /** Identique Header.handleNav('/about') : pas encore de transition des images */
+  const goToAboutPage = () => {
+    if (pathname !== '/about') {
+      router.push('/about', { scroll: false });
+      setReset(true);
+    }
+    close();
+  };
+
   const count = projectsDetails.length;
   const links = [
     {
@@ -291,6 +300,11 @@ const Menu = () => {
       sup: count > 0 ? `(${pad(count)})` : undefined,
       onClick: goToProjets,
       current: pathname === '/work',
+    },
+    {
+      label: 'About',
+      onClick: goToAboutPage,
+      current: pathname === '/about',
     },
     {
       label: 'Contact',

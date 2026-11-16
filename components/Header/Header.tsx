@@ -13,7 +13,7 @@ import { clearFlag } from '@/utils/fromWorkList';
 const Header = () => {
   const workRef = useRef<HTMLAnchorElement | null>(null);
   const personalRef = useRef<HTMLAnchorElement | null>(null);
-  const aboutRef = useRef<HTMLParagraphElement | null>(null);
+  const aboutRef = useRef<HTMLAnchorElement | null>(null);
   const contactRef = useRef<HTMLAnchorElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -173,13 +173,15 @@ const Header = () => {
           >
             Works
           </Link>
-          <p
+          <Link
             className="col-start-5 col-end-8 justify-self-end justify-items-end relative right-[20px] cursor-none hidden md:block"
             ref={aboutRef}
+            href={'/about'}
+            onClick={(e) => handleNav(e, '/about')}
             data-cursor
           >
             About
-          </p>
+          </Link>
           <Link
             className="absolute right-[0px] top-[50px] cursor-none hidden md:block"
             ref={contactRef}
