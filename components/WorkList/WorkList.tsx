@@ -125,14 +125,6 @@ export default function WorkList({
   leavingRef.current = Boolean(
     goToContact || goToWork || returnHome || goToProject,
   );
-  const targetX = useRef<number>(0);
-  const targetY = useRef<number>(0);
-  const currentX = useRef<number | null>(null);
-  const currentY = useRef<number | null>(null);
-  const hoveredIndexRef = useRef<number | null>(null);
-  const titleWrapperRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLParagraphElement>(null);
-  const [active, setActive] = useState<boolean | null>(false);
 
   // Vue : on ne restaure la liste qu'au retour d'une page projet ouverte depuis Works.
   // Les autres arrivées (home, contact, 404) visent la grille → on démarre en grille.
@@ -336,7 +328,6 @@ export default function WorkList({
     if (switchingRef.current || navigatingRef.current) return;
     navigatingRef.current = true;
     playSound(OPEN_WHOOSH);
-    setActive(false);
 
     // Lance le plein écran : le Scene démarre sur le changement de selectedIndex
     const startProjectTransition = (target: DOMRect) => {
@@ -435,7 +426,6 @@ export default function WorkList({
     // Plus de ligne survolée : les aperçus ouverts rétrécissent vers leur miniature
     // pendant la sortie du texte (la boucle d'aperçu continue de tourner)
     hoveredRowRef.current = null;
-    setActive(false);
     setHoveredIndex(null);
 
     // Bascule réelle du DOM (le layout effect enchaîne sur le glissement des images)
@@ -583,36 +573,6 @@ export default function WorkList({
     };
   }, []);
 
-  useLayoutEffect(() => {
-    if (!finePointer || !titleRef.current) return;
-    const tl = gsap.timeline();
-    const splitTitle = SplitText.create(titleRef.current, {
-      type: 'chars',
-    });
-
-    if (active) {
-      tl.fromTo(
-        splitTitle.chars,
-        { yPercent: 110 },
-        { yPercent: 0, stagger: 0.03, ease: 'expo.out' },
-      );
-    } else {
-      tl.fromTo(
-        splitTitle.chars,
-        { yPercent: 0 },
-        {
-          yPercent: 110,
-          stagger: 0.03,
-          duration: 0.6,
-          ease: 'expo.out',
-          onComplete: () => {
-            hoveredIndexRef.current = null;
-          },
-        },
-      );
-    }
-  }, [active, finePointer]);
-
   const handleMouseMove = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     index: number | null,
@@ -632,13 +592,10 @@ export default function WorkList({
     const uv = { x: pointX, y: pointY };
     setUv(uv);
     setHoveredIndex(index);
-    hoveredIndexRef.current = index;
-    setActive(true);
   };
 
   const handleMouseLeave = () => {
     if (!finePointer) return;
-    setActive(false);
     setHoveredIndex(null);
   };
 
@@ -741,41 +698,12 @@ export default function WorkList({
   useEffect(() => {
     if (!finePointer) return;
 
-    const tick = () => {
-      if (
-        currentX.current === null ||
-        currentY.current === null ||
-        hoveredIndexRef.current === null
-      ) {
-        requestAnimationFrame(tick);
-      } else if (titleWrapperRef.current) {
-        currentX.current =
-          currentX.current + (targetX.current - currentX.current) * 0.1;
-        currentY.current =
-          currentY.current + (targetY.current - currentY.current) * 0.1;
-        titleWrapperRef.current.style.left = currentX.current + 'px';
-        titleWrapperRef.current.style.top = currentY.current + 'px';
-        requestAnimationFrame(tick);
-      } else {
-        requestAnimationFrame(tick);
-      }
-    };
-    const id = requestAnimationFrame(tick);
     const handleMove = (e: MouseEvent) => {
       pointerRef.current = { x: e.clientX, y: e.clientY };
-      targetX.current = e.clientX + 50;
-      targetY.current = e.clientY - 10;
-      if (currentX.current === null) {
-        currentX.current = targetX.current;
-      }
-      if (currentY.current === null) {
-        currentY.current = targetY.current;
-      }
     };
     window.addEventListener('mousemove', handleMove);
     return () => {
       window.removeEventListener('mousemove', handleMove);
-      cancelAnimationFrame(id);
     };
   }, [finePointer]);
 
@@ -863,28 +791,6 @@ export default function WorkList({
                 ></Link>
               );
             })}
-            {finePointer ? (
-              <div
-                className="fixed overflow-hidden pointer-events-none"
-                ref={titleWrapperRef}
-              >
-                <p
-                  className=" font-fabrikatMono "
-                  style={{
-                    color: 'black',
-                    fontSize: 'clamp(36px, 4vw, 60px)',
-                    letterSpacing: '-0.01em',
-                    textShadow:
-                      '0 2px 34px rgba(10,12,14,0.55), 0 0 2px rgba(10,12,14,0.4)',
-                  }}
-                  ref={titleRef}
-                >
-                  {hoveredIndexRef.current === null
-                    ? null
-                    : projects[hoveredIndexRef.current].title}
-                </p>
-              </div>
-            ) : null}
           </div>
         ) : null}
         {/* Deux emplacements distincts (pas un ternaire) : la liste garde le même
