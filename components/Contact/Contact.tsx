@@ -13,6 +13,7 @@ import ContactPhantomGrid from './ContactPhantomGrid';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import { PAPER } from '@/utils/theme';
+import { getContactRingRects } from '@/utils/aboutLayout';
 
 gsap.registerPlugin(SplitText);
 
@@ -107,6 +108,18 @@ export default function Contact({ projects }: Props) {
     setFromProjectIndex(index);
     setFromProjectSlug(slug);
     setProjectImageSelected(project.featuredImage.src);
+    // L'anneau tourne : la transition part des places actuelles des images,
+    // pas de l'anneau immobile (sinon elles y sautent d'abord)
+    if (projectsContactCoords?.length) {
+      const live = getContactRingRects(
+        projectsContactCoords.length,
+        window.innerWidth,
+        window.innerHeight,
+      );
+      setProjects(
+        projectsContactCoords.map((item, i) => ({ ...item, rects: live[i] })),
+      );
+    }
     if (worklistRects) {
       setProjectSelectedCoords(worklistRects);
       // Scroll appliqué APRÈS le reverse (sinon les cibles GSAP ne matchent plus)
@@ -196,10 +209,11 @@ export default function Contact({ projects }: Props) {
       <WorklistPhantomGrid projects={projects} />
       <IntroGridPhantom projects={projects} />
 
-      <main className="relative z-[2] min-h-screen flex flex-col justify-center text-black px-[8vw] md:px-[10vw] pt-[88px] pb-[calc(3*min(17vw,70px)+6.5rem)] md:pt-0 md:pb-0 overflow-x-hidden">
+      {/* Texte au centre de l'anneau formé par les images (ContactPhantomGrid) */}
+      <main className="relative z-[2] min-h-screen flex flex-col items-center justify-center text-center text-black px-[8vw] md:px-[10vw] py-[88px] md:py-0 overflow-x-hidden">
         <div
           ref={contentRef}
-          className="relative z-[2] w-full max-w-none md:max-w-[52%] pointer-events-none [&_a]:pointer-events-auto [&_[data-reveal]]:opacity-0"
+          className="relative z-[2] flex w-full flex-col items-center pointer-events-none [&_a]:pointer-events-auto [&_[data-reveal]]:opacity-0"
         >
           <p
             data-reveal
@@ -220,7 +234,7 @@ export default function Contact({ projects }: Props) {
 
           <nav
             data-reveal
-            className="flex flex-wrap gap-x-8 md:gap-x-16 gap-y-3 mb-6 md:mb-12"
+            className="flex flex-wrap justify-center gap-x-8 md:gap-x-16 gap-y-3 mb-6 md:mb-12"
           >
             {SOCIAL_LINKS.map(({ label, href }) => (
               <Link
@@ -236,11 +250,11 @@ export default function Contact({ projects }: Props) {
             ))}
           </nav>
 
-          <div data-reveal className="h-px w-full bg-black/80 mb-4 md:mb-5" />
+          <div data-reveal className="h-px w-full max-w-[560px] bg-black/80 mb-4 md:mb-5" />
 
           <div
             data-reveal
-            className="flex flex-col gap-2.5 text-[10px] md:text-[11px] uppercase tracking-[0.12em] md:flex-row md:items-center md:justify-between md:gap-3"
+            className="flex w-full max-w-[560px] flex-col items-center gap-2.5 text-[10px] md:text-[11px] uppercase tracking-[0.12em] md:flex-row md:justify-between md:gap-3"
           >
             <p className="flex items-center gap-2">
               <span aria-hidden className="text-[8px] leading-none shrink-0">
@@ -248,7 +262,7 @@ export default function Contact({ projects }: Props) {
               </span>
               Disponible pour de nouveaux projets
             </p>
-            <p className="md:text-right">
+            <p>
               Paris — <span>{now}</span>
             </p>
           </div>
