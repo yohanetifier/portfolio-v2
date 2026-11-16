@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import Plane from '../Plane/Plane';
+import Plane, { PLANE_AMPLITUDE } from '../Plane/Plane';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -27,6 +27,13 @@ import { LIST_EXIT, VIEW_SWITCH } from '@/utils/worksView';
 import { getNextRect, measureTrack, nextProjectStore } from '@/utils/nextProject';
 import { projectFly } from '@/utils/projectFly';
 import { getFanCard } from '@/utils/menuFan';
+import {
+  ABOUT,
+  contactRing,
+  getAboutCard,
+  getPortraitTile,
+  stateAt,
+} from '@/utils/aboutLayout';
 import { ThemeContext } from '@/contexts/MenuProvider';
 import { projectList } from '@/utils/projectList';
 import { useOpenProject } from '../Project/useOpenProject';
@@ -60,6 +67,29 @@ function getPlaneOpacity(group: THREE.Group) {
   const mesh = group.children[0] as THREE.Mesh | undefined;
   const material = mesh?.material as THREE.ShaderMaterial | undefined;
   return material?.uniforms?.uOpacity ?? null;
+}
+
+/** About : la part de portrait d'un plane (0 = image du projet, 1 = sa tuile) */
+function setPlanePortrait(
+  group: THREE.Group,
+  mix: number,
+  portrait?: { texture: THREE.Texture; tile: { x: number; y: number; w: number; h: number } },
+) {
+  const mesh = group.children[0] as THREE.Mesh | undefined;
+  const uniforms = (mesh?.material as THREE.ShaderMaterial | undefined)?.uniforms;
+  if (!uniforms?.uMix) return;
+  uniforms.uMix.value = mix;
+  // Les tuiles du portrait sont à plat : sinon l'ondulation de chaque carte
+  // décale ses bords de ceux de ses voisines (coutures en dents de scie)
+  uniforms.uAmplitude.value = PLANE_AMPLITUDE * (1 - mix);
+  if (!portrait) return;
+  const { texture, tile } = portrait;
+  uniforms.uPortrait.value = texture;
+  const image = texture.image as { width: number; height: number } | undefined;
+  if (image?.width) uniforms.uPortraitSize.value.set(image.width, image.height);
+  uniforms.uTileOff.value.set(tile.x, tile.y);
+  uniforms.uTileSize.value.set(tile.w, tile.h);
+  uniforms.uPortraitAspect.value = ABOUT.portraitRatio;
 }
 
 const Scene = ({ projectsDetails }: Props) => {
@@ -791,6 +821,179 @@ const Scene = ({ projectsDetails }: Props) => {
       group.visible = !(hideHero && i === activeIndex);
       // L'éventail fixe son propre ordre (les cartes de droite devant)
       if (!menuHasImages) group.renderOrder = i === driving ? 2 : 0;
+    });
+  });
+
+  // About : à l'arrivée, chaque image part de sa place sur la page quittée.
+  // v : 0 → 1 (GSAP), from : les places mémorisées (vide = arrivée directe sur
+  // /about, sans page avant : les images apparaissent en fondu)
+  const onAbout = pathname === '/about';
+  type Pose = { x: number; y: number; w: number; h: number; rotation: number };
+  const aboutArrivalRef = useRef<{ v: number; from: (Pose | null)[] }>({
+    v: 1,
+    from: [],
+  });
+  // Places à l'écran à la dernière image avant About. Pas lues au changement de
+  // page : le canvas a son propre rendu React, qui reçoit la nouvelle URL en même
+  // temps que la grille envoyée par About → les images y sont déjà replacées.
+  const lastPosesRef = useRef<Pose[]>([]);
+  useLayoutEffect(() => {
+    if (!onAbout) return;
+    const arrival = aboutArrivalRef.current;
+    arrival.from = lastPosesRef.current.map((pose) => ({ ...pose }));
+    arrival.v = 0;
+    const tween = gsap.to(arrival, {
+      v: 1,
+      // Même rythme que les autres transitions du site (1 s, power2.inOut)
+      duration: 1,
+      ease: 'power2.inOut',
+    });
+    return () => {
+      tween.kill();
+      arrival.v = 1;
+    };
+  }, [onAbout]);
+
+  // About : la photo du portrait, chargée la première fois qu'on vient sur About
+  const portraitRef = useRef<THREE.Texture | null>(null);
+  useEffect(() => {
+    if (!onAbout || portraitRef.current) return;
+    // Même réglage de couleurs que les images des projets (aucune conversion)
+    new THREE.TextureLoader().load('/images/about-portrait.jpg', (texture) => {
+      portraitRef.current = texture;
+    });
+  }, [onAbout]);
+
+  // About : chaque image suit la disposition de la section à l'écran (stateAt)
+  const aboutDrivingRef = useRef(false);
+  useFrame(({ clock }) => {
+    const groups = groupRefArray.current;
+    const blocked =
+      goToContact ||
+      returnHome ||
+      goToWork ||
+      goToProject ||
+      isReturning ||
+      menuOpen ||
+      fanRaised ||
+      fanFlightRef.current >= 0;
+
+    if (!onAbout) {
+      // Hors d'About : on note où est chaque image (départ du vol vers About)
+      const poses = lastPosesRef.current;
+      poses.length = groups.length;
+      groups.forEach((group, i) => {
+        if (!group) return;
+        const pose = (poses[i] ??= { x: 0, y: 0, w: 0, h: 0, rotation: 0 });
+        pose.x = group.position.x;
+        pose.y = group.position.y;
+        pose.w = group.scale.x;
+        pose.h = group.scale.y;
+        pose.rotation = group.rotation.z;
+      });
+    }
+
+    if (!onAbout || blocked) {
+      // Passage de relais : on rend aux images une opacité et une rotation
+      // neutres, l'autre système (transition, menu) part de là
+      if (aboutDrivingRef.current) {
+        aboutDrivingRef.current = false;
+        groups.forEach((group) => {
+          if (!group) return;
+          setPlaneOpacity(group, 1);
+          setPlanePortrait(group, 0);
+          group.rotation.z = 0;
+          group.renderOrder = 0;
+        });
+      }
+      return;
+    }
+    aboutDrivingRef.current = true;
+
+    const n = groups.length;
+    const { v, from } = aboutArrivalRef.current;
+    const t = clock.elapsedTime;
+    groups.forEach((group, i) => {
+      if (!group) return;
+      const card = stateAt(i, n, window.scrollY, size.width, size.height, t);
+      if (!card) return;
+      const world = rectToWorld(
+        new DOMRect(card.x - card.w / 2, card.y - card.h / 2, card.w, card.h),
+        size,
+        viewport,
+      );
+      let { x, y, w, h } = world;
+      let rotation = -card.rotation;
+      // Arrivée : toutes les images ensemble, comme les autres transitions
+      const start = from[i];
+      const e = v;
+      if (start && e < 1) {
+        x = THREE.MathUtils.lerp(start.x, x, e);
+        y = THREE.MathUtils.lerp(start.y, y, e);
+        w = THREE.MathUtils.lerp(start.w, w, e);
+        h = THREE.MathUtils.lerp(start.h, h, e);
+        rotation = THREE.MathUtils.lerp(start.rotation, rotation, e);
+      }
+      group.position.set(x, y, 0);
+      group.scale.set(w, h, 1);
+      group.rotation.z = rotation;
+      // Arrivée directe : fondu ; sinon les images restent visibles en vol
+      setPlaneOpacity(group, card.opacity * (start ? 1 : e));
+      // Portrait : chaque carte montre son morceau de la photo (une fois chargée)
+      const texture = portraitRef.current;
+      setPlanePortrait(
+        group,
+        texture ? card.mix : 0,
+        texture ? { texture, tile: getPortraitTile(i, n) } : undefined,
+      );
+      group.renderOrder = i;
+    });
+  });
+
+  // Contact : l'anneau d'images tourne lentement, comme à la fin d'About. Il
+  // part de l'anneau immobile (là où arrivent les transitions) : t = 0, puis
+  // avance seulement quand le Scene a la main (menu, transition → en pause)
+  const onContact = pathname === '/contact';
+  const contactDrivingRef = useRef(false);
+  useFrame((_, delta) => {
+    const groups = groupRefArray.current;
+    const blocked =
+      goToContact ||
+      returnHome ||
+      goToWork ||
+      goToProject ||
+      isReturning ||
+      menuOpen ||
+      fanRaised ||
+      fanFlightRef.current >= 0;
+    if (!onContact || blocked) {
+      if (!onContact) contactRing.t = 0;
+      // Passage de relais : cartes droites, l'autre système part de là
+      if (contactDrivingRef.current) {
+        contactDrivingRef.current = false;
+        groups.forEach((group) => {
+          if (group) group.rotation.z = 0;
+        });
+      }
+      return;
+    }
+    contactDrivingRef.current = true;
+    contactRing.t += delta;
+    const t = contactRing.t;
+    const n = groups.length;
+    groups.forEach((group, i) => {
+      if (!group) return;
+      const card = getAboutCard('ring', i, n, size.width, size.height, t);
+      const { x, y, w, h } = rectToWorld(
+        new DOMRect(card.x - card.w / 2, card.y - card.h / 2, card.w, card.h),
+        size,
+        viewport,
+      );
+      group.position.set(x, y, 0);
+      group.scale.set(w, h, 1);
+      // La légère inclinaison arrive en douceur (les transitions posent les
+      // cartes droites)
+      group.rotation.z = -card.rotation * Math.min(t / 1.5, 1);
     });
   });
 
