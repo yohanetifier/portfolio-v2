@@ -1,7 +1,9 @@
+import { getNotFoundProjectLayout } from '@/components/NotFound/notFoundLayout';
+
 /**
  * Page About : les images des projets changent de disposition à chaque section
- * (nuage, portrait, dispersion, colonnes, paquet, grille, anneau). Formes
- * géométriques → calculées, pour n images (9 ici, 12 chez le DA).
+ * (places de la 404, portrait, lettres C, S et R, anneau). Formes géométriques
+ * → calculées, pour n images (9 ici, 12 chez le DA).
  */
 
 export const ABOUT = {
@@ -9,8 +11,6 @@ export const ABOUT = {
   ratio: 1.22,
   /** Le portrait : largeur = hauteur × portraitRatio */
   portraitRatio: 0.8,
-  /** Écart entre les cartes des grilles (px) */
-  gap: 14,
 } as const;
 
 /** Ce que le Scene applique à une image : centre et taille (px écran),
@@ -30,13 +30,17 @@ export type AboutCard = {
 export type AboutLayoutName =
   | 'hero'
   | 'portrait'
-  | 'scatter'
-  | 'columns'
-  | 'deck'
-  | 'grid'
+  | 'letterC'
+  | 'letterS'
+  | 'letterR'
   | 'ring';
 
 const isMobile = (W: number) => W < 768;
+
+/** Ordinateur : la place libre à droite du texte (colonne de texte jusqu'à
+ *  56 % de la largeur) — sa largeur et son centre, en part de l'écran */
+const FREE_W = 0.38;
+const FREE_CX = 0.78;
 
 /** Largeur de référence d'une carte */
 const base = (W: number) =>
@@ -47,11 +51,6 @@ const noise = (i: number, seed: number) => {
   const s = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453;
   return (s - Math.floor(s)) * 2 - 1;
 };
-
-/** Angle d'or : chaque carte tourne de 137,5° par rapport à la précédente. Les
- *  cartes se répartissent régulièrement dans un disque, sans se superposer en
- *  ligne, quel que soit n (comme les graines d'un tournesol). */
-const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
 const card = (
   x: number,
@@ -70,28 +69,28 @@ const card = (
   ...rest,
 });
 
-/** Grille de cols colonnes centrée sur (cx, cy), cartes de largeur s */
-const gridCell = (
-  i: number,
-  n: number,
-  cols: number,
-  cx: number,
-  cy: number,
-  s: number,
-) => {
-  const rows = Math.ceil(n / cols);
-  const col = i % cols;
-  const row = Math.floor(i / cols);
-  const h = s * ABOUT.ratio;
-  return {
-    x: cx + (col - (cols - 1) / 2) * (s + ABOUT.gap),
-    y: cy + (row - (rows - 1) / 2) * (h + ABOUT.gap),
-  };
+/** Le portrait découpé en cols × rows tuiles (9 images → 3 × 3) */
+const portraitGrid = (n: number) => {
+  const cols = Math.ceil(Math.sqrt(n * ABOUT.portraitRatio));
+  return { cols, rows: Math.ceil(n / cols) };
 };
 
-/** Largeur de carte pour que rows rangées tiennent dans maxH */
-const fitRows = (rows: number, maxH: number, s: number) =>
-  Math.min(s, (maxH - (rows - 1) * ABOUT.gap) / rows / ABOUT.ratio);
+/**
+ * Le morceau du portrait que montre la carte i : sa place dans la photo
+ * entière (0 → 1, y vers le haut comme les uv du shader) et sa taille.
+ */
+export function getPortraitTile(i: number, n: number) {
+  const { cols, rows } = portraitGrid(n);
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  return {
+    x: col / cols,
+    // La rangée 0 est en haut de l'écran, donc en haut de la photo (y = 1)
+    y: 1 - (row + 1) / rows,
+    w: 1 / cols,
+    h: 1 / rows,
+  };
+}
 
 /**
  * Place de la carte i sur n dans une disposition. t : temps (s), pour la
@@ -109,20 +108,21 @@ export function getAboutCard(
   const b = base(W);
 
   switch (layout) {
-    // Nuage autour de la moitié droite, qui dérive doucement
+    // Les mêmes places que la page 404 : réparties sur tout l'écran, qui
+    // dérivent doucement
     case 'hero': {
-      const r = Math.sqrt((i + 0.5) / n);
-      const a = i * GOLDEN_ANGLE;
-      const cx = mobile ? W * 0.5 : W * 0.7;
-      const cy = mobile ? H * 0.69 : H * 0.52;
-      const rx = mobile ? W * 0.34 : W * 0.24;
-      const ry = mobile ? H * 0.22 : H * 0.36;
-      return card(
-        cx + Math.cos(a) * r * rx + Math.sin(t * 0.35 + i * 1.7) * 14,
-        cy + Math.sin(a) * r * ry + Math.cos(t * 0.3 + i * 2.3) * 12,
-        b * (0.9 + noise(i, 1) * 0.15),
-        { rotation: noise(i, 2) * 0.06, amp: 1 },
-      );
+      const { x, y, w, h } = getNotFoundProjectLayout(i, W, H, n);
+      return {
+        // Le calcul de la 404 part du centre de l'écran, y vers le haut
+        x: W / 2 + x + Math.sin(t * 0.35 + i * 1.7) * 14,
+        y: H / 2 - y + Math.cos(t * 0.3 + i * 2.3) * 12,
+        w,
+        h,
+        rotation: noise(i, 2) * 0.06,
+        opacity: 1,
+        amp: 1,
+        mix: 0,
+      };
     }
 
     // Les cartes deviennent les tuiles d'un portrait (cols × rows)
@@ -133,8 +133,7 @@ export function getAboutCard(
       const Pw = Ph * ABOUT.portraitRatio;
       const cx = mobile ? W * 0.5 : W * 0.68;
       const cy = mobile ? H * 0.64 : H * 0.53;
-      const cols = Math.ceil(Math.sqrt(n * ABOUT.portraitRatio));
-      const rows = Math.ceil(n / cols);
+      const { cols, rows } = portraitGrid(n);
       const tw = Pw / cols;
       const th = Ph / rows;
       // + 0,5 px : pas de fine ligne entre deux tuiles
@@ -144,57 +143,166 @@ export function getAboutCard(
         w: tw + 0.5,
         h: th + 0.5,
         rotation: 0,
-        opacity: 1,
+        // Mobile : le portrait passe derrière le texte (plus long que la
+        // largeur ne permet d'éviter), en transparence comme les autres sections
+        opacity: mobile ? 0.25 : 1,
         amp: 0,
         mix: 1,
       };
     }
 
-    // Manifeste : éparpillées en deux colonnes lâches, à droite
-    case 'scatter': {
-      const x = mobile
-        ? W * (i % 2 ? 0.78 : 0.22)
-        : W * (i % 2 ? 0.86 : 0.67);
-      const y = H * (0.15 + (0.7 * (i + 0.5)) / n);
-      return card(
-        x + noise(i, 3) * W * 0.04,
+    // Ma philosophie : les cartes dessinent un grand C, l'initiale de
+    // « Comprendre » et de « Construire ». Elles suivent un arc de cercle
+    // ouvert à droite, chacune penchée le long de la courbe.
+    case 'letterC': {
+      const cx = mobile ? W * 0.5 : FREE_CX * W;
+      const cy = mobile ? H * 0.62 : H * 0.52;
+      const R = mobile
+        ? Math.min(W * 0.32, H * 0.24)
+        : Math.min(FREE_W * W * 0.4, H * 0.32);
+      // Ouverture de 100° à droite : de -50° (en haut à droite) à +50° (en bas
+      // à droite) en passant par le haut, la gauche et le bas (y vers le bas)
+      const OPEN = (50 * Math.PI) / 180;
+      const sweep = Math.PI * 2 - OPEN * 2;
+      const a = -OPEN - (n > 1 ? (i / (n - 1)) * sweep : 0);
+      // Cartes jointives le long de l'arc (un léger chevauchement)
+      const s = Math.min((R * sweep) / n * 1.1, b * 1.3);
+      // Penchée le long de la courbe, jamais la tête en bas
+      let rotation = a + Math.PI / 2;
+      rotation = Math.atan(Math.tan(rotation));
+      return {
+        x: cx + Math.cos(a) * R,
+        y: cy + Math.sin(a) * R,
+        w: s,
+        h: s * 0.75,
+        rotation,
+        opacity: mobile ? 0.25 : 1,
+        amp: 0.3,
+        mix: 0,
+      };
+    }
+
+    // Mes expertises (« Des idées aux solutions ») : les cartes dessinent un
+    // S, l'initiale de « Solutions ». Deux arcs de cercle de rayon r posés l'un
+    // sur l'autre : celui du haut tourne vers la gauche, celui du bas vers la
+    // droite ; ils se rejoignent au centre.
+    case 'letterS': {
+      const cx = mobile ? W * 0.5 : FREE_CX * W;
+      const cy = mobile ? H * 0.6 : H * 0.5;
+      // Hauteur du S : 4 rayons + une carte
+      const r = mobile
+        ? Math.min(W * 0.22, H * 0.13)
+        : Math.min(FREE_W * W * 0.3, (H * 0.8) / 4.6);
+      const ARC = (240 * Math.PI) / 180;
+      const START = (30 * Math.PI) / 180;
+      // u : distance parcourue sur le S (angle), de 0 à 2 arcs
+      const u = n > 1 ? (i / (n - 1)) * ARC * 2 : 0;
+      let x: number;
+      let y: number;
+      let a: number;
+      if (u <= ARC) {
+        // Arc du haut : de -30° (en haut à droite) par le haut et la gauche,
+        // jusqu'au centre du S (y vers le bas : -90° = en haut)
+        a = -START - u;
+        x = cx + Math.cos(a) * r;
+        y = cy - r + Math.sin(a) * r;
+      } else {
+        // Arc du bas : du centre du S par la droite et le bas, jusqu'en bas à
+        // gauche
+        a = -Math.PI / 2 + (u - ARC);
+        x = cx + Math.cos(a) * r;
+        y = cy + r + Math.sin(a) * r;
+      }
+      // Cartes jointives le long du S (un léger chevauchement)
+      const s = Math.min(((r * ARC * 2) / n) * 1.1, b * 1.3);
+      return {
+        x,
         y,
-        b * (0.85 + noise(i, 4) * 0.15) * (mobile ? 1.2 : 1),
-        { rotation: noise(i, 5) * 0.08, amp: 1, opacity: mobile ? 0.2 : 1 },
-      );
+        w: s,
+        h: s * 0.75,
+        // Penchée le long de la courbe, jamais la tête en bas
+        rotation: Math.atan(Math.tan(a + Math.PI / 2)),
+        opacity: mobile ? 0.18 : 1,
+        amp: 0.5,
+        mix: 0,
+      };
     }
 
-    // En bref : deux colonnes bien rangées
-    case 'columns': {
-      const s = fitRows(Math.ceil(n / 2), H * 0.8, b * 0.8);
-      const { x, y } = gridCell(i, n, 2, mobile ? W * 0.5 : W * 0.78, H * 0.5, s);
-      return card(x, y, s, { amp: 0.5, opacity: mobile ? 0.18 : 1 });
-    }
-
-    // Méthode : un paquet de cartes légèrement décalées
-    case 'deck': {
-      const k = i - (n - 1) / 2;
-      // Même étalement total quel que soit n
-      const step = n > 1 ? 50 / (n - 1) : 0;
-      return card(
-        (mobile ? W * 0.55 : W * 0.77) + k * step,
-        (mobile ? H * 0.8 : H * 0.5) - k * step * 0.8,
-        b * 1.15,
-        { rotation: (k / Math.max(n - 1, 1)) * 0.25, amp: 0.4, opacity: mobile ? 0.3 : 1 },
-      );
-    }
-
-    // Chiffres : grille presque carrée, comme la grille de Contact
-    case 'grid': {
-      const cols = Math.max(3, Math.ceil(Math.sqrt(n)));
-      const s = fitRows(Math.ceil(n / cols), H * 0.7, b * 0.72);
-      const { x, y } = gridCell(i, n, cols, mobile ? W * 0.5 : W * 0.76, mobile ? H * 0.8 : H * 0.5, s);
-      return card(x, y, s, { amp: 0.3, opacity: mobile ? 0.25 : 1 });
+    // Ma méthode (« De votre besoin à sa réalisation ») : les cartes
+    // dessinent un R, l'initiale de « Réalisation ». Un seul trait continu : la
+    // barre verticale (de bas en haut), le haut de la boucle, la boucle (un
+    // demi-cercle de rayon r), puis la jambe en diagonale jusqu'en bas à droite.
+    case 'letterR': {
+      const cx = mobile ? W * 0.5 : FREE_CX * W;
+      const cy = mobile ? H * 0.6 : H * 0.5;
+      // Hauteur du R : 4 r (+ une carte) ; largeur : 1,6 r
+      const r = mobile
+        ? Math.min(W * 0.2, H * 0.13)
+        : Math.min(FREE_W * W * 0.4, (H * 0.8) / 4.6);
+      const left = cx - 0.8 * r;
+      const top = cy - 2 * r;
+      const bar = 0.6 * r;
+      // Les 4 morceaux du trait et leur longueur
+      const leg = Math.hypot(r, 2 * r);
+      const parts = [4 * r, bar, Math.PI * r, leg];
+      const total = parts.reduce((sum, length) => sum + length, 0);
+      // d : distance parcourue sur le trait jusqu'à la carte i
+      let d = n > 1 ? (i / (n - 1)) * total : 0;
+      let x: number;
+      let y: number;
+      let a: number; // direction du trait à cet endroit (radians, y vers le bas)
+      if (d <= parts[0]) {
+        // Barre verticale, de bas en haut
+        x = left;
+        y = top + 4 * r - d;
+        a = -Math.PI / 2;
+      } else if ((d -= parts[0]) <= parts[1]) {
+        // Haut de la boucle, vers la droite
+        x = left + d;
+        y = top;
+        a = 0;
+      } else if ((d -= parts[1]) <= parts[2]) {
+        // Boucle : demi-cercle par la droite, du haut jusqu'au milieu du R
+        const angle = -Math.PI / 2 + d / r;
+        x = left + bar + Math.cos(angle) * r;
+        y = top + r + Math.sin(angle) * r;
+        a = angle + Math.PI / 2;
+      } else {
+        // Jambe : du milieu du R jusqu'en bas à droite
+        const t = Math.min((d - parts[2]) / leg, 1);
+        x = left + bar + t * r;
+        y = top + 2 * r + t * 2 * r;
+        a = Math.atan2(2 * r, r);
+      }
+      // Cartes jointives le long du trait (un léger chevauchement)
+      const s = Math.min((total / n) * 1.1, b * 1.3);
+      return {
+        x,
+        y,
+        w: s,
+        h: s * 0.75,
+        // Penchée dans le sens du trait, jamais la tête en bas
+        rotation: Math.atan(Math.tan(a)),
+        opacity: mobile ? 0.3 : 1,
+        amp: 0.4,
+        mix: 0,
+      };
     }
 
     // Contact : un anneau autour du mail, qui tourne lentement
     case 'ring': {
-      const a = (i / n) * Math.PI * 2 + t * 0.12 - Math.PI / 2;
+      let a = (i / n) * Math.PI * 2 + t * 0.12 - Math.PI / 2;
+      if (mobile) {
+        // Mobile : le texte prend toute la largeur → pas de cartes sur les
+        // côtés. Une moitié en arc au-dessus (de -140° à -40°), l'autre en
+        // dessous (de 40° à 140°), sans rotation dans le temps
+        const top = Math.ceil(n / 2);
+        const onTop = i < top;
+        const k = onTop ? i : i - top;
+        const count = onTop ? top : n - top;
+        const from = onTop ? -140 : 40;
+        a = ((from + (count > 1 ? k / (count - 1) : 0.5) * 100) * Math.PI) / 180;
+      }
       return card(
         W / 2 + Math.cos(a) * W * 0.36,
         H / 2 + Math.sin(a) * H * (mobile ? 0.38 : 0.36),
@@ -203,4 +311,94 @@ export function getAboutCard(
       );
     }
   }
+}
+
+/**
+ * Page Contact : l'anneau tourne comme à la fin d'About. t : secondes de
+ * rotation, avancées par le Scene seulement quand il a la main sur les images
+ * (en pause pendant le menu, une transition…), remises à 0 hors de Contact.
+ * Lu aussi par la grille fantôme pour que le survol suive les images.
+ */
+export const contactRing = { t: 0 };
+
+/** Places des images sur l'anneau de Contact à l'instant t (px écran) */
+export function getContactRingRects(n: number, W: number, H: number, t = contactRing.t) {
+  return Array.from({ length: n }, (_, i) => {
+    const card = getAboutCard('ring', i, n, W, H, t);
+    return new DOMRect(card.x - card.w / 2, card.y - card.h / 2, card.w, card.h);
+  });
+}
+
+/**
+ * Ancres : pour chaque section, le défilement (px) où elle est centrée à l'écran,
+ * et sa disposition. Mesurées par About, lues par le Scene à chaque image (un
+ * objet modifié en place, pas un état : rien à re-rendre).
+ */
+export const aboutAnchors: {
+  current: { at: number; layout: AboutLayoutName }[];
+} = { current: [] };
+
+/** Mesure les sections marquées data-about-layout (au montage, au resize) */
+export function measureAboutAnchors() {
+  const H = window.innerHeight;
+  const max = document.documentElement.scrollHeight - H;
+  const sections = document.querySelectorAll<HTMLElement>('[data-about-layout]');
+  aboutAnchors.current = Array.from(sections).map((el) => {
+    const rect = el.getBoundingClientRect();
+    const top = rect.top + window.scrollY;
+    return {
+      // Section centrée ; jamais au-delà du bas de la page (dernière section)
+      at: Math.min(Math.max(top + rect.height / 2 - H / 2, 0), max),
+      layout: el.dataset.aboutLayout as AboutLayoutName,
+    };
+  });
+}
+
+const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+/** Lent au départ et à l'arrivée, rapide au milieu */
+const ease = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/**
+ * Pose de la carte i pour un défilement scrollY : entre deux sections, les
+ * cartes glissent de l'une à l'autre, chacune un peu après la précédente.
+ */
+export function stateAt(
+  i: number,
+  n: number,
+  scrollY: number,
+  W: number,
+  H: number,
+  t = 0,
+): AboutCard | null {
+  const anchors = aboutAnchors.current;
+  if (anchors.length === 0) return null;
+
+  // A : dernière section dépassée, B : la suivante
+  let k = 0;
+  while (k < anchors.length - 1 && scrollY >= anchors[k + 1].at) k++;
+  const A = anchors[k];
+  const B = anchors[Math.min(k + 1, anchors.length - 1)];
+  const a = getAboutCard(A.layout, i, n, W, H, t);
+  if (A === B || B.at <= A.at) return a;
+  const b = getAboutCard(B.layout, i, n, W, H, t);
+
+  // raw : de 0 (section A centrée) à 1 (section B centrée)
+  const raw = clamp01((scrollY - A.at) / (B.at - A.at));
+  // Départ décalé : la dernière carte part 0,2 après la première, quel que soit n
+  const e = ease(clamp01((raw - 0.1 - (i / n) * 0.2) / 0.7));
+  // À mi-chemin, les cartes penchent (une à gauche, une à droite) : un vol
+  const flight = Math.sin(e * Math.PI);
+
+  return {
+    x: lerp(a.x, b.x, e),
+    y: lerp(a.y, b.y, e),
+    w: lerp(a.w, b.w, e),
+    h: lerp(a.h, b.h, e),
+    rotation: lerp(a.rotation, b.rotation, e) + flight * 0.14 * (i % 2 ? 1 : -1),
+    opacity: lerp(a.opacity, b.opacity, e),
+    amp: lerp(a.amp, b.amp, e) + flight * 0.9,
+    mix: lerp(a.mix, b.mix, e),
+  };
 }
