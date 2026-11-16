@@ -33,7 +33,7 @@ const EXPERTISES = [
   },
   {
     title: 'Intégration & déploiement',
-    tag: 'Interconnexion d’application veille à ce que vos outils fonctionnent ensemble et soient déployés dans de bonnes conditions.',
+    tag: 'Interconnexion d’applications, déploiement et mise en production de solutions fiables, sécurisées et adaptées à votre environnement technique.',
     text: '',
   },
 ];
