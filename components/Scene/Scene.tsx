@@ -592,11 +592,13 @@ const Scene = ({ projectsDetails }: Props) => {
       if (!returnHome) {
         // La transition part de l'éventail (elle anime depuis la position
         // actuelle) mais ne touche pas à la rotation : on redresse les cartes.
+        // À plat (0), pas l'inclinaison mémorisée : ouvert sur About ou
+        // Contact, elle venait des lettres ou de l'anneau, et les cartes
+        // seraient restées penchées sur la page suivante.
         // Vers l'intro, la transition remet elle-même l'inclinaison du paquet.
-        groups.forEach((group, i) => {
-          const pose = poses[i];
-          if (group && pose) {
-            gsap.to(group.rotation, { z: pose.rotation, duration: 1, ease: 'power2.inOut' });
+        groups.forEach((group) => {
+          if (group) {
+            gsap.to(group.rotation, { z: 0, duration: 1, ease: 'power2.inOut' });
           }
         });
       }
@@ -1543,6 +1545,11 @@ const Scene = ({ projectsDetails }: Props) => {
       setSettledIndex(null);
       setIsReturning(false);
       setReset(false);
+      // Changement de page sans transition (About) : rien à animer ici. Sans ce
+      // return, la suite lit encore l'ancien selectedIndex (celui du projet
+      // quitté) : elle le remettait en plein écran, et à la fin le Plane
+      // renvoyait vers /work/[projet]
+      return;
     }
 
     if (selectedIndex === null) return;
