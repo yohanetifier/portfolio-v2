@@ -3,7 +3,7 @@ import { portfolioViewModel } from '@/src/viewmodels/PortfolioViewModel';
 import { Metadata } from 'next';
 
 const description =
-  'Yohan Etifier, designer et développeur à Paris. Des sites sur mesure pour des commerces et des artisans, de la première maquette à la mise en ligne.';
+  'Yohan Etifier, consultant technique et développeur fullstack indépendant à Paris : solutions numériques sur mesure, architecture technique, intégration et déploiement, de l’analyse du besoin à la mise en production.';
 
 export const metadata: Metadata = {
   title: 'About',

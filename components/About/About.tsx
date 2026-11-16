@@ -1,68 +1,79 @@
 'use client';
 
 import { Project } from '@/src/models/Project';
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { PAPER } from '@/utils/theme';
+import { aboutAnchors, measureAboutAnchors } from '@/utils/aboutLayout';
 
 type Props = {
   projects: Pick<Project, 'title' | 'featuredImage'>[];
 };
 
-const ROWS = [
+const EXPERTISES = [
   {
-    title: 'Le métier',
-    tag: 'Commerces · artisans',
-    text: 'Poissonnier, marchés, hôtels, artisans : des métiers concrets, des clients sans service marketing, un budget qui doit servir.',
+    title: 'Développement sur mesure',
+    tag: 'Applications métier, plateformes web, interfaces et API.',
+    text: 'Je développe des solutions adaptées à vos processus, à vos utilisateurs et à vos objectifs.',
   },
   {
-    title: 'La méthode',
-    tag: 'Un seul interlocuteur',
-    text: 'Je travaille seul, de la première maquette à la mise en ligne. Un site qui n’a pas été dessiné par quelqu’un qui ne le codera jamais.',
+    title: 'Architecture technique',
+    tag: 'Conception d’architectures applicatives, organisation des services et choix technologiques.',
+    text: 'Je construis des systèmes fiables, maintenables et capables d’accompagner l’évolution de votre activité.',
   },
   {
-    title: 'Les outils',
-    tag: 'Next.js · Astro · GSAP',
-    text: 'Next.js ou Astro selon le projet, Three.js et GSAP quand le mouvement s’impose. Un CMS que le client utilise sans moi.',
+    title: 'Intégration & déploiement',
+    tag: 'Interconnexion d’application veille à ce que vos outils fonctionnent ensemble et soient déployés dans de bonnes conditions.',
+    text: '',
   },
 ];
 
 const STEPS = [
   {
-    day: 'J+0',
-    title: 'Maquette',
-    text: 'On part de votre boutique, de vos clients, de vos photos. Une maquette validée ensemble avant la première ligne de code.',
+    title: 'Comprendre',
+    text: 'Analyser votre activité, vos besoins et vos contraintes.',
   },
   {
-    day: 'J+21',
-    title: 'Code',
-    text: 'Le site est construit sur mesure. Le mouvement arrive seulement s’il aide à vendre.',
+    title: 'Concevoir',
+    text: 'Définir une solution technique cohérente et adaptée à vos objectifs.',
   },
   {
-    day: 'J+45',
-    title: 'En ligne',
-    text: 'Mise en ligne, prise en main du CMS, et je reste joignable après.',
+    title: 'Développer',
+    text: 'Construire une application fiable, performante et simple à utiliser.',
+  },
+  {
+    title: 'Déployer & accompagner',
+    text: 'Mettre en production, assurer le suivi et faire évoluer votre solution.',
   },
 ];
 
-const STATS = [
-  { value: '06', label: 'Sites en ligne' },
-  { value: '03', label: 'Ans à mon compte' },
-  { value: '01', label: 'Interlocuteur' },
-];
+const pad = (n: number) => String(n).padStart(2, '0');
 
 const label = 'text-[10px] md:text-[11px] uppercase tracking-[0.14em]';
 const display = 'font-sans font-bold tracking-[-0.03em] leading-[0.98] [text-wrap:balance]';
 const soft = 'text-[13px] leading-[1.6] text-black/60';
 // Colonne de texte : à gauche, les images occupent la droite
 const col = 'w-full md:w-[min(560px,46vw)]';
+// Une initiale mise en avant, en jaune : celles que dessinent les images (C, S,
+// R) et celles des mots clés des deux premières sections (ambitions, vision)
+const letter = 'text-[#FFC400]';
 
 export default function About({ projects }: Props) {
-  const { setProjects, setScrollY, setIsLostPage, projectsContactCoords } =
-    useThreeJsContext();
+  const {
+    setProjects,
+    setScrollY,
+    setIsLostPage,
+    projectsContactCoords,
+    goToWork,
+    goToContact,
+    returnHome,
+    goToProject,
+  } = useThreeJsContext();
+  const contentRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setScrollY(0);
@@ -73,8 +84,46 @@ export default function About({ projects }: Props) {
     setIsLostPage(false);
   }, [setIsLostPage]);
 
-  // Provisoire (jusqu'à l'étape 3) : les images se rangent dans la grille de
-  // Contact, à droite. Ensuite, le Scene les placera section par section.
+  // Où chaque section est centrée : le Scene y place la disposition de ses images.
+  // Re-mesuré quand la page change de hauteur (resize, polices chargées).
+  useLayoutEffect(() => {
+    measureAboutAnchors();
+    document.fonts?.ready.then(measureAboutAnchors);
+    window.addEventListener('resize', measureAboutAnchors);
+    return () => {
+      window.removeEventListener('resize', measureAboutAnchors);
+      aboutAnchors.current = [];
+    };
+  }, []);
+
+  // Arrivée : le texte apparaît en fondu pendant que les images s'installent
+  // (même durée et même courbe que leur vol, et que les fondus de Contact)
+  useLayoutEffect(() => {
+    const tween = gsap.fromTo(
+      contentRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 1, ease: 'power2.inOut' },
+    );
+    return () => {
+      tween.kill();
+    };
+  }, []);
+
+  // Départ (Works, Contact, Yeti, un projet) : le texte s'efface pendant que les
+  // images partent vers la page suivante
+  useEffect(() => {
+    if (!(goToWork || goToContact || returnHome || goToProject)) return;
+    gsap.to(contentRef.current, {
+      opacity: 0,
+      duration: 1,
+      ease: 'power2.inOut',
+      overwrite: 'auto',
+    });
+  }, [goToWork, goToContact, returnHome, goToProject]);
+
+  // Liste des images pour le Scene (même en arrivant directement sur /about) et
+  // poses de départ des transitions de sortie (à revoir à l'étape 7). Sur la
+  // page, c'est le Scene qui place les images, section par section.
   useEffect(() => {
     if (projectsContactCoords?.length) setProjects(projectsContactCoords);
   }, [projectsContactCoords, setProjects]);
@@ -85,81 +134,139 @@ export default function About({ projects }: Props) {
       <IntroGridPhantom projects={projects} />
       <ContactPhantomGrid projects={projects} />
 
-      <main className="relative z-[2] text-black px-[8vw] md:px-[10vw] overflow-x-hidden">
-        {/* Hero */}
-        <section className="flex min-h-[100svh] flex-col justify-start gap-7 pt-[18vh] md:justify-center md:pt-0">
-          <p className={label}>[ À propos ]</p>
-          <h1 className={`${display} ${col} text-[clamp(2rem,4.6vw,4.1rem)]`}>
-            Je conçois et je code des sites pour des commerces qui méritent
-            mieux qu’un template.
+      <main
+        ref={contentRef}
+        className="relative z-[2] text-black px-[8vw] md:px-[10vw] overflow-x-hidden">
+        {/* 01 — Introduction */}
+        <section data-about-layout="hero" className="relative flex min-h-[100svh] flex-col justify-start gap-7 pt-[18vh] md:justify-center md:pt-0">
+          {/* Même voile que la 404 : les images qui passent sous le texte
+              s'estompent. Sur toute la largeur (les marges de main en négatif) */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 -inset-x-[8vw] md:-inset-x-[10vw]"
+            style={{
+              background:
+                'radial-gradient(72% 58% at 30% 46%, color-mix(in srgb, var(--background) 96%, transparent) 0%, color-mix(in srgb, var(--background) 78%, transparent) 46%, color-mix(in srgb, var(--background) 18%, transparent) 78%, transparent 100%)',
+            }}
+          />
+          <p className={`${label} relative`}>
+            [ Consultant en solutions numériques sur mesure ]
+          </p>
+          <h1 className={`${display} ${col} relative text-[clamp(2rem,4.6vw,4.1rem)]`}>
+            La technologie au service de vos{' '}
+            <span className={letter}>a</span>mbitions.
           </h1>
-          <p className={`${label} flex flex-wrap gap-8`}>
+          <div className={`${col} relative flex flex-col gap-3`}>
+            <p className={`${soft} max-w-[46ch]`}>
+              Je conçois et développe des solutions numériques sur mesure
+              pour aider les entreprises à simplifier leur fonctionnement,
+              améliorer leurs outils et accompagner leur croissance.
+            </p>
+            <p className={`${soft} max-w-[46ch]`}>
+              De l’analyse de vos besoins à la mise en production, je transforme
+              vos idées en solutions concrètes.
+            </p>
+          </div>
+          <p className={`${label} relative flex flex-wrap gap-8`}>
             <span>Yohan Etifier — Paris</span>
             <span>↓ Scroll</span>
           </p>
         </section>
 
-        {/* Portrait : la légende (les images formeront le portrait à droite) */}
-        <section className="flex min-h-[100svh] flex-col justify-start gap-5 pt-[13vh] md:justify-center md:pt-0">
-          <p className={label}>[ Yohan Etifier ]</p>
+        {/* 02 — À propos (les images forment le portrait à droite) */}
+        <section data-about-layout="portrait" className="flex min-h-[100svh] flex-col justify-start gap-5 py-[13vh] md:justify-center">
+          <p className={label}>[ À propos ]</p>
           <h2 className={`${display} ${col} text-[clamp(1.9rem,4vw,3.6rem)]`}>
-            Six sites en ligne. Une seule personne derrière.
+            Derrière chaque solution, une <span className={letter}>v</span>ision.
           </h2>
-          <p className={`${soft} hidden max-w-[34ch] md:block`}>
-            Designer et développeur. De la première maquette à la mise en
-            ligne, sans intermédiaire.
+          <div className={`${col} flex flex-col gap-3`}>
+            <p className={`${soft} max-w-[46ch]`}>
+              Je suis Yohan Etifier, consultant technique et développeur
+              fullstack indépendant. J’accompagne les entreprises dans la
+              conception, le développement et l’évolution de leurs
+              applications et plateformes numériques.
+            </p>
+            <p className={`${soft} max-w-[46ch]`}>
+              Ma conviction : une bonne solution technique commence par une
+              compréhension précise du besoin métier.
+            </p>
+            <p className={`${soft} max-w-[46ch]`}>
+              J’associe vision globale et expertise technique pour concevoir
+              des outils fiables, performants et adaptés à votre activité.
+            </p>
+          </div>
+          <p className={label}>
+            Un seul interlocuteur, de la réflexion à la réalisation.
           </p>
         </section>
 
-        {/* Manifeste */}
-        <section className="flex min-h-[120vh] items-center py-[20vh]">
+        {/* 03 — Ma philosophie */}
+        <section data-about-layout="letterC" className="flex min-h-[120vh] items-center py-[20vh]">
           <div className={`${col} flex flex-col gap-8`}>
-            <p className={label}>[ Manifeste ]</p>
-            <p className={`${display} text-[clamp(1.6rem,3.1vw,2.75rem)] leading-[1.08]`}>
-              Un poissonnier n’a pas de service marketing. Il a un étal, des
-              clients fidèles et dix minutes le dimanche soir pour mettre son
-              site à jour. Je fais des sites pour lui : simples à tenir,
-              impossibles à confondre avec un template.
+            <p className={label}>[ Ma philosophie ]</p>
+            <h2 className={`${display} text-[clamp(1.9rem,4vw,3.6rem)]`}>
+              <span className={letter}>C</span>omprendre d’abord. Construire
+              ensuite.
+            </h2>
+            <p className={`${display} text-[clamp(1.25rem,2.2vw,1.9rem)] leading-[1.15]`}>
+              Chaque entreprise possède ses propres enjeux. Une solution
+              pertinente doit répondre à ses besoins réels, sans complexité
+              inutile. Mon rôle est de traduire vos objectifs métier en
+              solutions techniques concrètes.
             </p>
+            <p className={`${soft} max-w-[52ch]`}>
+              De la conception d’une application à l’intégration de vos
+              systèmes, je privilégie la simplicité, la fiabilité et
+              l’évolutivité.
+            </p>
+            <p className={label}>Moins de complexité. Plus d’impact.</p>
           </div>
         </section>
 
-        {/* En bref */}
-        <section className="flex min-h-[110vh] items-center py-[16vh]">
+        {/* 04 — Mes expertises */}
+        <section data-about-layout="letterS" className="flex min-h-[110vh] items-center py-[16vh]">
           <div className={`${col} flex flex-col gap-7`}>
-            <p className={label}>[ En bref ]</p>
+            <p className={label}>[ Mes expertises ]</p>
+            <h2 className={`${display} text-[clamp(1.9rem,4vw,3.6rem)]`}>
+              Des idées aux <span className={letter}>s</span>olutions.
+            </h2>
             <div className="border-b border-black/15">
-              {ROWS.map((row) => (
+              {EXPERTISES.map((item, i) => (
                 <div
-                  key={row.title}
+                  key={item.title}
                   className="grid gap-2.5 border-t border-black/15 py-[26px]"
                 >
-                  <h3 className="flex items-baseline justify-between gap-4 font-sans text-[clamp(1.5rem,2.6vw,2.3rem)] font-bold tracking-[-0.02em]">
-                    <span>{row.title}</span>
-                    <small className={`${label} whitespace-nowrap text-black/60`}>
-                      {row.tag}
+                  <h3 className="flex items-baseline gap-4 font-sans text-[clamp(1.5rem,2.6vw,2.3rem)] font-bold tracking-[-0.02em]">
+                    <small className={`${label} font-fabrikatMono font-normal`}>
+                      {pad(i + 1)}
                     </small>
+                    <span>{item.title}</span>
                   </h3>
-                  <p className={`${soft} max-w-[52ch]`}>{row.text}</p>
+                  <p className={`${label} text-black/60`}>{item.tag}</p>
+                  {item.text && (
+                    <p className={`${soft} max-w-[52ch]`}>{item.text}</p>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Méthode */}
-        <section className="flex min-h-[120vh] items-center py-[16vh]">
+        {/* 05 — Ma méthode */}
+        <section data-about-layout="letterR" className="flex min-h-[120vh] items-center py-[16vh]">
           <div className={`${col} flex flex-col gap-9`}>
-            <p className={label}>[ Méthode — un projet type ]</p>
-            <div className="h-px bg-black/15" />
+            <p className={label}>[ Ma méthode ]</p>
+            <h2 className={`${display} text-[clamp(1.9rem,4vw,3.6rem)]`}>
+              De votre besoin à sa <span className={letter}>r</span>éalisation.
+            </h2>
             <ol>
-              {STEPS.map((step) => (
+              {STEPS.map((step, i) => (
                 <li
-                  key={step.day}
+                  key={step.title}
                   className="grid grid-cols-[74px_1fr] gap-5 border-t border-black/15 py-[22px] last:border-b"
                 >
                   <b className="pt-1.5 text-[11px] tracking-[0.14em]">
-                    {step.day}
+                    {pad(i + 1)}
                   </b>
                   <div>
                     <h3 className="mb-2 font-sans text-[clamp(1.4rem,2.2vw,2rem)] font-bold tracking-[-0.02em]">
@@ -173,45 +280,30 @@ export default function About({ projects }: Props) {
           </div>
         </section>
 
-        {/* Chiffres */}
-        <section className="flex min-h-[100vh] items-center py-[16vh]">
-          <div className={`${col} flex flex-col gap-7`}>
-            <p className={label}>[ En chiffres ]</p>
-            <dl>
-              {STATS.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="flex items-baseline justify-between gap-4 border-t border-black/15 py-3.5 last:border-b"
-                >
-                  <dd className="font-sans text-[clamp(3.2rem,7vw,6.4rem)] font-bold leading-[0.9] tracking-[-0.04em] tabular-nums">
-                    {stat.value}
-                  </dd>
-                  <dt className={`${label} text-right`}>{stat.label}</dt>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </section>
-
-        {/* Contact */}
-        <section className="flex min-h-[100svh] flex-col items-center justify-center gap-6 py-[12vh] text-center">
-          <p className={label}>[ Un projet ? ]</p>
+        {/* 06 — Contact */}
+        <section data-about-layout="ring" className="flex min-h-[100svh] flex-col items-center justify-center gap-6 py-[12vh] text-center">
+          {/* La boucle de la page : le a jaune du premier titre (ambitions)
+              revient, avec le r de la méthode (réalisation) */}
+          <h2 className={`${display} max-w-[22ch] text-[clamp(1.6rem,3.4vw,3rem)]`}>
+            De vos <span className={letter}>a</span>mbitions à leur{' '}
+            <span className={letter}>r</span>éalisation.
+          </h2>
+          <p className="font-sans text-[clamp(1rem,1.4vw,1.25rem)] font-bold tracking-[-0.01em]">
+            Et si nous donnions vie à votre prochain projet ?
+          </p>
+          <p className={`${soft} max-w-[46ch]`}>
+            Une application à développer ? Une plateforme à moderniser ? Des
+            outils à connecter ? Échangeons sur vos besoins pour construire
+            ensemble une solution adaptée à votre entreprise.
+          </p>
+          {/* Le seul lien de la section : le mail, sous forme de bouton */}
           <a
             href="mailto:contact@yohanetifier.com"
-            className="font-sans text-[clamp(1.3rem,5.4vw,4.5rem)] font-bold leading-none tracking-[-0.02em] [overflow-wrap:anywhere] cursor-none"
+            className="flex min-h-12 cursor-none items-center rounded-full border border-[#12120f] px-[26px] text-[11px] uppercase tracking-[0.22em] text-[#12120f] transition-colors hover:bg-[#12120f] hover:text-[#f4f3f0]"
             data-cursor
           >
-            contact@yohanetifier.com
+            Parlons de votre projet
           </a>
-          <p className={`${label} flex flex-wrap justify-center gap-7`}>
-            <span>
-              <span aria-hidden className="mr-1.5 text-[8px]">
-                ●
-              </span>
-              Disponible pour de nouveaux projets
-            </span>
-            <span>Paris</span>
-          </p>
         </section>
       </main>
     </>
