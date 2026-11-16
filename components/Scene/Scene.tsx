@@ -29,6 +29,7 @@ import { projectFly } from '@/utils/projectFly';
 import { getFanCard } from '@/utils/menuFan';
 import {
   ABOUT,
+  aboutFromMenu,
   contactRing,
   getAboutCard,
   getPortraitTile,
@@ -570,6 +571,21 @@ const Scene = ({ projectsDetails }: Props) => {
       if (group) group.renderOrder = 0;
     });
 
+    // Lien About du menu : pas de retour dans la page quittée, About fait voler
+    // les cartes de l'éventail jusqu'à sa disposition (au-dessus du voile)
+    if (aboutFromMenu.current) {
+      menuPosesRef.current = [];
+      const lower = gsap.delayedCall(1.1, () => {
+        setFanRaised(false);
+        aboutFromMenu.current = false;
+      });
+      return () => {
+        lower.kill();
+        setFanRaised(false);
+        aboutFromMenu.current = false;
+      };
+    }
+
     if (goToContact || goToWork || returnHome || isReturning || goToProject) {
       menuPosesRef.current = [];
       fromMenuFanRef.current = true;
@@ -829,27 +845,26 @@ const Scene = ({ projectsDetails }: Props) => {
   // /about, sans page avant : les images apparaissent en fondu)
   const onAbout = pathname === '/about';
   type Pose = { x: number; y: number; w: number; h: number; rotation: number };
-  const aboutArrivalRef = useRef<{ v: number; from: (Pose | null)[] }>({
-    v: 1,
-    from: [],
-  });
-  // Places à l'écran à la dernière image avant About. Pas lues au changement de
-  // page : le canvas a son propre rendu React, qui reçoit la nouvelle URL en même
-  // temps que la grille envoyée par About → les images y sont déjà replacées.
+  const aboutArrivalRef = useRef<{
+    v: number;
+    from: (Pose | null)[];
+    /** Arrivée pas encore lancée : elle part quand le Scene a la main (après
+     *  le menu par exemple), depuis la dernière place affichée des images */
+    pending: boolean;
+    tween: gsap.core.Tween | null;
+  }>({ v: 1, from: [], pending: false, tween: null });
+  // Places à l'écran à la dernière image où About n'avait pas la main. Pas lues
+  // au moment du départ : le canvas a son propre rendu React, qui peut avoir
+  // déjà replacé les images (grille envoyée par About) juste avant.
   const lastPosesRef = useRef<Pose[]>([]);
   useLayoutEffect(() => {
     if (!onAbout) return;
     const arrival = aboutArrivalRef.current;
-    arrival.from = lastPosesRef.current.map((pose) => ({ ...pose }));
-    arrival.v = 0;
-    const tween = gsap.to(arrival, {
-      v: 1,
-      // Même rythme que les autres transitions du site (1 s, power2.inOut)
-      duration: 1,
-      ease: 'power2.inOut',
-    });
+    arrival.pending = true;
     return () => {
-      tween.kill();
+      arrival.tween?.kill();
+      arrival.tween = null;
+      arrival.pending = false;
       arrival.v = 1;
     };
   }, [onAbout]);
@@ -875,11 +890,14 @@ const Scene = ({ projectsDetails }: Props) => {
       goToProject ||
       isReturning ||
       menuOpen ||
-      fanRaised ||
+      // Lien About du menu : les cartes partent de l'éventail vers About,
+      // au-dessus du voile qui se referme
+      (fanRaised && !aboutFromMenu.current) ||
       fanFlightRef.current >= 0;
 
-    if (!onAbout) {
-      // Hors d'About : on note où est chaque image (départ du vol vers About)
+    if (!onAbout || blocked) {
+      // Tant qu'About n'a pas la main : on note où est chaque image (départ du
+      // vol vers About)
       const poses = lastPosesRef.current;
       poses.length = groups.length;
       groups.forEach((group, i) => {
@@ -910,8 +928,22 @@ const Scene = ({ projectsDetails }: Props) => {
     }
     aboutDrivingRef.current = true;
 
+    // Arrivée : elle part maintenant, de la dernière place affichée
+    const arrival = aboutArrivalRef.current;
+    if (arrival.pending) {
+      arrival.pending = false;
+      arrival.from = lastPosesRef.current.map((pose) => ({ ...pose }));
+      arrival.v = 0;
+      arrival.tween = gsap.to(arrival, {
+        v: 1,
+        // Même rythme que les autres transitions du site (1 s, power2.inOut)
+        duration: 1,
+        ease: 'power2.inOut',
+      });
+    }
+
     const n = groups.length;
-    const { v, from } = aboutArrivalRef.current;
+    const { v, from } = arrival;
     const t = clock.elapsedTime;
     groups.forEach((group, i) => {
       if (!group) return;

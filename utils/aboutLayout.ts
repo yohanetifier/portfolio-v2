@@ -313,6 +313,10 @@ export function getAboutCard(
   }
 }
 
+/** Le menu mobile a lancé About : ses cartes y volent directement depuis
+ *  l'éventail (au lieu de revenir d'abord dans la page quittée) */
+export const aboutFromMenu = { current: false };
+
 /**
  * Page Contact : l'anneau tourne comme à la fin d'About. t : secondes de
  * rotation, avancées par le Scene seulement quand il a la main sur les images

@@ -11,6 +11,7 @@ import WorklistPhantomGrid from '../WorklistPhantomGrid/WorklistPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import { PAPER } from '@/utils/theme';
+import { getLenis } from '@/utils/scroll';
 import { aboutAnchors, measureAboutAnchors } from '@/utils/aboutLayout';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -87,6 +88,10 @@ export default function About({ projects }: Props) {
 
   useLayoutEffect(() => {
     setIsLostPage(false);
+    // En haut de la page dès l'arrivée : depuis le menu, la navigation garde le
+    // défilement de la page quittée (Works descendu → About au milieu)
+    getLenis()?.scrollTo(0, { immediate: true, force: true });
+    window.scrollTo(0, 0);
   }, [setIsLostPage]);
 
   // Où chaque section est centrée : le Scene y place la disposition de ses images.

@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemeContext } from '@/contexts/MenuProvider';
+import { aboutFromMenu } from '@/utils/aboutLayout';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { useThreeJsContext } from '@/contexts/ThreeJsContext';
 import { getProjectPath } from '@/utils/getProjectPath';
@@ -284,9 +285,10 @@ const Menu = () => {
     close();
   };
 
-  /** Identique Header.handleNav('/about') : pas encore de transition des images */
+  /** Les cartes de l'éventail volent jusqu'à About (voir aboutFromMenu) */
   const goToAboutPage = () => {
     if (pathname !== '/about') {
+      aboutFromMenu.current = true;
       router.push('/about', { scroll: false });
       setReset(true);
     }
