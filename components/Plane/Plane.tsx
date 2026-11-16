@@ -9,7 +9,7 @@ import { useHeaderContext } from '@/contexts/HeaderContext';
 import { unlockScroll } from '@/utils/scroll';
 
 /** Amplitude du déform (réduite pour limiter le motion sickness) */
-const PLANE_AMPLITUDE = 0.18;
+export const PLANE_AMPLITUDE = 0.18;
 
 const vertexShader = `
 uniform float uTime;
@@ -105,14 +105,55 @@ vec2 coverUv(vec2 uv, float planeAspect, float textureAspect) {
 
 uniform float uOpacity;
 
+// Page About : le plane peut devenir un morceau (tuile) d'un portrait
+uniform sampler2D uPortrait;
+uniform vec2 uPortraitSize;
+/** 0 = image du projet, 1 = sa tuile du portrait */
+uniform float uMix;
+/** Place de la tuile dans le portrait entier (0 → 1, y vers le haut) */
+uniform vec2 uTileOff;
+uniform vec2 uTileSize;
+/** Largeur / hauteur du portrait entier à l'écran */
+uniform float uPortraitAspect;
+uniform float uSeed;
+
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+
 void main() {
   float planeAspect = uPlaneScale.x / max(uPlaneScale.y, 0.0001);
   float textureAspect = uTextureSize.x / max(uTextureSize.y, 0.0001);
   vec2 uv = coverUv(vUv, planeAspect, textureAspect);
-  vec4 tex = texture2D(uTexture, uv);
-  gl_FragColor = vec4(tex.rgb, uOpacity);
+  vec3 color = texture2D(uTexture, uv).rgb;
+
+  if (uMix > 0.0) {
+    // Le point du portrait entier sous ce pixel, puis object-cover de la photo
+    vec2 portraitUv = uTileOff + vUv * uTileSize;
+    float photoAspect = uPortraitSize.x / max(uPortraitSize.y, 0.0001);
+    vec3 portrait = texture2D(uPortrait, coverUv(portraitUv, uPortraitAspect, photoAspect)).rgb;
+    // Fondu par taches (bruit) plutôt qu'un fondu uniforme, avec un fin liseré
+    // sombre à la frontière
+    float n = vnoise(vUv * 6.0 + uSeed * 17.0) * 0.6 + vnoise(vUv * 22.0 + uSeed) * 0.4;
+    float t = uMix * 1.3 - 0.15;
+    float m = smoothstep(n - 0.06, n + 0.06, t);
+    color = mix(color, portrait, m);
+    float edge = 1.0 - smoothstep(0.0, 0.05, abs(n - t));
+    color = mix(color, vec3(0.071, 0.071, 0.059), edge * step(uMix, 0.99));
+  }
+
+  gl_FragColor = vec4(color, uOpacity);
 }
 `;
+
+/** Texture vide (1 px) tant que le portrait n'est pas chargé */
+const EMPTY_TEXTURE = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+EMPTY_TEXTURE.needsUpdate = true;
 
 interface Props {
   imageUrl: string;
@@ -159,6 +200,13 @@ const Plane = ({
       ),
     },
     uOpacity: { value: 1.0 },
+    uPortrait: { value: EMPTY_TEXTURE as THREE.Texture },
+    uPortraitSize: { value: new THREE.Vector2(1, 1) },
+    uMix: { value: 0 },
+    uTileOff: { value: new THREE.Vector2(0, 0) },
+    uTileSize: { value: new THREE.Vector2(1, 1) },
+    uPortraitAspect: { value: 0.8 },
+    uSeed: { value: Math.random() * 10 },
   });
 
   useEffect(() => {
