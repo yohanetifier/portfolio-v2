@@ -2,7 +2,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
-import { CaseStudy } from '@/utils/caseStudies';
+import { CaseStudy } from '@/utils/projectDetails';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const caps = 'text-[10px] md:text-[11px] uppercase tracking-[0.14em]';

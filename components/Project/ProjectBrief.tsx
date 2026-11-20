@@ -2,7 +2,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
-import { ProjectBrief as Brief } from '@/utils/projectBriefs';
+import { ProjectBrief as Brief } from '@/utils/projectDetails';
 
 /**
  * En bas du hero, par-dessus l'image du projet (comme un générique) :

@@ -19,8 +19,7 @@ import NextProject from './NextProject';
 import ProjectNav from './ProjectNav';
 import ProjectBrief from './ProjectBrief';
 import CaseStudyBody from './CaseStudyBody';
-import { CaseStudy } from '@/utils/caseStudies';
-import { projectBriefs } from '@/utils/projectBriefs';
+import { CaseStudy, toBrief } from '@/utils/projectDetails';
 import { getLenis, holdScroll, releaseScroll } from '@/utils/scroll';
 import { nextProjectStore } from '@/utils/nextProject';
 
@@ -57,7 +56,7 @@ const Project = ({ data, mediaUrls, projects, caseStudy }: Props) => {
   );
   const overlayRef = useRef<HTMLDivElement>(null);
   // Bandeau sous le hero (rôle, stack, phrase) : seulement si le projet en a un
-  const brief = caseStudy ? undefined : projectBriefs[data.title];
+  const brief = caseStudy ? undefined : toBrief(data.title, data.details);
   // Arrivée par le scroll « projet suivant » : lu au premier rendu et gardé dans
   // une ref, pour survivre au double passage des effets (StrictMode, en dev)
   const arrivedBySwapRef = useRef(nextProjectStore.justSwapped);

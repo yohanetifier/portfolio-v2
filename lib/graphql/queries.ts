@@ -26,6 +26,20 @@ export const GET_PROJECT_BY_TITLE = `
             altText
           }
         }
+        # Champs ACF « Projet — fiche et étude de cas » (noms GraphQL du back-office)
+        projectDetails {
+          role
+          technologies
+          summary
+          etiquette
+          nomDuProjet
+          titre
+          caseIntro
+          caseContext
+          caseRole
+          caseTech
+          caseResults
+        }
       }	
     }
   } 

@@ -30,6 +30,7 @@ export class ProjectRepositoryImpl implements ProjectRepository {
         src: data.works.nodes[0].featuredImage.node.sourceUrl,
         alt: data.works.nodes[0].featuredImage.node.altText,
       },
+      details: data.works.nodes[0].projectDetails ?? null,
     };
   }
 }
