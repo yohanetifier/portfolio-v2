@@ -39,6 +39,7 @@ const Header = () => {
     (!isIntro &&
       pathname !== '/contact' &&
       !pathname.startsWith('/work') &&
+      !pathname.startsWith('/case-studies') &&
       !pathname.startsWith('/blogs'));
 
   const returnToWorkList = () => {

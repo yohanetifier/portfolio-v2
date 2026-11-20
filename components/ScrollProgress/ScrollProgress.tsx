@@ -19,6 +19,7 @@ export default function ScrollProgress() {
     (pathname !== '/' &&
       pathname !== '/contact' &&
       !pathname.startsWith('/work') &&
+      !pathname.startsWith('/case-studies') &&
       !pathname.startsWith('/blogs'));
   const visible =
     pathname !== '/' && pathname !== '/contact' && !isLostRoute;

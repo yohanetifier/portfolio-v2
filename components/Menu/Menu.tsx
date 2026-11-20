@@ -65,6 +65,7 @@ const Menu = () => {
     (pathname !== '/' &&
       pathname !== '/contact' &&
       !pathname.startsWith('/work') &&
+      !pathname.startsWith('/case-studies') &&
       !pathname.startsWith('/blogs'));
 
   // Ne pas unlockScroll au close si une transition GSAP vient de partir

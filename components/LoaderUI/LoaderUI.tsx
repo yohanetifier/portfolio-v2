@@ -32,6 +32,7 @@ function isLostPath(pathname: string | null, isLostPage: boolean) {
     pathname !== '/contact' &&
     pathname !== '/about' &&
     !pathname.startsWith('/work') &&
+    !pathname.startsWith('/case-studies') &&
     !pathname.startsWith('/blogs')
   );
 }

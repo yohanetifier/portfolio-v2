@@ -19,10 +19,13 @@ const FullscreenCanvas = () => {
     (pathname !== '/' &&
       pathname !== '/contact' &&
       !pathname.startsWith('/work') &&
+      !pathname.startsWith('/case-studies') &&
       !pathname.startsWith('/blogs'));
 
   const showScene =
     pathname.startsWith('/work') ||
+    // Étude de cas : même hero que la page projet (l'image plein écran)
+    pathname.startsWith('/case-studies') ||
     pathname === '/' ||
     pathname === '/contact' ||
     isLostRoute ||

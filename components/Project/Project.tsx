@@ -17,6 +17,10 @@ import ContactPhantomGrid from '../Contact/ContactPhantomGrid';
 import IntroGridPhantom from '../IntroPhantomGrid/IntroPhantomGrid';
 import NextProject from './NextProject';
 import ProjectNav from './ProjectNav';
+import ProjectBrief from './ProjectBrief';
+import CaseStudyBody from './CaseStudyBody';
+import { CaseStudy } from '@/utils/caseStudies';
+import { projectBriefs } from '@/utils/projectBriefs';
 import { getLenis, holdScroll, releaseScroll } from '@/utils/scroll';
 import { nextProjectStore } from '@/utils/nextProject';
 
@@ -24,9 +28,11 @@ interface Props {
   data: ProjectType;
   mediaUrls: string[];
   projects: Pick<ProjectModel, 'featuredImage' | 'title'>[];
+  /** Page étude de cas (/case-studies/[projet]) : même hero, autre contenu */
+  caseStudy?: CaseStudy;
 }
 
-const Project = ({ data, mediaUrls, projects }: Props) => {
+const Project = ({ data, mediaUrls, projects, caseStudy }: Props) => {
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const mainWrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -50,6 +56,8 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
     (item) => slugify(item.title) === workPath,
   );
   const overlayRef = useRef<HTMLDivElement>(null);
+  // Bandeau sous le hero (rôle, stack, phrase) : seulement si le projet en a un
+  const brief = caseStudy ? undefined : projectBriefs[data.title];
   // Arrivée par le scroll « projet suivant » : lu au premier rendu et gardé dans
   // une ref, pour survivre au double passage des effets (StrictMode, en dev)
   const arrivedBySwapRef = useRef(nextProjectStore.justSwapped);
@@ -244,16 +252,43 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
         {/* Transparent : laisse voir le plane WebGL en hero */}
         <div className="w-screen h-screen relative flex justify-center items-center font-fabrikatMono">
           <h1
-            className="fixed z-1 text-[clamp(2.5rem,5vw,5rem)] text-white"
+            className={`fixed z-1 text-white ${
+              caseStudy
+                ? 'w-[85%] max-w-[16ch] text-center text-[clamp(2rem,4.4vw,4.5rem)] leading-[1.05] [text-wrap:balance] md:w-auto'
+                : 'text-[clamp(2.5rem,5vw,5rem)]'
+            }`}
             ref={titleRef}
             onPointerEnter={() => animateText(titleRef.current!)}
           >
-            {data.title}
+            {caseStudy ? caseStudy.title : data.title}
           </h1>
+          {brief && <ProjectBrief brief={brief} />}
+          {caseStudy && (
+            <>
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-black/45 to-transparent"
+              />
+              <div className="absolute bottom-0 left-1/2 flex w-[85%] -translate-x-1/2 flex-col gap-2 pb-8 text-white md:w-[90%] md:pb-10">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-white/75 md:text-[11px]">
+                  {caseStudy.label}
+                </p>
+                <p className="font-sans text-[22px] font-bold leading-[1.1] tracking-[-0.02em] md:text-[32px]">
+                  {caseStudy.project}
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="relative z-[20] bg-paper">
-          {mediaUrls.map((element, index) => {
+          {caseStudy && (
+            <CaseStudyBody
+              study={caseStudy}
+              projectHref={`/work/${slugify(data.title)}`}
+            />
+          )}
+          {!caseStudy && mediaUrls.map((element, index) => {
             if (element.endsWith('mp4')) {
               return (
                 <div
@@ -289,13 +324,17 @@ const Project = ({ data, mediaUrls, projects }: Props) => {
           })}
         </div>
 
-        <NextProject projects={projects} currentIndex={currentIndex} />
+        {!caseStudy && (
+          <NextProject projects={projects} currentIndex={currentIndex} />
+        )}
       </div>
-      <ProjectNav
-        projects={projects}
-        currentIndex={currentIndex}
-        contentRef={overlayRef}
-      />
+      {!caseStudy && (
+        <ProjectNav
+          projects={projects}
+          currentIndex={currentIndex}
+          contentRef={overlayRef}
+        />
+      )}
     </div>
   );
 };
